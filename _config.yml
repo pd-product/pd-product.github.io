@@ -51,7 +51,11 @@ baseurl: ""
 # email: deliberately omitted for v1 -- a public mailto: gets scraped.
 # email: "you@example.com"
 linkedin: "https://www.linkedin.com/in/patrick-diggins/"
-resume: "/pat-diggins-resume.pdf"
+# resume: withdrawn pending a replacement PDF. The file is gone from the repo,
+# so this key MUST stay commented out until the new one lands: setting it while
+# no PDF is published renders a live 404 in the contact list, and jekyll-sitemap
+# would list the URL for crawlers again.
+# resume: "/pat-diggins-resume.pdf"
 
 # Nav is data, not markup: edited here, rendered by _includes/nav.html.
 # Two of the three are anchors on the home page, so they are written as
