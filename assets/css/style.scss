@@ -261,9 +261,10 @@ a:hover { color: var(--text); }
 }
 
 /* --- Home: about + contact (index.html) --------------------------------
-   Both are sections in <main>, stacked. (The earlier comp had them side by
-   side inside the footer; stacking is the honest fit for this markup and
-   reads better narrow.)                                                   */
+   Two sections in <main>, styled to read as one panel. Per about-contact-fix.md
+   (design session, mock option 13b) they sit on the site's spine rather than
+   inventing their own left edges: the page previously had four different ones
+   (hero 46, work copy 262, about copy 150, contact 46) and now has two.      */
 
 .about,
 .contact {
@@ -272,31 +273,11 @@ a:hover { color: var(--text); }
   padding: 40px var(--gutter);
 }
 
-/* Repo-session change, flagged to design.
-   The photo was floated, so the copy wrapped underneath it and was capped at
-   54ch, leaving most of the section empty to the right. This lays the section
-   out explicitly instead: photo in a fixed first column, copy in the second,
-   heading spanning both. Placement is explicit rather than automatic, because
-   auto-placement would drop the second paragraph into the photo column.
-   Grid also contains the (now unfloated) photo, so flow-root is unnecessary. */
-.about {
-  display: grid;
-  grid-template-columns: 84px minmax(0, 1fr);
-  column-gap: 20px;
-  align-items: start;
-}
-
-.about > h2 { grid-column: 1 / -1; }
-
-/* Design-session refinement, requested after review.
-   About and Contact are separate sections because that is what the markup
-   supports, but the comp reads them as one panel. Dropping the rule between
-   them and the second top padding makes the shared panel-deep background run
-   continuously, so they read as one block with two labelled parts rather than
-   two stacked panels. .about keeps its own top border, which is what separates
-   the pair from the work list above.
-   Separation between the two is now .about's 40px bottom padding alone; adjust
-   here if the design wants a different interval. */
+/* Dropping the rule between the two and the second top padding lets the shared
+   panel-deep background run continuously, so they read as one block with two
+   labelled parts. .about keeps its own top border, which separates the pair
+   from the work list above. Separation between them is .about's bottom padding
+   alone. Retained unchanged at the design session's request. */
 .contact {
   border-top: 0;
   padding-top: 0;
@@ -311,34 +292,64 @@ a:hover { color: var(--text); }
   margin-bottom: 14px;
 }
 
+/* Label in the 168px rail where every work-row eyebrow sits, content in the
+   main column at 262px where every summary starts. Rows are explicit so the
+   photo and the copy share row 2 and their top edges line up; auto-placement
+   would drop the copy to row 1 and the second paragraph past the photo.
+   These rules must stay AFTER the shared h2 rule above: same specificity, so
+   source order is what lets the margins below win. */
+.about,
+.contact {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  column-gap: var(--rail-gap);
+  align-items: start;
+}
+
+.about > h2 { grid-column: 1; grid-row: 1; margin-bottom: 16px; }
+
+/* Fills the rail rather than sitting at 84px in a 168px column: the rail is
+   otherwise empty here, and the photo is the only image on the page. */
+.about-photo {
+  grid-column: 1;
+  grid-row: 2;
+  width: var(--rail);
+  height: var(--rail);
+  object-fit: cover;
+  border: 1px solid var(--border);
+  margin: 0;
+}
+
+.about-copy { grid-column: 2; grid-row: 2; }
+
 .about p {
   font: 400 15px/1.66 var(--sans);
   color: var(--muted);
-  /* Widened from 54ch and pinned to the copy column: see the .about note above.
-     72ch stays inside the readable range rather than running the full width. */
-  grid-column: 2;
-  max-width: 72ch;
+  /* 62ch, matching .work-summary and .work-lesson directly above, so the copy
+     column has one measure down the whole page. Was 72ch, which was right for a
+     full-width column but this column is no longer full width. */
+  max-width: 62ch;
   text-wrap: pretty;
 }
 
 .about p + p { margin-top: 12px; }
 
-.about-photo {
-  width: 84px;
-  height: 84px;
-  object-fit: cover;
-  border: 1px solid var(--border);
-  /* No longer floated: the section is a grid. See the .about note above. */
-  grid-column: 1;
-  grid-row: 2;
-  margin: 0;
+/* Loses its bottom margin: it now sits beside its links rather than above. */
+.contact > h2 { grid-column: 1; margin-bottom: 0; }
+
+/* A horizontal row of bordered links, echoing the work-row chips, rather than a
+   vertical list of three short items in a full-width section. */
+.contact-links {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font: 400 11px var(--mono);
 }
 
-.contact-links {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font: 400 12.5px var(--mono);
+.contact-links a {
+  border: 1px solid var(--border);
+  padding: 5px 9px;
 }
 
 /* --- Footer (_includes/footer.html) -----------------------------------
@@ -768,11 +779,22 @@ a:hover { color: var(--text); }
 
   .story-pager { flex-direction: column; align-items: flex-start; }
   .pager-next { margin-left: 0; text-align: left; }
-  /* Stack on narrow screens. Every explicit placement from the desktop grid has
-     to be reset, or the copy would be pushed into a phantom second column. */
-  .about { grid-template-columns: minmax(0, 1fr); }
-  .about-photo { grid-column: 1; grid-row: auto; margin: 0 0 16px; }
-  .about p { grid-column: 1; max-width: none; }
+  /* Stack on narrow screens. EVERY explicit placement from the desktop grid has
+     to be reset, or the content is pushed into a phantom second column. */
+  .about,
+  .contact { grid-template-columns: minmax(0, 1fr); }
+
+  .about > h2,
+  .about-photo,
+  .about-copy,
+  .contact > h2,
+  .contact-links { grid-column: 1; }
+
+  /* 168px is a lot of vertical space on a phone. */
+  .about-photo { grid-row: auto; width: 120px; height: 120px; margin: 0 0 16px; }
+  .about-copy { grid-row: auto; }
+  .about p { max-width: none; }
+  .contact > h2 { margin-bottom: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

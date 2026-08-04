@@ -85,8 +85,15 @@ of the text onto the page as visible content.
 <section id="about" class="about">
   <h2>About</h2>
   <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
-  <p>I work on the platforms that sit between publishers and the demand that pays for their content. My career has moved steadily toward the decisions behind technical products, and I got there by taking on that work before it was mine to do. Lately that includes writing code with AI agents.</p>
-  <p>In January 2026 I went from AI skeptic to AI native, now building work and personal tools daily.</p>
+  {%- comment -%}
+  Same pattern and the same reason as .work-copy: without this wrapper the two
+  paragraphs are separate grid items, so the second falls to a third row a full
+  rail-height below the photo. The wrapper is unstyled apart from its placement.
+  {%- endcomment -%}
+  <div class="about-copy">
+    <p>I work on the platforms that sit between publishers and the demand that pays for their content. My career has moved steadily toward the decisions behind technical products, and I got there by taking on that work before it was mine to do. Lately that includes writing code with AI agents.</p>
+    <p>In January 2026 I went from AI skeptic to AI native, now building work and personal tools daily.</p>
+  </div>
 </section>
 
 <section id="contact" class="contact">
