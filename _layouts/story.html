@@ -1,0 +1,62 @@
+---
+layout: default
+---
+{%- comment -%}
+Story page. Every field below is optional except title and order: a story that
+omits `partners`, `chips`, or a chapter simply renders without it.
+{%- endcomment -%}
+
+{%- assign ordered = site.work | sort: "order" -%}
+{%- for s in ordered -%}
+  {%- if s.url == page.url -%}{%- assign position = forloop.index0 -%}{%- endif -%}
+{%- endfor -%}
+
+<article class="story">
+  <header class="story-header">
+    <p class="eyebrow">
+      <span class="eyebrow-index">{% if page.order < 10 %}0{% endif %}{{ page.order }}</span>
+      <span class="eyebrow-sep">/</span>
+      <span class="eyebrow-category">{{ page.category }}</span>
+    </p>
+    <h1 class="story-title">{{ page.title }}</h1>
+    {%- if page.summary %}
+    <p class="story-summary">{{ page.summary }}</p>
+    {%- endif %}
+  </header>
+
+  {%- if page.hero_image %}
+  <figure class="story-hero">
+    <img src="{{ page.hero_image | relative_url }}" alt="{{ page.hero_caption | default: page.title | escape }}">
+    {%- if page.hero_caption %}<figcaption>{{ page.hero_caption }}</figcaption>{% endif %}
+  </figure>
+  {%- endif %}
+
+  <div class="story-body">
+    <aside class="story-rail">
+      <dl class="story-meta">
+        {%- if page.role %}<dt>Role</dt><dd>{{ page.role }}</dd>{% endif %}
+        {%- if page.team %}<dt>Team</dt><dd>{{ page.team }}</dd>{% endif %}
+        {%- if page.timeframe %}<dt>Duration</dt><dd>{{ page.timeframe }}</dd>{% endif %}
+        {%- if page.partners %}<dt>Partners</dt><dd>{{ page.partners }}</dd>{% endif %}
+      </dl>
+      {% include chapter-rail.html content=content %}
+    </aside>
+
+    <div class="story-prose">
+      {{ content }}
+    </div>
+  </div>
+
+  <nav class="story-pager" aria-label="More work">
+    {%- assign prev_index = position | minus: 1 -%}
+    {%- assign next_index = position | plus: 1 -%}
+    {%- if position > 0 -%}
+      {%- assign prev = ordered[prev_index] %}
+      <a class="pager-prev" rel="prev" href="{{ prev.url | relative_url }}">{{ prev.title }}</a>
+    {%- endif -%}
+    {%- if next_index < ordered.size -%}
+      {%- assign next = ordered[next_index] %}
+      <a class="pager-next" rel="next" href="{{ next.url | relative_url }}">{{ next.title }}</a>
+    {%- endif -%}
+  </nav>
+</article>

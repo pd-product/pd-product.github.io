@@ -1,0 +1,55 @@
+---
+layout: default
+title: "Home"
+permalink: /
+---
+
+<section class="intro">
+  <h1>{{ site.title }}</h1>
+  <p class="tagline">{{ site.tagline }}</p>
+  <!-- TODO: hero content from the design session lands here. -->
+</section>
+
+<section id="work" class="work-list">
+  <h2>Work</h2>
+  <ol class="work-rows">
+    {%- assign ordered = site.work | sort: "order" -%}
+    {%- for story in ordered %}
+    <li class="work-row">
+      <a href="{{ story.url | relative_url }}">
+        {%- assign card = story.card_image | default: story.hero_image -%}
+        {%- if card %}
+        <img class="work-card-image" src="{{ card | relative_url }}" alt="">
+        {%- endif %}
+        <p class="eyebrow">
+          <span class="eyebrow-index">{% if story.order < 10 %}0{% endif %}{{ story.order }}</span>
+          <span class="eyebrow-sep">/</span>
+          <span class="eyebrow-category">{{ story.category }}</span>
+        </p>
+        <h3 class="work-title">{{ story.title }}</h3>
+        {%- if story.summary %}<p class="work-summary">{{ story.summary }}</p>{% endif %}
+        {%- if story.chips %}
+        <ul class="chips">
+          {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
+        </ul>
+        {%- endif %}
+      </a>
+    </li>
+    {%- endfor %}
+  </ol>
+</section>
+
+<section id="about" class="about">
+  <h2>About</h2>
+  <!-- TODO: about copy. This is a block on the home page, not a separate page. -->
+</section>
+
+<section id="contact" class="contact">
+  <h2>Contact</h2>
+  <!-- Links only: GitHub Pages has no server, so there is no form to submit. -->
+  <ul class="contact-links">
+    <li><a href="mailto:{{ site.email }}">Email</a></li>
+    <li><a href="{{ site.linkedin }}" rel="me">LinkedIn</a></li>
+    <li><a href="{{ site.resume | relative_url }}">Resume (PDF)</a></li>
+  </ul>
+</section>

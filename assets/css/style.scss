@@ -1,0 +1,34 @@
+---
+# Empty front matter is required: it tells Jekyll to compile this SCSS file
+# to /assets/css/style.css. Do not remove these two lines.
+---
+
+/* Placeholder only. The design session's CSS replaces everything below. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+
+.site-header,
+.content,
+.site-footer {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.site-nav ul {
+  display: flex;
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}

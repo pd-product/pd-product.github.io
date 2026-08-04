@@ -1,0 +1,56 @@
+# Site metadata. TODO: replace placeholders with real values.
+title: "TODO Your Name"
+tagline: "TODO one-line positioning statement"
+description: "TODO 1-2 sentence description used for search results and link previews."
+author: "TODO Your Name"
+
+# User site: served from the domain root, so baseurl is empty.
+# url must be set and absolute: jekyll-seo-tag uses it to build absolute
+# share-card URLs, which is what makes a pasted link render a preview.
+url: "https://pd-product.github.io"
+baseurl: ""
+
+# Contact is links only. There is no server, so there is no form.
+email: "TODO you@example.com"
+linkedin: "TODO https://www.linkedin.com/in/..."
+resume: "/resume.pdf"
+
+# Nav is data, not markup: edited here, rendered by _includes/nav.html.
+# Two of the three are anchors on the home page, so they are written as
+# absolute paths and work from story pages too.
+nav:
+  - title: "work"
+    url: "/#work"
+  - title: "about"
+    url: "/#about"
+  - title: "contact"
+    url: "/#contact"
+
+# Story pages. Add a file to _work/ and it gets a page, a URL, a home-page
+# row, and prev/next placement. Nothing is hand-indexed.
+# permalink :title uses the `slug` front matter key when present.
+collections:
+  work:
+    output: true
+    permalink: /work/:title/
+
+defaults:
+  - scope:
+      path: ""
+      type: "work"
+    values:
+      layout: "story"
+  # Site-wide share-card default so no page is ever missing an image.
+  # Any page or story may override with its own `image:`.
+  - scope:
+      path: ""
+    values:
+      image: "/assets/og/default.png"
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+exclude:
+  - README.md
+  - Gemfile

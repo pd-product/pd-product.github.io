@@ -1,0 +1,30 @@
+{%- comment -%}
+Chapter rail, derived from the story's own h2 headings.
+
+Nothing is declared per story: omit a chapter and its rail entry disappears,
+add one and it appears. The rail and the page cannot disagree, because one is
+generated from the other.
+
+Requires each h2 to carry an explicit kramdown anchor, e.g.
+
+    ## The situation    {#situation}
+
+The explicit anchor is what keeps a shared deep link such as
+/work/<slug>/#situation working after the heading text is reworded.
+
+Authoring guidance (not enforced here): 3-8 entries is the comfortable range,
+and heading text under ~24 characters avoids wrapping in the 168px rail.
+{%- endcomment -%}
+{%- assign chunks = include.content | split: '<h2 id="' -%}
+{%- if chunks.size > 1 -%}
+<nav class="chapter-rail" aria-label="Chapters">
+  <ul>
+    {%- for chunk in chunks offset:1 -%}
+      {%- assign anchor = chunk | split: '"' | first -%}
+      {%- assign after = chunk | split: '">' -%}
+      {%- assign label = after[1] | split: '</h2>' | first | strip_html | strip -%}
+      <li><a href="#{{ anchor }}">{{ label }}</a></li>
+    {%- endfor -%}
+  </ul>
+</nav>
+{%- endif -%}

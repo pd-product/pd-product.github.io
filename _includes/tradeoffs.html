@@ -1,0 +1,35 @@
+{%- comment -%}
+Tradeoff tables, rendered from front matter rather than a Markdown table.
+
+The chosen column is identified by name, not by position, so the marker can
+never land on the wrong column. The check mark is written as an HTML entity to
+keep the source ASCII.
+
+`tradeoffs` is a LIST of tables even when a story has only one. A story that
+needs more than ~5 dimensions is meant to use a second table for a second
+decision rather than a taller one, and a list supports that without a later
+change to every existing story.
+{%- endcomment -%}
+{%- for table in include.tradeoffs -%}
+<figure class="tradeoff">
+  {%- if table.title %}<figcaption>{{ table.title }}</figcaption>{% endif -%}
+  <table>
+    <thead>
+      <tr>
+        <th scope="col" class="tradeoff-dimension"><span class="sr-only">Dimension</span></th>
+        <th scope="col" class="tradeoff-rejected">{{ table.rejected }}</th>
+        <th scope="col" class="tradeoff-chosen">{{ table.chosen }} <span aria-hidden="true">&#10003;</span><span class="sr-only">(chosen)</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for row in table.rows %}
+      <tr>
+        <th scope="row" class="tradeoff-dimension">{{ row.dimension }}</th>
+        <td class="tradeoff-rejected">{{ row.rejected }}</td>
+        <td class="tradeoff-chosen">{{ row.chosen }}</td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+</figure>
+{%- endfor -%}
