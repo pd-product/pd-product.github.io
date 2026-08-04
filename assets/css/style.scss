@@ -220,7 +220,23 @@ a:hover { color: var(--text); }
   white-space: nowrap;
 }
 
-.work-row { border-top: 1px solid var(--hairline); }
+/* The whole row is the click target, so the whole row responds: its top
+   hairline goes accent on hover and focus. The title colour change below
+   stays. Transition is on border-color only, so nothing else animates.
+   :focus-within gives keyboard users the same cue as the pointer.
+   Design session, refinement 2.
+
+   The FIRST row's top hairline doubles as the boundary below the hero and the
+   last row has no bottom border, so the highlight always reads as "the line
+   above this row". Deliberate: the About panel's own top border closes the
+   set, so no border-bottom is added to :last-child. */
+.work-row {
+  border-top: 1px solid var(--hairline);
+  transition: border-color .15s ease;
+}
+
+.work-row:hover,
+.work-row:focus-within { border-top-color: var(--accent); }
 
 /* the whole row is one anchor in the template */
 .work-row > a {
@@ -830,6 +846,10 @@ a:hover { color: var(--text); }
 
 @media (prefers-reduced-motion: reduce) {
   * { scroll-behavior: auto !important; }
+
+  /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
+     but the preference is a preference. */
+  .work-row { transition: none; }
 }
 
 /* --- Signature elements ------------------------------------------------
