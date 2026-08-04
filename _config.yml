@@ -38,7 +38,7 @@ noindex: true
 # User site: served from the domain root, so baseurl is empty.
 # url must be set and absolute: jekyll-seo-tag uses it to build absolute
 # share-card URLs, which is what makes a pasted link render a preview.
-url: "https://pd-product.github.io"
+url: "https://pdiggins.com"
 baseurl: ""
 
 # Contact is links only. There is no server, so there is no form.
