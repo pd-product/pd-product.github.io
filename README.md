@@ -77,12 +77,18 @@ Diagrams and cards are committed at final size; there is no build-time image pro
 share cards are an authoring step, not a build step: `image:` in a story's front matter overrides
 the site-wide default in `_config.yml`, so nothing is ever missing a card.
 
-- `assets/img/` -- diagrams, exported at the dimensions the design calls for.
+- `assets/img/` -- the about photo, plus diagrams when they arrive, exported at the dimensions the
+  design calls for. Full-resolution originals are kept in `_originals/`, which Jekyll does not
+  publish; re-derive from there rather than upscaling a shipped file when a display size grows.
 - `assets/og/` -- share cards at 1200x630. `default.png` is the site-wide fallback; per-story cards
-  override it. TODO: add `default.png`.
-- `assets/fonts/` -- self-hosted woff2. IBM Plex Mono is under the SIL Open Font License, which
-  requires the license text to travel with the font, so commit `OFL.txt` alongside the woff2 files;
-  this repo is public and therefore redistributes them. TODO: add the woff2 files and `OFL.txt`.
+  override it via `image:` in the story front matter.
+- `assets/fonts/` -- self-hosted IBM Plex Mono Regular and Medium woff2, with `OFL.txt` alongside.
+  The SIL Open Font License requires its text to travel with the font, and this repo is public and
+  therefore redistributes it. `OFL.txt` is the one file exempt from the ASCII-only convention.
+
+v1 ships without diagrams by design decision. No story sets `hero_image`, so the hero figure and
+home-page card do not render; the CSS for both is written and inert, so adding one later needs no
+CSS change.
 
 Do not put a `README.md` inside these folders. The site-wide `defaults` block in `_config.yml`
 gives front matter to every markdown file, which turns a stray note into a published, indexed page.
