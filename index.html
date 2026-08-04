@@ -50,10 +50,19 @@ permalink: /
 
 <section id="contact" class="contact">
   <h2>Contact</h2>
-  <!-- Links only: GitHub Pages has no server, so there is no form to submit. -->
+  <!-- Links only: GitHub Pages has no server, so there is no form to submit.
+       Each link renders only once its value is set in _config.yml, so an
+       unfinished site shows a short list rather than live broken links. The
+       section itself always exists because the nav anchors to #contact. -->
   <ul class="contact-links">
+    {%- if site.email %}
     <li><a href="mailto:{{ site.email }}">Email</a></li>
+    {%- endif %}
+    {%- if site.linkedin %}
     <li><a href="{{ site.linkedin }}" rel="me">LinkedIn</a></li>
+    {%- endif %}
+    {%- if site.resume %}
     <li><a href="{{ site.resume | relative_url }}">Resume (PDF)</a></li>
+    {%- endif %}
   </ul>
 </section>

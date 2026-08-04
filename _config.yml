@@ -24,9 +24,14 @@ url: "https://pd-product.github.io"
 baseurl: ""
 
 # Contact is links only. There is no server, so there is no form.
-email: "TODO you@example.com"
-linkedin: "TODO https://www.linkedin.com/in/..."
-resume: "/resume.pdf"
+# These keys are COMMENTED OUT rather than left as placeholder strings: an unset
+# key is nil and therefore falsy in Liquid, so index.html omits the link
+# entirely. A placeholder string is truthy and would render a live broken link.
+# Note an empty string "" would also be truthy in Liquid -- omit the key, do not
+# blank it. Uncomment each as its real value becomes available.
+# email: "you@example.com"
+# linkedin: "https://www.linkedin.com/in/..."
+# resume: "/resume.pdf"
 
 # Nav is data, not markup: edited here, rendered by _includes/nav.html.
 # Two of the three are anchors on the home page, so they are written as
