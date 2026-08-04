@@ -51,11 +51,22 @@ its marker can never land on the wrong column. Place it in the body where it bel
 `tradeoffs` is a list even with one table. Target 3 rows, 5 is the ceiling -- a story needing more
 dimensions should add a second table for a second decision rather than a taller one.
 
-## Images
+## Assets
 
 Diagrams and cards are committed at final size; there is no build-time image processing. Story
 share cards are an authoring step, not a build step: `image:` in a story's front matter overrides
 the site-wide default in `_config.yml`, so nothing is ever missing a card.
+
+- `assets/img/` -- diagrams, exported at the dimensions the design calls for.
+- `assets/og/` -- share cards at 1200x630. `default.png` is the site-wide fallback; per-story cards
+  override it. TODO: add `default.png`.
+- `assets/fonts/` -- self-hosted woff2. IBM Plex Mono is under the SIL Open Font License, which
+  requires the license text to travel with the font, so commit `OFL.txt` alongside the woff2 files;
+  this repo is public and therefore redistributes them. TODO: add the woff2 files and `OFL.txt`.
+
+Do not put a `README.md` inside these folders. The site-wide `defaults` block in `_config.yml`
+gives front matter to every markdown file, which turns a stray note into a published, indexed page.
+Placeholder folders are held by `.gitkeep`, which Jekyll ignores because it starts with a dot.
 
 ## Layout
 
