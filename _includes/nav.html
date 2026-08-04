@@ -1,10 +1,35 @@
 <header class="site-header">
   {%- comment -%}
+  Story pages replace the wordmark with a breadcrumb, per comp 7b: on a case
+  page the useful information is which case you are in, not the site's name,
+  and the first crumb is the way back to the index.
+
+  Detected by LAYOUT rather than by URL so it cannot drift from the
+  collection's permalink. Note that `layout: story` is supplied by the `work`
+  defaults block in _config.yml, not by each story's own front matter, so this
+  test depends on that default remaining in place. Verified against the
+  rendered nav on the built site, not inferred.
+  {%- endcomment -%}
+  {%- if page.layout == "story" %}
+  {%- comment -%}
+  `crumb` is an optional front-matter override, because the full story titles
+  are too long for this slot. Falling back to page.title means a new story
+  without one still renders, just longer -- and .site-crumb truncates rather
+  than wrapping so it cannot push the nav links off the row.
+  {%- endcomment -%}
+  <p class="site-crumb">
+    <a href="{{ '/#work' | relative_url }}">work</a>
+    <span class="site-crumb-sep" aria-hidden="true">/</span>
+    <span aria-current="page">{{ page.crumb | default: page.title }}</span>
+  </p>
+  {%- else %}
+  {%- comment -%}
   site.brand, not site.title: `title` is the SEO string and carries the role
   suffix, which would read badly as a header link and would produce a doubled
   separator in {% seo %} page titles.
   {%- endcomment -%}
   <a class="site-title" href="{{ '/' | relative_url }}">{{ site.brand | default: site.title }}</a>
+  {%- endif %}
   <nav class="site-nav" aria-label="Main">
     <ul>
       {% for item in site.nav %}

@@ -1,6 +1,9 @@
 ---
 slug: "targeting-architecture"
 title: "Rebuilding how publishers target their inventory"
+# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
+# copy, not a trim of `title` -- the full title is too long for that slot.
+crumb: "targeting architecture"
 summary: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
 # One line, shown on the home-page row under the summary. A trim of this
 # story's own "What I would redo" chapter, approved as written.

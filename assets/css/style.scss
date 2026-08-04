@@ -151,6 +151,31 @@ a:hover { color: var(--text); }
   text-transform: lowercase;
 }
 
+/* Story pages only: replaces the wordmark (design session, comp 7b breadcrumb).
+   Same mono size and colour language as .site-nav, so the header reads as one
+   row of small type. */
+.site-crumb {
+  display: flex;
+  gap: 9px;
+  font: 400 12px var(--mono);
+  color: var(--nav-muted);
+  min-width: 0;
+}
+
+.site-crumb a { color: var(--nav-muted); }
+.site-crumb a:hover { color: var(--text); }
+
+/* Truncates rather than wrapping, so a long fallback title cannot push the nav
+   links off the row. min-width: 0 above is what lets the crumb shrink inside
+   the flex header; overflow: hidden here is what lets the span shrink inside
+   the crumb. */
+.site-crumb [aria-current] {
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .site-nav ul {
   display: flex;
   gap: 24px;
@@ -722,6 +747,12 @@ a:hover { color: var(--text); }
 
   .site-header { padding: 16px var(--gutter); }
   .site-nav ul { gap: 16px; }
+
+  /* The header is already tight here. Drop the first crumb and the separator
+     rather than shrinking the type; the nav's own "work" link is still the
+     route back to the index, so nothing becomes unreachable. */
+  .site-crumb a,
+  .site-crumb-sep { display: none; }
 
   .intro { padding: 34px var(--gutter) 28px; }
   .intro h1 { font-size: 29px; letter-spacing: -.025em; }

@@ -1,6 +1,9 @@
 ---
 slug: "personal-finance-tools"
 title: "The spreadsheet that became a toolkit"
+# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
+# copy, not a trim of `title` -- the full title is too long for that slot.
+crumb: "personal finance tools"
 summary: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
 # One line, shown on the home-page row under the summary. A trim of this
 # story's own "What I would redo" chapter, approved as written.

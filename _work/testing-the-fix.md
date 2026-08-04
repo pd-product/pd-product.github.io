@@ -1,6 +1,9 @@
 ---
 slug: "testing-the-fix"
 title: "Testing a fix before we built it"
+# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
+# copy, not a trim of `title` -- the full title is too long for that slot.
+crumb: "testing the fix"
 summary: "Two engineering leaders proposed a solution to a targeting gap and were confident it would hold. I doubted it on a hunch, spent a weekend building the analysis to find out, and it turned out the design would have left 14% of revenue exposed."
 # One line, shown on the home-page row under the summary. A trim of this
 # story's own "What I would redo" chapter, approved as written.
