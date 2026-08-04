@@ -18,11 +18,9 @@
   would have been inconsistent.
 
   The separator is a marked-up span carrying aria-hidden, NOT CSS generated
-  content. It was briefly moved to a li + li::before rule on the reasoning that
-  generated content stays out of the accessibility tree. That reasoning is
-  wrong: browsers do expose ::before/::after text to accessibility APIs, and a
-  pseudo-element cannot be given aria-hidden, so the CSS form was the version
-  that could be announced. Independent review caught it.
+  content: generated text may be announced depending on browser and assistive
+  technology, and a pseudo-element cannot carry aria-hidden, so it cannot be
+  reliably suppressed. Decorative text has to be marked up to be hideable.
 
   `crumb` is an optional front-matter override, because the full story titles
   are too long for this slot. Falling back to page.title means a new story
