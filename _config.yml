@@ -1,8 +1,21 @@
-# Site metadata. TODO: replace placeholders with real values.
-title: "TODO Your Name"
+# Site metadata. TODO: replace the remaining placeholders with real copy.
+title: "Patrick Diggins"
 tagline: "TODO one-line positioning statement"
 description: "TODO 1-2 sentence description used for search results and link previews."
-author: "TODO Your Name"
+author: "Patrick Diggins"
+
+# Rendered by _includes/footer.html. Year of first publication, per the US
+# Copyright Office's notice guidance; do not bump it annually.
+copyright_year: 2026
+
+# TODO: SET THIS TO false AT LAUNCH.
+# The site is public and carries a real name, but the content is still
+# placeholder. This emits <meta name="robots" content="noindex"> so search
+# engines do not index a half-built page under that name.
+# Deliberately NOT done with robots.txt: a Disallow rule stops the crawler
+# fetching the page at all, so it never sees the noindex and the URL can still
+# surface in results. The meta tag has to be reachable to be obeyed.
+noindex: true
 
 # User site: served from the domain root, so baseurl is empty.
 # url must be set and absolute: jekyll-seo-tag uses it to build absolute

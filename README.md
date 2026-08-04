@@ -2,6 +2,15 @@
 
 Static site published by GitHub Pages at https://pd-product.github.io/
 
+## Copyright
+
+Copyright (c) 2026 Patrick Diggins. All rights reserved. **No license is granted** to reproduce,
+distribute, adapt, or create derivative works from the contents of this repository. Viewing and
+forking within GitHub, per GitHub's Terms of Service, are permitted; no other rights are granted.
+See [LICENSE](LICENSE).
+
+This is deliberate, not an oversight. Third-party assets keep their own licenses.
+
 Publishing source is **Deploy from a branch** (`main`, root). GitHub runs Jekyll on its side, so
 there is no build step to run locally and no CI workflow to maintain. Pushing to `main` publishes;
 allow a few minutes.
