@@ -883,11 +883,26 @@ a:hover { color: var(--text); }
 }
 
 /* The redo chapter carries the only accent rule in the prose. This relies on
-   #redo being the LAST chapter -- the sibling selector claims every paragraph
-   after it. That is how the stories are written; if a chapter is ever added
-   below it, wrap that chapter instead. */
+   #redo being the LAST chapter -- the sibling selector claims every direct
+   child after it. That is how the stories are written (verified: {#redo} is
+   the last h2 in all three); if a chapter is ever added below it, wrap that
+   chapter instead. THE LAST-CHAPTER CONSTRAINT IS LOAD-BEARING, not a
+   stylistic note.
+
+   `~ *` rather than `~ p`: the rule previously claimed paragraphs only, so a
+   list, figure or blockquote in this chapter dropped out of the accent bar
+   with no error. `~ *` costs nothing while #redo is last, since there is
+   nothing after it but its own content. Design session refinement 4,
+   option (b), confirmed.
+
+   Residual, flagged to the design session: the two CONTINUITY rules below are
+   still paragraph-scoped. .story-prose ol and ul carry margin-top: 13px, so a
+   non-paragraph child here would show the bar with a 13px gap above it. That
+   is a cosmetic gap rather than a broken bar, so it is strictly better than
+   before, but it is not fully defused. Widening those two to `~ *` and
+   `~ * + *` is behaviour-identical today and would close it. */
 .story-prose > h2#redo,
-.story-prose > h2#redo ~ p {
+.story-prose > h2#redo ~ * {
   border-left: 2px solid var(--accent);
   padding-left: 22px;
 }
@@ -919,5 +934,5 @@ a:hover { color: var(--text); }
   .work-lesson { max-width: none; }
 
   .story-prose > h2#redo,
-  .story-prose > h2#redo ~ p { padding-left: 16px; }
+  .story-prose > h2#redo ~ * { padding-left: 16px; }
 }
