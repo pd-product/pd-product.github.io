@@ -712,18 +712,12 @@ a:hover { color: var(--text); }
 
 .story-pager a:hover { color: var(--accent); }
 
-/* .pager-next::after removed: it set `content: ""` and nothing else, which
-   rendered an empty block after the next link. It was also carried on the
-   shared selector above, so that selector now targets only what it styles.
-   The label for .pager-next is on ::before, below. Design session,
-   refinement 5.
-
-   The two adjacent .pager-prev::before rules are merged here for the same
-   reason. Note that this rule and .pager-next::before below now declare an
-   identical property set apart from `content`; consolidating them onto one
-   selector is a further tidy-up, left to the design session. */
-.pager-prev::before {
-  content: "Previous case";
+/* Both pager labels, one rule. .pager-next::after used to hold an empty
+   `content: ""` here, which rendered a stray empty block after the next link;
+   removing it left prev and next declaring an identical property set apart
+   from `content`, so they are consolidated. Design session, accepted. */
+.pager-prev::before,
+.pager-next::before {
   display: block;
   margin-bottom: 7px;
   font: 400 11px var(--mono);
@@ -732,19 +726,13 @@ a:hover { color: var(--text); }
   color: var(--accent);
 }
 
+.pager-prev::before { content: "Previous case"; }
+.pager-next::before { content: "Next case"; }
+
+/* Positional only; the label above is shared with .pager-prev::before. */
 .pager-next {
   margin-left: auto;
   text-align: right;
-}
-
-.pager-next::before {
-  content: "Next case";
-  display: block;
-  margin-bottom: 7px;
-  font: 400 11px var(--mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
 }
 
 /* --- Responsive -------------------------------------------------------
@@ -942,21 +930,30 @@ a:hover { color: var(--text); }
    nothing after it but its own content. Design session refinement 4,
    option (b), confirmed.
 
-   Residual, flagged to the design session: the two CONTINUITY rules below are
-   still paragraph-scoped. .story-prose ol and ul carry margin-top: 13px, so a
-   non-paragraph child here would show the bar with a 13px gap above it. That
-   is a cosmetic gap rather than a broken bar, so it is strictly better than
-   before, but it is not fully defused. Widening those two to `~ *` and
-   `~ * + *` is behaviour-identical today and would close it. */
+   The two CONTINUITY rules below are widened to match, so the whole chapter is
+   governed by one set of selectors rather than a border rule and a spacing
+   rule that agree only by coincidence. */
 .story-prose > h2#redo,
 .story-prose > h2#redo ~ * {
   border-left: 2px solid var(--accent);
   padding-left: 22px;
 }
 
+/* The continuity rules. These convert the inter-element margin into intra-
+   element padding, which is what keeps the accent bar unbroken down the whole
+   chapter instead of gapping between children.
+
+   Widened to `~ *` alongside the border rule above. Leaving them at `~ p`
+   while the border claimed every child was worse than the original bug: an
+   element would have taken the bar but not the spacing, which reads as a
+   defect rather than a documented limitation. `.story-prose ol` and `ul` carry
+   margin-top: 13px, so that gap was real, not theoretical. Behaviour-identical
+   today -- every child of this chapter is currently a paragraph -- and it
+   means one set of rules governs the chapter rather than two that agree by
+   coincidence. Design session, accepted. */
 .story-prose > h2#redo { margin-bottom: 0; padding-bottom: 13px; }
-.story-prose > h2#redo ~ p { margin-top: 0; }
-.story-prose > h2#redo ~ p + p { padding-top: 13px; }
+.story-prose > h2#redo ~ * { margin-top: 0; }
+.story-prose > h2#redo ~ * + * { padding-top: 13px; }
 
 /* Reading progress fills the rail's existing top hairline. Zero-width until
    the script sets --rail-progress, so no JS means no stray mark. */
