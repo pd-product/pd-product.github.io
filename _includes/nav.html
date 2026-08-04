@@ -1,5 +1,10 @@
 <header class="site-header">
-  <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+  {%- comment -%}
+  site.brand, not site.title: `title` is the SEO string and carries the role
+  suffix, which would read badly as a header link and would produce a doubled
+  separator in {% seo %} page titles.
+  {%- endcomment -%}
+  <a class="site-title" href="{{ '/' | relative_url }}">{{ site.brand | default: site.title }}</a>
   <nav class="site-nav" aria-label="Main">
     <ul>
       {% for item in site.nav %}

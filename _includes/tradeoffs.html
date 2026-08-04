@@ -25,8 +25,12 @@ change to every existing story.
       {%- for row in table.rows %}
       <tr>
         <th scope="row" class="tradeoff-dimension">{{ row.dimension }}</th>
-        <td class="tradeoff-rejected">{{ row.rejected }}</td>
-        <td class="tradeoff-chosen">{{ row.chosen }}</td>
+        {%- comment -%}
+        data-label carries the option name into the sub-640px stacked view,
+        where the dimension column is dropped and the pairs need naming.
+        {%- endcomment -%}
+        <td class="tradeoff-rejected" data-label="{{ table.rejected }}">{{ row.rejected }}</td>
+        <td class="tradeoff-chosen" data-label="{{ table.chosen }}">{{ row.chosen }}</td>
       </tr>
       {%- endfor %}
     </tbody>

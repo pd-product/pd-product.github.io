@@ -34,6 +34,7 @@ and heading text under ~24 characters avoids wrapping in the 168px rail.
 {%- assign chunks = include.content | split: '<h2 id="' -%}
 {%- if chunks.size > 1 -%}
 <nav class="chapter-rail" aria-label="Chapters">
+  <h2>Chapters</h2>
   <ul>
     {%- for chunk in chunks offset:1 -%}
       {%- assign head = chunk | split: '</h2>' | first -%}

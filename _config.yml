@@ -1,7 +1,13 @@
-# Site metadata. TODO: replace the remaining placeholders with real copy.
-title: "Patrick Diggins"
-tagline: "TODO one-line positioning statement"
-description: "TODO 1-2 sentence description used for search results and link previews."
+# Site metadata.
+# `title` is the SEO string and carries the role suffix. `brand` is what the
+# header link prints -- separate, because the suffix reads badly as a header and
+# would produce a doubled separator in {% seo %} page titles.
+# `author` stays the full legal name: it feeds the copyright notice, where the
+# enforceable name matters more than the familiar one.
+title: "Pat Diggins | Product Manager"
+brand: "Pat Diggins"
+tagline: "Product manager working on advertising platforms. Case studies on the decisions behind them, including the ones I would make differently."
+description: "Product manager working on advertising platforms. Case studies on the decisions behind them, including the ones I would make differently."
 author: "Patrick Diggins"
 
 # Rendered by _includes/footer.html. Year of first publication, per the US
@@ -29,9 +35,12 @@ baseurl: ""
 # entirely. A placeholder string is truthy and would render a live broken link.
 # Note an empty string "" would also be truthy in Liquid -- omit the key, do not
 # blank it. Uncomment each as its real value becomes available.
+# email: deliberately omitted for v1 -- a public mailto: gets scraped.
 # email: "you@example.com"
-# linkedin: "https://www.linkedin.com/in/..."
-# resume: "/resume.pdf"
+linkedin: "https://www.linkedin.com/in/patrick-diggins/"
+# resume: stays commented until pat-diggins-resume.pdf is actually in the repo.
+# Uncommenting it before the file exists publishes a link to a 404.
+# resume: "/pat-diggins-resume.pdf"
 
 # Nav is data, not markup: edited here, rendered by _includes/nav.html.
 # Two of the three are anchors on the home page, so they are written as

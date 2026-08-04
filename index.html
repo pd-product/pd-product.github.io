@@ -4,10 +4,12 @@ title: "Home"
 permalink: /
 ---
 
+<!-- The headline claim is display copy, not metadata, so it lives here rather
+     than in _config.yml. site.title and site.tagline stay in config for {% seo %}
+     but are deliberately not printed on the page. -->
 <section class="intro">
-  <h1>{{ site.title }}</h1>
-  <p class="tagline">{{ site.tagline }}</p>
-  <!-- TODO: hero content from the design session lands here. -->
+  <p class="eyebrow">senior pm &middot; ad platforms and ai</p>
+  <h1>I own platform businesses and build on them. These are the calls I made, including the ones I would make differently.</h1>
 </section>
 
 <section id="work" class="work-list">
@@ -32,6 +34,17 @@ permalink: /
         </p>
         <h3 class="work-title">{{ story.title }}</h3>
         {%- if story.summary %}<p class="work-summary">{{ story.summary }}</p>{% endif %}
+        {%- comment -%}
+        The lesson line is what makes the index specific rather than generic:
+        each row states what the case taught, not only what it achieved.
+        Guarded, so a story without `lesson` renders as before.
+        {%- endcomment -%}
+        {%- if story.lesson %}
+        <div class="work-lesson">
+          <p class="work-lesson-label">Lesson</p>
+          <p class="work-lesson-text">{{ story.lesson }}</p>
+        </div>
+        {%- endif %}
         {%- if story.chips %}
         <ul class="chips">
           {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
@@ -45,6 +58,7 @@ permalink: /
 
 <section id="about" class="about">
   <h2>About</h2>
+  <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
   <!-- TODO: about copy. This is a block on the home page, not a separate page. -->
 </section>
 
@@ -55,14 +69,18 @@ permalink: /
        unfinished site shows a short list rather than live broken links. The
        section itself always exists because the nav anchors to #contact. -->
   <ul class="contact-links">
+    {%- comment -%}
+    Labels are lowercase mono with a trailing north-east arrow, per the design.
+    The arrow and the accent are HTML entities so the source stays ASCII.
+    {%- endcomment -%}
     {%- if site.email %}
-    <li><a href="mailto:{{ site.email }}">Email</a></li>
+    <li><a href="mailto:{{ site.email }}">email &#8599;</a></li>
     {%- endif %}
     {%- if site.linkedin %}
-    <li><a href="{{ site.linkedin }}" rel="me">LinkedIn</a></li>
+    <li><a href="{{ site.linkedin }}" rel="me">linkedin &#8599;</a></li>
     {%- endif %}
     {%- if site.resume %}
-    <li><a href="{{ site.resume | relative_url }}">Resume (PDF)</a></li>
+    <li><a href="{{ site.resume | relative_url }}">r&eacute;sum&eacute;.pdf &#8599;</a></li>
     {%- endif %}
   </ul>
 </section>
