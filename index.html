@@ -1,8 +1,13 @@
 ---
 layout: default
-title: "Home"
 permalink: /
 ---
+{%- comment -%}
+No `title` here on purpose. With one, jekyll-seo-tag renders "Home | Pat
+Diggins ...", and "Home" is noise in a browser tab and a search result. Without
+it the home page's title is the site title alone. Story pages still get their
+own title prefixed.
+{%- endcomment -%}
 
 <!-- The headline claim is display copy, not metadata, so it lives here rather
      than in _config.yml. site.title and site.tagline stay in config for {% seo %}
