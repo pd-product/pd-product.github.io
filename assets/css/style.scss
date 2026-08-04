@@ -153,22 +153,41 @@ a:hover { color: var(--text); }
 
 /* Story pages only: replaces the wordmark (design session, comp 7b breadcrumb).
    Same mono size and colour language as .site-nav, so the header reads as one
-   row of small type. */
-.site-crumb {
+   row of small type.
+
+   .site-crumb is now the <nav> landmark and the <ol> inside it is the flex
+   container, so min-width: 0 is needed on BOTH: the nav is the flex item of
+   .site-header and the ol is the flex item's own content. Repo-session
+   addition to the design's rules -- without it on the nav, the shrink chain
+   starts one element too low and the ellipsis below is not guaranteed.
+   Flagged to design. */
+.site-crumb { min-width: 0; }
+
+.site-crumb ol {
   display: flex;
   gap: 9px;
+  min-width: 0;
   font: 400 12px var(--mono);
-  color: var(--nav-muted);
+}
+
+.site-crumb li {
+  display: flex;
+  gap: 9px;
   min-width: 0;
 }
+
+/* Separator is generated, not marked up, so the accessibility tree never sees
+   it and there is no decorative span to aria-hide. */
+.site-crumb li + li::before { content: "/"; color: var(--nav-muted); }
 
 .site-crumb a { color: var(--nav-muted); }
 .site-crumb a:hover { color: var(--text); }
 
 /* Truncates rather than wrapping, so a long fallback title cannot push the nav
-   links off the row. min-width: 0 above is what lets the crumb shrink inside
-   the flex header; overflow: hidden here is what lets the span shrink inside
-   the crumb. */
+   links off the row. The min-width: 0 chain above is what lets each ancestor
+   shrink; overflow: hidden here is what lets the span itself shrink inside its
+   li (a flex item with non-visible overflow has an automatic minimum size of
+   0). */
 .site-crumb [aria-current] {
   color: var(--text);
   overflow: hidden;
@@ -772,11 +791,11 @@ a:hover { color: var(--text); }
   .site-header { padding: 16px var(--gutter); }
   .site-nav ul { gap: 16px; }
 
-  /* The header is already tight here. Drop the first crumb and the separator
-     rather than shrinking the type; the nav's own "work" link is still the
-     route back to the index, so nothing becomes unreachable. */
-  .site-crumb a,
-  .site-crumb-sep { display: none; }
+  /* The header is already tight here. Drop the first crumb and its generated
+     separator rather than shrinking the type; the nav's own "work" link is
+     still the route back to the index, so nothing becomes unreachable. */
+  .site-crumb li:first-child { display: none; }
+  .site-crumb li + li::before { content: none; }
 
   .intro { padding: 34px var(--gutter) 28px; }
   .intro h1 { font-size: 29px; letter-spacing: -.025em; }
