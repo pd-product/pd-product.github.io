@@ -21,8 +21,12 @@ permalink: /
         {%- if card %}
         <img class="work-card-image" src="{{ card | relative_url }}" alt="">
         {%- endif %}
+        {%- comment -%}
+        Position in the sorted list, not the raw `order` value. See the same
+        note in _layouts/story.html; both derive it this way so they agree.
+        {%- endcomment -%}
         <p class="eyebrow">
-          <span class="eyebrow-index">{% if story.order < 10 %}0{% endif %}{{ story.order }}</span>
+          <span class="eyebrow-index">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
           <span class="eyebrow-sep">/</span>
           <span class="eyebrow-category">{{ story.category }}</span>
         </p>

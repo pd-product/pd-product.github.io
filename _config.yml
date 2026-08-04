@@ -47,16 +47,27 @@ collections:
     output: true
     permalink: /work/:title/
 
+# Explicit heading anchors are a URL contract: /work/<slug>/#situation must keep
+# working after a heading is reworded. auto_ids would silently mint an id from
+# the heading text instead, so a forgotten `{#id}` would appear to work and then
+# break every shared deep link on the next edit. With auto_ids off, a forgotten
+# anchor drops that chapter out of the rail, which is visible on the page.
+kramdown:
+  auto_ids: false
+
+# Share-card default. These scopes are deliberately narrow: an empty `path: ""`
+# scope with no `type` applies repo-wide and turned three stray notes under
+# assets/ into published, indexed pages. Scope every default to a type.
 defaults:
   - scope:
       path: ""
       type: "work"
     values:
       layout: "story"
-  # Site-wide share-card default so no page is ever missing an image.
-  # Any page or story may override with its own `image:`.
+      image: "/assets/og/default.png"
   - scope:
       path: ""
+      type: "pages"
     values:
       image: "/assets/og/default.png"
 

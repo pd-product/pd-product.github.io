@@ -13,8 +13,17 @@ omits `partners`, `chips`, or a chapter simply renders without it.
 
 <article class="story">
   <header class="story-header">
+    {%- comment -%}
+    The eyebrow number is the story's position in the sorted list, NOT the raw
+    `order` value. `order` is a sort key only. Deriving the display from
+    position is both what the design intends -- a reading-order signpost -- and
+    immune to duplicate, missing, zero, or negative `order` values, which would
+    otherwise render as a duplicate number, a blank, `00`, or `0-1`. The home
+    row derives its number the same way, so the two always agree.
+    {%- endcomment -%}
+    {%- assign display_index = position | plus: 1 -%}
     <p class="eyebrow">
-      <span class="eyebrow-index">{% if page.order < 10 %}0{% endif %}{{ page.order }}</span>
+      <span class="eyebrow-index">{% if display_index < 10 %}0{% endif %}{{ display_index }}</span>
       <span class="eyebrow-sep">/</span>
       <span class="eyebrow-category">{{ page.category }}</span>
     </p>
@@ -47,6 +56,11 @@ omits `partners`, `chips`, or a chapter simply renders without it.
     </div>
   </div>
 
+  {%- comment -%}
+  Only emit the landmark when it can hold a link; an empty labelled <nav> is
+  noise for a screen reader. With one story there is no prev and no next.
+  {%- endcomment -%}
+  {%- if ordered.size > 1 %}
   <nav class="story-pager" aria-label="More work">
     {%- assign prev_index = position | minus: 1 -%}
     {%- assign next_index = position | plus: 1 -%}
@@ -59,4 +73,5 @@ omits `partners`, `chips`, or a chapter simply renders without it.
       <a class="pager-next" rel="next" href="{{ next.url | relative_url }}">{{ next.title }}</a>
     {%- endif -%}
   </nav>
+  {%- endif %}
 </article>

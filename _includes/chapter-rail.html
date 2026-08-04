@@ -10,7 +10,23 @@ Requires each h2 to carry an explicit kramdown anchor, e.g.
     ## The situation    {#situation}
 
 The explicit anchor is what keeps a shared deep link such as
-/work/<slug>/#situation working after the heading text is reworded.
+/work/<slug>/#situation working after the heading text is reworded. Kramdown
+auto_ids is disabled in _config.yml so that a forgotten anchor drops the
+chapter out of the rail visibly, rather than silently minting an unstable id
+derived from the heading text.
+
+PARSING NOTE. The label is taken by removing the known `id">` prefix from the
+heading's inner HTML, NOT by splitting on '">'. Splitting is wrong: kramdown
+renders inline code as <code class="language-plaintext highlighter-rouge"> and
+links as <a href="...">, both of which contain '">', so a split lands inside
+the attribute and yields a truncated label plus malformed markup.
+
+Known limits, accepted rather than fixed, because authoring guidance controls
+them and the failure is visible on the page:
+  - Only the `{#id}` attribute form is matched. `{: .class #id}` renders the
+    class first and the chapter is omitted from the rail.
+  - An h2 whose content is only an image yields an empty label; the anchor is
+    used as the label so the entry is never blank.
 
 Authoring guidance (not enforced here): 3-8 entries is the comfortable range,
 and heading text under ~24 characters avoids wrapping in the 168px rail.
@@ -20,9 +36,11 @@ and heading text under ~24 characters avoids wrapping in the 168px rail.
 <nav class="chapter-rail" aria-label="Chapters">
   <ul>
     {%- for chunk in chunks offset:1 -%}
-      {%- assign anchor = chunk | split: '"' | first -%}
-      {%- assign after = chunk | split: '">' -%}
-      {%- assign label = after[1] | split: '</h2>' | first | strip_html | strip -%}
+      {%- assign head = chunk | split: '</h2>' | first -%}
+      {%- assign anchor = head | split: '"' | first -%}
+      {%- assign prefix = anchor | append: '">' -%}
+      {%- assign label = head | remove_first: prefix | strip_html | strip -%}
+      {%- if label == '' -%}{%- assign label = anchor -%}{%- endif -%}
       <li><a href="#{{ anchor }}">{{ label }}</a></li>
     {%- endfor -%}
   </ul>

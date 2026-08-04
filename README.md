@@ -25,8 +25,11 @@ page (`/#about`, `/#contact`), not separate pages. Stories live at `/work/<slug>
 Copy `_work/example-story.md`. Set `slug` (keep the filename identical to it), `title`, `category`,
 and `order`. Everything else is optional and is simply not rendered when absent.
 
-`order` is the global reading position. It drives three things at once: the zero-padded eyebrow
-number, the row's place on the home page, and prev/next on the story page. No index needs editing.
+`order` is the global reading position and is required. It is a **sort key only**: the zero-padded
+eyebrow number is derived from the story's position in the sorted list, not from the value itself,
+so duplicate, missing, zero, or negative values cannot render a duplicate number, a blank, `00`, or
+`0-1`. Home row and story page derive it the same way and therefore always agree. Use unique
+integers anyway -- ties have no defined order. No index needs editing.
 
 Set `published: false` to keep a story in the repo but out of the built site. That is Jekyll's own
 flag, so an unpublished story drops out of the home list, prev/next, and the sitemap together.
@@ -44,6 +47,14 @@ one -- delete the section and its rail entry goes with it. The explicit anchor i
 deep link such as `/work/<slug>/#situation` working after the heading is reworded.
 
 Standard anchors: `#situation`, `#constraints`, `#the-call`, `#shipped`, `#redo`.
+
+The anchor is **required**, not optional. Kramdown's `auto_ids` is disabled in `_config.yml`, so a
+heading without `{#id}` gets no id at all and drops out of the rail -- visibly, on the page. That is
+deliberate: with `auto_ids` on, a forgotten anchor appears to work while minting an id from the
+heading text, and every shared deep link then breaks the next time that heading is reworded.
+
+Only the `{#id}` form is matched. The `{: .class #id}` form renders the class attribute first and
+the chapter will be missing from the rail.
 
 Authoring guidance, not enforced by the template: 3-8 rail entries is the comfortable range, and
 heading text under about 24 characters avoids wrapping in the rail.

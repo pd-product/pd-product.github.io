@@ -3,7 +3,23 @@
 # to /assets/css/style.css. Do not remove these two lines.
 ---
 
-/* Placeholder only. The design session's CSS replaces everything below. */
+/* Placeholder only. The design session's CSS replaces everything below --
+   EXCEPT .sr-only, which is functional, not decorative. The markup uses it to
+   hide text that only assistive technology should read, such as the "(chosen)"
+   label on a tradeoff table header. Without the rule the text renders visibly.
+   Keep it when this file is replaced. */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
 
 *,
 *::before,
