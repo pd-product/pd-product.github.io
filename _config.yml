@@ -11,7 +11,14 @@
 # built site. seo-tag supplies its own pipe between page title and site title.
 title: "Pat Diggins &#8211; Product Manager"
 brand: "Pat Diggins"
-tagline: "Product manager working on advertising platforms. Case studies on the decisions behind them, including the ones I would make differently."
+# tagline and description must NOT be the same string. jekyll-seo-tag appends
+# the tagline (falling back to the description) to the site title whenever the
+# page title equals it, which is the home page. With both set to the long
+# sentence the home <title> came out at ~180 characters; search engines truncate
+# around 60. The tagline is therefore short and is used only as metadata -- it
+# is not printed anywhere, since the hero claim lives in index.html.
+# Wording is lifted from the design's own hero eyebrow, not invented.
+tagline: "Ad platforms and AI"
 description: "Product manager working on advertising platforms. Case studies on the decisions behind them, including the ones I would make differently."
 author: "Patrick Diggins"
 
