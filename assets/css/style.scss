@@ -272,6 +272,14 @@ a:hover { color: var(--text); }
   padding: 40px var(--gutter);
 }
 
+/* Added by the repo session, not the design session.
+   .about-photo floats left, and a section does not contain its own floats. With
+   short about copy the 84px photo protruded past the section and the Contact
+   links wrapped around it. flow-root establishes a block formatting context so
+   the section contains the float regardless of how long the copy is; it changes
+   nothing visually when the copy is long enough. Flagged to design. */
+.about { display: flow-root; }
+
 .about > h2,
 .contact > h2 {
   font: 400 11.5px var(--mono);

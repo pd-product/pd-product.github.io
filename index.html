@@ -9,9 +9,16 @@ it the home page's title is the site title alone. Story pages still get their
 own title prefixed.
 {%- endcomment -%}
 
-<!-- The headline claim is display copy, not metadata, so it lives here rather
-     than in _config.yml. site.title and site.tagline stay in config for {% seo %}
-     but are deliberately not printed on the page. -->
+{%- comment -%}
+The headline claim is display copy, not metadata, so it lives here rather than
+in _config.yml. site.title and site.tagline stay in config for the seo tag but
+are deliberately not printed on the page.
+
+This MUST be a Liquid comment, not an HTML one. Liquid executes tags inside
+HTML comments: naming the seo tag in a `<!-- -->` block expanded it, and its
+own `<!-- End Jekyll SEO tag -->` closed this comment early, leaking the rest
+of the text onto the page as visible content.
+{%- endcomment -%}
 <section class="intro">
   <p class="eyebrow">senior pm &middot; ad platforms and ai</p>
   <h1>I own platform businesses and build on them. These are the calls I made, including the ones I would make differently.</h1>
@@ -37,24 +44,38 @@ own title prefixed.
           <span class="eyebrow-sep">/</span>
           <span class="eyebrow-category">{{ story.category }}</span>
         </p>
-        <h3 class="work-title">{{ story.title }}</h3>
-        {%- if story.summary %}<p class="work-summary">{{ story.summary }}</p>{% endif %}
         {%- comment -%}
-        The lesson line is what makes the index specific rather than generic:
-        each row states what the case taught, not only what it achieved.
-        Guarded, so a story without `lesson` renders as before.
+        Everything except the eyebrow goes in ONE wrapper. `.work-row > a` is a
+        two-column grid with automatic placement, so separate direct children
+        alternate between the rail and the main column: the summary and chips
+        landed in the 168px rail. Worse, placement then depended on how many
+        optional fields a story happened to set, so omitting `summary` moved the
+        lesson into the rail too.
+
+        The wrapper is deliberately unstyled. It occupies the main column as a
+        single grid item, and every rule in the design CSS is class-based, so
+        the descendants keep their styling with no change to the stylesheet.
         {%- endcomment -%}
-        {%- if story.lesson %}
-        <div class="work-lesson">
-          <p class="work-lesson-label">Lesson</p>
-          <p class="work-lesson-text">{{ story.lesson }}</p>
+        <div class="work-copy">
+          <h3 class="work-title">{{ story.title }}</h3>
+          {%- if story.summary %}<p class="work-summary">{{ story.summary }}</p>{% endif %}
+          {%- comment -%}
+          The lesson line is what makes the index specific rather than generic:
+          each row states what the case taught, not only what it achieved.
+          Guarded, so a story without `lesson` renders as before.
+          {%- endcomment -%}
+          {%- if story.lesson %}
+          <div class="work-lesson">
+            <p class="work-lesson-label">Lesson</p>
+            <p class="work-lesson-text">{{ story.lesson }}</p>
+          </div>
+          {%- endif %}
+          {%- if story.chips %}
+          <ul class="chips">
+            {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
+          </ul>
+          {%- endif %}
         </div>
-        {%- endif %}
-        {%- if story.chips %}
-        <ul class="chips">
-          {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
-        </ul>
-        {%- endif %}
       </a>
     </li>
     {%- endfor %}
@@ -64,7 +85,8 @@ own title prefixed.
 <section id="about" class="about">
   <h2>About</h2>
   <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
-  <!-- TODO: about copy. This is a block on the home page, not a separate page. -->
+  <p>I work on the platforms that sit between publishers and the demand that pays for their content. My career has moved steadily toward the decisions behind technical products, and I got there by taking on that work before it was mine to do. Lately that includes writing code with AI agents.</p>
+  <p>In January 2026 I went from AI skeptic to AI native, now building work and personal tools daily.</p>
 </section>
 
 <section id="contact" class="contact">
