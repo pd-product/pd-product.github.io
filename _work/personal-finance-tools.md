@@ -46,6 +46,7 @@ I started building the rebalancing model in a spreadsheet. Fairly early on it be
 1. The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
 2. Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
 3. The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
+{: role="list"}
 
 ## The call I made    {#the-call}
 

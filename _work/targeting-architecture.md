@@ -46,6 +46,7 @@ Customers were direct with me about how prohibitive this overhead was. They had 
 1. The existing model was live and carrying real publisher revenue, so nothing could break for anyone already running on it.
 2. The only alternative on the table was making no investment at all and letting first-party and third-party publishers keep absorbing the friction.
 3. Ownership of the core targeting logic was genuinely unsettled between engineering teams, and engineering leadership had to settle it before the work could be assigned.
+{: role="list"}
 
 ## The call I made    {#the-call}
 
