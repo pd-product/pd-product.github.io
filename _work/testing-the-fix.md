@@ -13,7 +13,7 @@ partners: "Publishers with uncommon inventory setups"
 timeframe: "A weekend, against a year of partial fixes"
 chips:
   - "one weekend"
-  - "14% exposed"
+  - "14% revenue exposed"
 # Order matters: this story's opening paragraph refers to case 1 as "the
 # previous case study". Reordering requires a copy edit.
 tradeoffs:

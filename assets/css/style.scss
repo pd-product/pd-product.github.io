@@ -272,13 +272,21 @@ a:hover { color: var(--text); }
   padding: 40px var(--gutter);
 }
 
-/* Added by the repo session, not the design session.
-   .about-photo floats left, and a section does not contain its own floats. With
-   short about copy the 84px photo protruded past the section and the Contact
-   links wrapped around it. flow-root establishes a block formatting context so
-   the section contains the float regardless of how long the copy is; it changes
-   nothing visually when the copy is long enough. Flagged to design. */
-.about { display: flow-root; }
+/* Repo-session change, flagged to design.
+   The photo was floated, so the copy wrapped underneath it and was capped at
+   54ch, leaving most of the section empty to the right. This lays the section
+   out explicitly instead: photo in a fixed first column, copy in the second,
+   heading spanning both. Placement is explicit rather than automatic, because
+   auto-placement would drop the second paragraph into the photo column.
+   Grid also contains the (now unfloated) photo, so flow-root is unnecessary. */
+.about {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  column-gap: 20px;
+  align-items: start;
+}
+
+.about > h2 { grid-column: 1 / -1; }
 
 .about > h2,
 .contact > h2 {
@@ -292,7 +300,10 @@ a:hover { color: var(--text); }
 .about p {
   font: 400 15px/1.66 var(--sans);
   color: var(--muted);
-  max-width: 54ch;
+  /* Widened from 54ch and pinned to the copy column: see the .about note above.
+     72ch stays inside the readable range rather than running the full width. */
+  grid-column: 2;
+  max-width: 72ch;
   text-wrap: pretty;
 }
 
@@ -303,8 +314,10 @@ a:hover { color: var(--text); }
   height: 84px;
   object-fit: cover;
   border: 1px solid var(--border);
-  float: left;
-  margin: 0 20px 8px 0;
+  /* No longer floated: the section is a grid. See the .about note above. */
+  grid-column: 1;
+  grid-row: 2;
+  margin: 0;
 }
 
 .contact-links {
@@ -741,7 +754,11 @@ a:hover { color: var(--text); }
 
   .story-pager { flex-direction: column; align-items: flex-start; }
   .pager-next { margin-left: 0; text-align: left; }
-  .about-photo { float: none; margin: 0 0 16px; }
+  /* Stack on narrow screens. Every explicit placement from the desktop grid has
+     to be reset, or the copy would be pushed into a phantom second column. */
+  .about { grid-template-columns: minmax(0, 1fr); }
+  .about-photo { grid-column: 1; grid-row: auto; margin: 0 0 16px; }
+  .about p { grid-column: 1; max-width: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -755,7 +772,10 @@ a:hover { color: var(--text); }
    ---------------------------------------------------------------------- */
 
 .work-lesson {
-  margin: 0 0 16px;
+  /* Owner feedback: the summary sat too close to this hairline. The rule had no
+     top margin, so the separator butted straight up against the description.
+     Repo-session change, flagged to design. */
+  margin: 22px 0 16px;
   padding-top: 14px;
   border-top: 1px solid var(--hairline);
   max-width: 62ch;
