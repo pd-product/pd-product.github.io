@@ -288,6 +288,20 @@ a:hover { color: var(--text); }
 
 .about > h2 { grid-column: 1 / -1; }
 
+/* Design-session refinement, requested after review.
+   About and Contact are separate sections because that is what the markup
+   supports, but the comp reads them as one panel. Dropping the rule between
+   them and the second top padding makes the shared panel-deep background run
+   continuously, so they read as one block with two labelled parts rather than
+   two stacked panels. .about keeps its own top border, which is what separates
+   the pair from the work list above.
+   Separation between the two is now .about's 40px bottom padding alone; adjust
+   here if the design wants a different interval. */
+.contact {
+  border-top: 0;
+  padding-top: 0;
+}
+
 .about > h2,
 .contact > h2 {
   font: 400 11.5px var(--mono);

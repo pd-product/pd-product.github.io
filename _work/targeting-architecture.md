@@ -13,7 +13,7 @@ partners: "1P and 3P publishers, demand partners, support and services"
 timeframe: "Over a year, scoping to GA"
 chips:
   - "over a year"
-  - "customer advocacy"
+  - "staged rollout"
 # No hero_image for v1 -- the site ships without diagrams. Adding one here is
 # the only change needed to bring the hero and home-page card back.
 tradeoffs:
