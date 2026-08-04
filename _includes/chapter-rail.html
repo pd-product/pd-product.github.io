@@ -15,16 +15,34 @@ auto_ids is disabled in _config.yml so that a forgotten anchor drops the
 chapter out of the rail visibly, rather than silently minting an unstable id
 derived from the heading text.
 
-PARSING NOTE. The label is taken by removing the known `id">` prefix from the
-heading's inner HTML, NOT by splitting on '">'. Splitting is wrong: kramdown
-renders inline code as <code class="language-plaintext highlighter-rouge"> and
-links as <a href="...">, both of which contain '">', so a split lands inside
-the attribute and yields a truncated label plus malformed markup.
+PARSING NOTE. The label is taken by removing the heading's complete OPENING
+TAG from its inner HTML. Two wrong ways to do this, both previously shipped or
+considered here:
+
+  - Splitting on '">' is wrong. Kramdown renders inline code as
+    <code class="language-plaintext highlighter-rouge"> and links as
+    <a href="...">, both of which contain '">', so the split lands inside an
+    attribute and yields a truncated label plus malformed markup.
+  - Removing a RECONSTRUCTED `id">` prefix is also wrong, which is what this
+    include did until the opener change. It assumes the opening tag is exactly
+    <h2 id="foo">. A heading carrying any other attribute renders as
+    <h2 id="foo" class="wide">, so the reconstructed prefix `foo">` does not
+    occur in the head at all, remove_first is a silent no-op, and strip_html
+    cannot clean up after it because there is no '<' left to match. The label
+    then renders as attribute debris.
+
+So: take the opener as everything up to the FIRST '>'. That is reliable
+because kramdown escapes '>' in body text as &gt;, so the first '>' in the
+head is always the one that closes the opening tag, whatever attributes it
+carries.
 
 Known limits, accepted rather than fixed, because authoring guidance controls
 them and the failure is visible on the page:
   - Only the `{#id}` attribute form is matched. `{: .class #id}` renders the
-    class first and the chapter is omitted from the rail.
+    class BEFORE the id, so the outer `split: '<h2 id="'` misses the heading
+    entirely and it vanishes from the rail silently. This is the reason the
+    explicit `{#id}` convention is a convention and not a preference; the
+    opener fix above does not and cannot rescue this case.
   - An h2 whose content is only an image yields an empty label; the anchor is
     used as the label so the entry is never blank.
 
@@ -43,8 +61,8 @@ and heading text under ~24 characters avoids wrapping in the 168px rail.
     {%- for chunk in chunks offset:1 -%}
       {%- assign head = chunk | split: '</h2>' | first -%}
       {%- assign anchor = head | split: '"' | first -%}
-      {%- assign prefix = anchor | append: '">' -%}
-      {%- assign label = head | remove_first: prefix | strip_html | strip -%}
+      {%- assign opener = head | split: '>' | first | append: '>' -%}
+      {%- assign label = head | remove_first: opener | strip_html | strip -%}
       {%- if label == '' -%}{%- assign label = anchor -%}{%- endif -%}
       <li><a href="#{{ anchor }}">{{ label }}</a></li>
     {%- endfor -%}
