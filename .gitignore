@@ -16,3 +16,6 @@ _site/
 # counterproductive to check this file into the repository.
 # Details at https://github.com/github/pages-gem/issues/768
 Gemfile.lock
+
+# Session scratch (review prompts, working notes). Never published, never committed.
+temp/
