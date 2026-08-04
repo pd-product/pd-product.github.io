@@ -26,7 +26,15 @@ of the text onto the page as visible content.
 
 <section id="work" class="work-list">
   <h2>Work</h2>
-  <ol class="work-rows">
+  {%- comment -%}
+  role="list" is not redundant here. The stylesheet's `ul, ol { list-style:
+  none }` reset removes the implicit list role in Safari with VoiceOver, so
+  without this the work index stops announcing as "list, 3 items" -- and this
+  is the site's primary content. Restated explicitly rather than fixed by
+  restoring markers, which the design does not use. Every list in the repo
+  carries it for the same reason. Design session, refinement 3.
+  {%- endcomment -%}
+  <ol class="work-rows" role="list">
     {%- assign ordered = site.work | sort: "order" -%}
     {%- for story in ordered %}
     <li class="work-row">
@@ -71,7 +79,7 @@ of the text onto the page as visible content.
           </div>
           {%- endif %}
           {%- if story.chips %}
-          <ul class="chips">
+          <ul class="chips" role="list">
             {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
           </ul>
           {%- endif %}
@@ -102,7 +110,7 @@ of the text onto the page as visible content.
        Each link renders only once its value is set in _config.yml, so an
        unfinished site shows a short list rather than live broken links. The
        section itself always exists because the nav anchors to #contact. -->
-  <ul class="contact-links">
+  <ul class="contact-links" role="list">
     {%- comment -%}
     Labels are lowercase mono with a trailing north-east arrow, per the design.
     The arrow and the accent are HTML entities so the source stays ASCII.

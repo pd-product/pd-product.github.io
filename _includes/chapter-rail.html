@@ -35,7 +35,11 @@ and heading text under ~24 characters avoids wrapping in the 168px rail.
 {%- if chunks.size > 1 -%}
 <nav class="chapter-rail" aria-label="Chapters">
   <h2>Chapters</h2>
-  <ul>
+  {%- comment -%}
+  role="list": the stylesheet's `ul, ol { list-style: none }` reset drops the
+  implicit list role in Safari with VoiceOver. See index.html.
+  {%- endcomment -%}
+  <ul role="list">
     {%- for chunk in chunks offset:1 -%}
       {%- assign head = chunk | split: '</h2>' | first -%}
       {%- assign anchor = head | split: '"' | first -%}

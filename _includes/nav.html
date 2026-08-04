@@ -31,7 +31,13 @@
   <a class="site-title" href="{{ '/' | relative_url }}">{{ site.brand | default: site.title }}</a>
   {%- endif %}
   <nav class="site-nav" aria-label="Main">
-    <ul>
+    {%- comment -%}
+    role="list": the stylesheet's `ul, ol { list-style: none }` reset drops the
+    implicit list role in Safari with VoiceOver. See index.html. Not on the
+    design session's list -- added here so the sweep covers every list in the
+    repo rather than four of five. Flagged back to them.
+    {%- endcomment -%}
+    <ul role="list">
       {% for item in site.nav %}
         <li><a href="{{ item.url | relative_url }}">{{ item.title }}</a></li>
       {% endfor %}
