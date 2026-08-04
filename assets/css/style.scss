@@ -693,17 +693,25 @@ a:hover { color: var(--text); }
 
 .story-pager a:hover { color: var(--accent); }
 
-.pager-prev::before,
-.pager-next::after {
+/* .pager-next::after removed: it set `content: ""` and nothing else, which
+   rendered an empty block after the next link. It was also carried on the
+   shared selector above, so that selector now targets only what it styles.
+   The label for .pager-next is on ::before, below. Design session,
+   refinement 5.
+
+   The two adjacent .pager-prev::before rules are merged here for the same
+   reason. Note that this rule and .pager-next::before below now declare an
+   identical property set apart from `content`; consolidating them onto one
+   selector is a further tidy-up, left to the design session. */
+.pager-prev::before {
+  content: "Previous case";
+  display: block;
+  margin-bottom: 7px;
   font: 400 11px var(--mono);
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--accent);
-  display: block;
 }
-
-.pager-prev::before { content: "Previous case"; margin-bottom: 7px; }
-.pager-next::after { content: ""; }
 
 .pager-next {
   margin-left: auto;
@@ -844,9 +852,29 @@ a:hover { color: var(--text); }
   .contact > h2 { margin-bottom: 14px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  * { scroll-behavior: auto !important; }
+/* The `* { scroll-behavior: auto !important }` guard that used to live here was
+   removed. Nothing in this stylesheet sets scroll-behavior: smooth, so it
+   reversed something that never happened while implying smooth scrolling
+   existed.
 
+   IF SMOOTH SCROLLING IS EVER ADDED -- the chapter rail is the plausible
+   candidate -- do NOT restore the blanket guard. Two reasons it was the wrong
+   shape:
+
+     1. Opt in at the point of use instead:
+          @media (prefers-reduced-motion: no-preference) {
+            html { scroll-behavior: smooth; }
+          }
+        That cannot be forgotten the way a distant sweeper can, and it needs no
+        universal !important.
+     2. The guard never covered the likelier source anyway. Per CSSOM-View, CSS
+        scroll-behavior applies only when a script requests `auto`, so a
+        scrollIntoView({behavior: 'smooth'}) call in assets/js/chapter-rail.js
+        would have ignored it entirely. JS-driven scrolling must branch on
+        matchMedia('(prefers-reduced-motion: reduce)') itself.
+
+   Design session, refinement 5. */
+@media (prefers-reduced-motion: reduce) {
   /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
      but the preference is a preference. */
   .work-row { transition: none; }
