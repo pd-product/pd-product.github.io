@@ -2,7 +2,15 @@
 layout: default
 title: "Page not found"
 permalink: /404.html
+# Page-level, not the site-wide D11 switch in _config.yml. This page serves 200
+# with a self-canonical, because GitHub Pages has no way to serve it as a real
+# 404 for an arbitrary path, so it is indexable unless told otherwise. It is out
+# of the sitemap already; this closes the rest.
+noindex: true
 ---
 
-<h1>Page not found</h1>
-<p><a href="{{ '/' | relative_url }}">Back to the home page</a></p>
+<section class="page-simple">
+  <h1>Page not found</h1>
+  <p>That link is broken or the page has moved.</p>
+  <p><a href="{{ '/' | relative_url }}">Back to the home page</a></p>
+</section>
