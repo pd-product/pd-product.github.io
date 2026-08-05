@@ -118,6 +118,13 @@ the site-wide default in `_config.yml`, so nothing is ever missing a card.
   publish; re-derive from there rather than upscaling a shipped file when a display size grows.
 - `assets/og/` -- share cards at 1200x630. `default.png` is the site-wide fallback; per-story cards
   override it via `image:` in the story front matter.
+
+  Keep `image:` a **bare path**, never a hash. seo-tag will emit `og:image:width/height/alt` from a
+  hash, but its JSON-LD drop then forwards every key into the structured data and hardcodes
+  `"@type": "imageObject"` in lowercase -- and Schema.org type names are case-sensitive, so that is
+  not a real type, and `alt` is not a Schema.org property. The dimensions come from `og_image:` in
+  `_config.yml` and are printed by `_layouts/default.html` instead. A story that sets its own
+  `image:` gets no dimension tags, deliberately: they would describe the wrong file.
 - `assets/fonts/` -- IBM Plex Mono Regular and Medium, self-hosted as woff2 and **subset** to the
   ~107 glyphs the site renders, which cut each file from about 46KB to about 11.6KB. They are
   declared in CSS as `"Site Mono"`: the SIL OFL reserves the name "Plex" and forbids a modified

@@ -91,33 +91,41 @@ kramdown:
 # scope with no `type` applies repo-wide and turned three stray notes under
 # assets/ into published, indexed pages. Scope every default to a type.
 #
-# `image` is a HASH, not a bare path string. jekyll-seo-tag only emits
-# og:image:width, og:image:height and og:image:alt when the keys are present,
-# and only builds a JSON-LD imageObject when the hash has more than one key.
-# Dimensions must match the real file (assets/og/default.png is 1200x630);
-# stating them lets a scraper reserve the right box before the image loads.
-# `alt` is the card's own text, transcribed -- keep them in step if the card is
-# ever regenerated.
+# `image` is a BARE PATH, not a hash, and must stay one. Giving seo-tag a hash
+# does emit og:image:width/height/alt -- but JSONLDDrop#image then forwards
+# every key into the JSON-LD and hardcodes `"@type": "imageObject"` in
+# lowercase. Schema.org type names are case-sensitive: `ImageObject` exists,
+# `imageObject` does not, and `alt` is not a Schema.org property at all. That
+# put a malformed image node on every page, which is worse than the three meta
+# tags are worth. The dimensions and alt text are emitted directly by
+# _layouts/default.html instead, from og_image below.
 defaults:
   - scope:
       path: ""
       type: "work"
     values:
       layout: "story"
-      image:
-        path: "/assets/og/default.png"
-        width: 1200
-        height: 630
-        alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
+      image: "/assets/og/default.png"
   - scope:
       path: ""
       type: "pages"
     values:
-      image:
-        path: "/assets/og/default.png"
-        width: 1200
-        height: 630
-        alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
+      image: "/assets/og/default.png"
+
+# Dimensions and alt for the share card above, emitted by hand in
+# _layouts/default.html because routing them through seo-tag corrupts the
+# JSON-LD (see the note on `image`). Keep these true of the real file:
+# assets/og/default.png is 1200x630, and the alt is a transcription of the
+# card's own text.
+og_image:
+  # Must match the `image:` value in BOTH defaults scopes above. The layout
+  # compares them, and emits the dimensions only when the page is really using
+  # this card -- a story with its own card would otherwise be described with
+  # this one's width and height.
+  path: "/assets/og/default.png"
+  width: 1200
+  height: 630
+  alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
 
 # Structured data for the person, not just the site. jekyll-seo-tag reads
 # `social.links` into JSON-LD `sameAs`, but ONLY on the home page or an /about/

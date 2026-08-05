@@ -891,13 +891,21 @@ a:hover { color: var(--text); }
      736px, most of two screens on a 390x844 phone -- ahead of the first
      sentence. Role and team are what someone checks after reading, not before.
 
-     `order` moves the box and does NOT move reading or focus order, so it is
-     only safe on content that nothing lands on. That is why the chapter rail is
-     display: none here rather than reordered with the rest: it holds five
-     links, and a jump list that a keyboard user reaches BEFORE the prose while
-     a sighted user sees it after is a focus-order mismatch. `display: none`
-     removes it from both trees, so there is nothing to mismatch. What moves is
-     the <dl>, which holds no focusable content.
+     `order` moves the box and moves NEITHER reading order nor focus order, so
+     what follows has to be true of anything reordered with it.
+
+     Reading order, WCAG 1.3.2: a screen reader still reaches the metadata
+     before the prose. That is allowed, because the two are independent
+     sections whose relative order does not change what either one MEANS -- and
+     the <dl>'s own internal order, where sequence does matter, is untouched.
+     Absence of focusable children is NOT what makes this pass; do not reuse
+     that as the test.
+
+     Focus order, WCAG 2.4.3: this is why the chapter rail is display: none
+     here rather than reordered. It holds five links, and a jump list a
+     keyboard user reaches BEFORE the prose while a sighted user sees it after
+     is a real mismatch. display: none removes it from both trees, so there is
+     nothing to mismatch. The <dl> that does move holds nothing focusable.
 
      The rail also carried a bottom border to separate it from the prose below.
      Now that it sits underneath, that border moves to the top for the same
