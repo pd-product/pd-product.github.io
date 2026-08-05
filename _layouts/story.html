@@ -28,8 +28,13 @@ omits `partners`, `chips`, or a chapter simply renders without it.
       <span class="eyebrow-category">{{ page.category }}</span>
     </p>
     <h1 class="story-title">{{ page.title }}</h1>
-    {%- if page.summary %}
-    <p class="story-summary">{{ page.summary }}</p>
+    {%- comment -%}
+    `description`, not a display-only key: one field feeds both this line and the
+    meta description, so the two cannot drift. jekyll-seo-tag reads
+    page.description directly.
+    {%- endcomment -%}
+    {%- if page.description %}
+    <p class="story-summary">{{ page.description }}</p>
     {%- endif %}
   </header>
 

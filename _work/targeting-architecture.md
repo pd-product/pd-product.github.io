@@ -4,12 +4,21 @@ title: "Rebuilding how publishers target their inventory"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "targeting architecture"
-summary: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
-# One line, shown on the home-page row under the summary. A trim of this
+# Shown under the title on the story page and on the home-page row, AND read by
+# jekyll-seo-tag as the meta description. The key must be `description`: with
+# any other name seo-tag falls back to page.excerpt, which is the first block of
+# the body -- the opening `## ` heading. Search and link previews then read
+# "The situation".
+description: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
+# One line, shown on the home-page row under the description. A trim of this
 # story's own "What I would redo" chapter, approved as written.
 lesson: "Treat the customer experience of a transition as part of the design, not as something that follows it."
 category: "supply"
 order: 1
+# Publication date of this page, not the date of the work it describes. Without
+# it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
+# move on every deploy and re-announce the story as new. Set once, then leave it.
+date: 2026-08-04
 role: "PM, Prebid Server Premium. Owned roadmap and outcome."
 team: "Customers, support, design, multiple eng teams"
 partners: "1P and 3P publishers, demand partners, support and services"

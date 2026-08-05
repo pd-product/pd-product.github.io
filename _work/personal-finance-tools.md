@@ -4,12 +4,21 @@ title: "The spreadsheet that became a toolkit"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "personal finance tools"
-summary: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
-# One line, shown on the home-page row under the summary. A trim of this
+# Shown under the title on the story page and on the home-page row, AND read by
+# jekyll-seo-tag as the meta description. The key must be `description`: with
+# any other name seo-tag falls back to page.excerpt, which is the first block of
+# the body -- the opening `## ` heading. Search and link previews then read
+# "The situation".
+description: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
+# One line, shown on the home-page row under the description. A trim of this
 # story's own "What I would redo" chapter, approved as written.
 lesson: "When building feels cheap, the discipline that protects you is the one you stop noticing you dropped."
 category: "personal"
 order: 3
+# Publication date of this page, not the date of the work it describes. Without
+# it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
+# move on every deploy and re-announce the story as new. Set once, then leave it.
+date: 2026-08-04
 role: "Sole author, with AI coding tools"
 team: "None. A planner validated the strategy separately."
 timeframe: "Ongoing since early 2026"
