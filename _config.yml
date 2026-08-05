@@ -16,11 +16,15 @@ title: "Pat Diggins &#8211; Senior Product Manager"
 brand: "Pat Diggins"
 # tagline and description must NOT be the same string. jekyll-seo-tag appends
 # the tagline (falling back to the description) to the site title whenever the
-# page title equals it, which is the home page. With both set to the long
-# sentence the home <title> came out at ~180 characters; search engines truncate
-# around 60. The tagline is therefore short and is used only as metadata -- it
-# is not printed anywhere, since the hero claim lives in index.html.
-# Wording is lifted from the design's own hero eyebrow, not invented.
+# page title equals it, which is the home page -- so whichever one is selected
+# has to be SHORT, or the home <title> becomes the whole sentence.
+#
+# Short does not mean a character budget: search engines publish no title-length
+# limit, truncate to the device width, and rewrite titles at their own
+# discretion. Judge it by rendered width, not by counting.
+#
+# The tagline is used only as metadata and is not printed anywhere, since the
+# hero claim lives in index.html.
 tagline: "Publisher solutions and AI"
 description: "Product manager working on advertising platforms. Case studies on the decisions behind them, including the ones I would make differently."
 author: "Patrick Diggins"
@@ -29,10 +33,9 @@ author: "Patrick Diggins"
 # Copyright Office's notice guidance; do not bump it annually.
 copyright_year: 2026
 
-# LAUNCHED 2026-08-04. Set to true to emit <meta name="robots" content="noindex">
-# on every page and pull the site back out of search results.
-# It was true from the first public commit until launch, because the repo was
-# public and carried a real name while the content was still placeholder.
+# The site-wide withdrawal switch. Set to true to emit
+# <meta name="robots" content="noindex"> on every page and pull the site back out
+# of search results. Keep the key even while it is false.
 # If it ever needs turning back on, use this rather than a robots.txt Disallow:
 # a Disallow rule stops the crawler fetching the page at all, so it never sees
 # the noindex and the URL can still surface in results. The meta tag has to be
@@ -165,6 +168,9 @@ plugins:
   - jekyll-seo-tag
   - jekyll-sitemap
 
+# `jekyll-optional-front-matter` renders any .md file with no front matter as a
+# live page, so an un-excluded note at the root becomes a published, indexed URL.
 exclude:
   - README.md
+  - CLAUDE.md
   - Gemfile

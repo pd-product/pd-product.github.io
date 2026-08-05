@@ -29,15 +29,24 @@ Copy `_work/example-story.md`. It carries `published: false`, so it is a templat
 page: it stays out of the built site, the home list, prev/next and the sitemap until a copy sets
 `published: true`.
 
-Required: `slug` (keep the filename identical to it), `title`, `category`, `order`. Everything else
-is optional and is simply not rendered when absent -- with two caveats worth knowing before you rely
-on that:
+Required: `slug` (keep the filename identical to it), `title`, `category`, `order`, `description`
+and `date`.
 
-- `category` is required in practice, not just by convention. Nothing guards it, and a story without
-  one renders a dangling `01 /` in the eyebrow on both the home row and the story page.
-- `description` is optional but is also the page's meta description. Omit it and `jekyll-seo-tag`
-  falls back to the page excerpt, which is the first block of the body -- your opening `## ` heading.
-  Every story served `content="The situation"` until this was fixed.
+The rest are presentational -- `partners`, `chips`, `hero_image` and friends -- and a story that
+omits one renders without it. Two carry a fallback rather than nothing: `crumb` falls back to
+`title`, and `hero_alt` falls back to `title`, which is a weak image description rather than a
+visible failure, so set it whenever you set `hero_image`.
+
+Nothing guards `category`, `description` or `date`, and each fails silently rather than visibly:
+
+- `category` renders a dangling `01 /` in the eyebrow, on both the home row and the story page,
+  when it is missing.
+- `description` is also the page's meta description. Omit it and `jekyll-seo-tag` falls back to the
+  page excerpt -- the first block of the body -- so the story goes to search results and link
+  previews described by its own opening heading.
+- `date` has a silent WRONG default rather than an absent one. Without it Jekyll stamps build time,
+  so `datePublished` and the sitemap's `lastmod` move on every deploy and re-announce the story as
+  new. Use the date the story was published, not the date you are editing.
 
 `order` is the global reading position and is required. It is a **sort key only**: the zero-padded
 eyebrow number is derived from the story's position in the sorted list, not from the value itself,
@@ -61,6 +70,11 @@ one -- delete the section and its rail entry goes with it. The explicit anchor i
 deep link such as `/work/<slug>/#situation` working after the heading is reworded.
 
 Standard anchors: `#situation`, `#constraints`, `#the-call`, `#shipped`, `#redo`.
+
+**`#redo` must stay the last chapter.** The accent bar down that chapter is a sibling selector that
+claims every element after the `#redo` heading, so a chapter added below it inherits the accent and
+reads as a bug. Adding one means rewriting that rule as a wrapper first -- see the comment on the
+rule in `assets/css/style.scss`. Neither widening nor narrowing the selector fixes it.
 
 The anchor is **required**, not optional. Kramdown's `auto_ids` is disabled in `_config.yml`, so a
 heading without `{#id}` gets no id at all and drops out of the rail -- visibly, on the page. That is

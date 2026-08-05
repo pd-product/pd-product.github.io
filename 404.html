@@ -2,10 +2,11 @@
 layout: default
 title: "Page not found"
 permalink: /404.html
-# Page-level, not the site-wide D11 switch in _config.yml. This page serves 200
-# with a self-canonical, because GitHub Pages has no way to serve it as a real
-# 404 for an arbitrary path, so it is indexable unless told otherwise. It is out
-# of the sitemap already; this closes the rest.
+# Page-level, not the site-wide `noindex` switch in _config.yml. A missing path
+# does get a real 404 from Pages, which carries this page's body -- but THIS
+# URL, /404.html requested directly, returns 200 with a self-canonical, so it is
+# indexable unless told otherwise. It is out of the sitemap already; this closes
+# the rest.
 noindex: true
 ---
 
