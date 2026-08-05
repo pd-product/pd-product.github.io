@@ -723,6 +723,14 @@ a:hover { color: var(--text); }
 .tradeoff tbody tr:last-child th,
 .tradeoff tbody tr:last-child td { border-bottom: 0; }
 
+/* Announced in the stacked view only. Above 640px the column header carries
+   "(chosen)" and a screen reader pairs that header with every cell in the
+   column, so this would say it twice. `.sr-only` does the hiding; this decides
+   only whether the note is present at all. It must stay AFTER `.sr-only` in
+   source order -- both are single-class selectors, so source order is what
+   decides which display wins. */
+.tradeoff-chosen-note { display: none; }
+
 /* --- Story: pager (_layouts/story.html) ------------------------------- */
 
 .story-pager {
@@ -872,6 +880,25 @@ a:hover { color: var(--text); }
     content: attr(data-label) " \2014" " ";
     color: var(--faint);
   }
+
+  /* The chosen option, marked where the reader can see it. The thead above is
+     display: none at this width, which takes the check mark, the "(chosen)"
+     label and the header colour shift with it -- so without these three rules
+     the two options render identically and the table stops saying which one
+     was taken, which is the only thing it exists to say.
+
+     Three signals, not one, matching the desktop treatment: the check survives
+     a screenshot and colour-vision deficiency, the accent carries it for
+     everyone else, and the sr-only note above carries it for a screen reader.
+     Same string-splitting rule as above -- every escape gets its own string. */
+  .tradeoff tbody td[data-chosen]::before {
+    content: attr(data-label) " \2713" " \2014" " ";
+    color: var(--accent);
+  }
+
+  .tradeoff tbody td[data-chosen] { color: var(--meta); }
+
+  .tradeoff-chosen-note { display: block; }
 
   .story-pager { flex-direction: column; align-items: flex-start; }
   .pager-next { margin-left: 0; text-align: left; }
