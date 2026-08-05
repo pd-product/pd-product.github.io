@@ -4,12 +4,21 @@ title: "Testing a fix before we built it"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "testing the fix"
-summary: "Two engineering leaders proposed a solution to a targeting gap and were confident it would hold. I doubted it on a hunch, spent a weekend building the analysis to find out, and it turned out the design would have left 14% of revenue exposed."
-# One line, shown on the home-page row under the summary. A trim of this
+# Shown under the title on the story page and on the home-page row, AND read by
+# jekyll-seo-tag as the meta description. The key must be `description`: with
+# any other name seo-tag falls back to page.excerpt, which is the first block of
+# the body -- the opening `## ` heading. Search and link previews then read
+# "The situation".
+description: "Two engineering leaders proposed a solution to a targeting gap and were confident it would hold. I doubted it on a hunch, spent a weekend building the analysis to find out, and it turned out the design would have left 14% of revenue exposed."
+# One line, shown on the home-page row under the description. A trim of this
 # story's own "What I would redo" chapter, approved as written.
 lesson: "When repeated fixes keep leaving edge cases behind, the problem is not understood yet."
 category: "platform"
 order: 2
+# Publication date of this page, not the date of the work it describes. Without
+# it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
+# move on every deploy and re-announce the story as new. Set once, then leave it.
+date: 2026-08-04
 role: "PM. Built the analysis independently."
 team: "Two eng leaders, plus the implementing teams"
 partners: "Publishers with uncommon inventory setups"
