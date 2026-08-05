@@ -46,7 +46,16 @@ been applied to lists and not to this table.
         reference.
         {%- endcomment -%}
         <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected | escape }}">{{ row.rejected }}</td>
-        <td role="cell" class="tradeoff-chosen" data-label="{{ table.chosen | escape }}">{{ row.chosen }}</td>
+        {%- comment -%}
+        `data-chosen` and the note below exist for the stacked view only. At
+        640px and below the whole thead is display: none, which takes the check
+        mark, the "(chosen)" label and the colour shift with it -- so the table
+        lost the one thing it exists to say on exactly the widths where most
+        people read it. The attribute is what the stylesheet hooks the marker
+        onto; the note is what a screen reader gets there. Above 640px the note
+        is display: none, because the column header already says it.
+        {%- endcomment -%}
+        <td role="cell" class="tradeoff-chosen" data-chosen data-label="{{ table.chosen | escape }}">{{ row.chosen }}<span class="sr-only tradeoff-chosen-note"> (chosen)</span></td>
       </tr>
       {%- endfor %}
     </tbody>
