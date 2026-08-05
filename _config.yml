@@ -4,11 +4,14 @@
 # would produce a doubled separator in {% seo %} page titles.
 # `author` stays the full legal name: it feeds the copyright notice, where the
 # enforceable name matters more than the familiar one.
-# The separator is an en dash entity, NOT a pipe. jekyll-seo-tag runs titles
-# through `smartify`, which hands the string to kramdown; kramdown reads a pipe
-# as table syntax and the resulting markup is then stripped, so "Pat Diggins |
-# Product Manager" rendered as "Pat Diggins Product Manager". Verified on the
-# built site. seo-tag supplies its own pipe between page title and site title.
+# The separator is an en dash entity, NOT a pipe. OBSERVED on the built site:
+# "Pat Diggins | Product Manager" rendered as "Pat Diggins Product Manager" --
+# the pipe and its surrounding spaces were swallowed somewhere in seo-tag's
+# title formatting. The cause was never reduced to a reproducer, so treat this
+# as behaviour to re-check rather than as a known mechanism, and do not write a
+# causal explanation for it here. The convention holds either way: seo-tag
+# supplies its own pipe between page title and site title, so a second one in
+# this string would read as a doubled separator regardless.
 title: "Pat Diggins &#8211; Product Manager"
 brand: "Pat Diggins"
 # tagline and description must NOT be the same string. jekyll-seo-tag appends

@@ -16,15 +16,15 @@ chapter out of the rail visibly, rather than silently minting an unstable id
 derived from the heading text.
 
 PARSING NOTE. The label is taken by removing the heading's complete OPENING
-TAG from its inner HTML. Two wrong ways to do this, both previously shipped or
-considered here:
+TAG from its inner HTML. Two approaches that do not work, recorded so neither
+is reached for again:
 
   - Splitting on '">' is wrong. Kramdown renders inline code as
     <code class="language-plaintext highlighter-rouge"> and links as
     <a href="...">, both of which contain '">', so the split lands inside an
     attribute and yields a truncated label plus malformed markup.
-  - Removing a RECONSTRUCTED `id">` prefix is also wrong, which is what this
-    include did until the opener change. It assumes the opening tag is exactly
+  - Removing a RECONSTRUCTED `id">` prefix is also wrong. It assumes the
+    opening tag is exactly
     <h2 id="foo">. A heading carrying any other attribute renders as
     <h2 id="foo" class="wide">, so the reconstructed prefix `foo">` does not
     occur in the head at all, remove_first is a silent no-op, and strip_html

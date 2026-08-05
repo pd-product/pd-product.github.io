@@ -1,6 +1,9 @@
 # Personal site
 
-Static site published by GitHub Pages at https://pd-product.github.io/
+Static site published by GitHub Pages at https://pdiggins.com
+
+`pd-product.github.io` still resolves and 301s here. That redirect is GitHub's own behaviour for the
+default Pages host once a custom domain is set, not something this repo configures.
 
 ## Copyright
 
@@ -22,8 +25,19 @@ page (`/#about`, `/#contact`), not separate pages. Stories live at `/work/<slug>
 
 ## Adding a story
 
-Copy `_work/example-story.md`. Set `slug` (keep the filename identical to it), `title`, `category`,
-and `order`. Everything else is optional and is simply not rendered when absent.
+Copy `_work/example-story.md`. It carries `published: false`, so it is a template rather than a
+page: it stays out of the built site, the home list, prev/next and the sitemap until a copy sets
+`published: true`.
+
+Required: `slug` (keep the filename identical to it), `title`, `category`, `order`. Everything else
+is optional and is simply not rendered when absent -- with two caveats worth knowing before you rely
+on that:
+
+- `category` is required in practice, not just by convention. Nothing guards it, and a story without
+  one renders a dangling `01 /` in the eyebrow on both the home row and the story page.
+- `description` is optional but is also the page's meta description. Omit it and `jekyll-seo-tag`
+  falls back to the page excerpt, which is the first block of the body -- your opening `## ` heading.
+  Every story served `content="The situation"` until this was fixed.
 
 `order` is the global reading position and is required. It is a **sort key only**: the zero-padded
 eyebrow number is derived from the story's position in the sorted list, not from the value itself,
@@ -71,6 +85,28 @@ its marker can never land on the wrong column. Place it in the body where it bel
 `tradeoffs` is a list even with one table. Target 3 rows, 5 is the ceiling -- a story needing more
 dimensions should add a second table for a second decision rather than a taller one.
 
+**The include line is required and fails silently without it.** Declaring `tradeoffs:` in front
+matter renders nothing on its own: the include is placed by hand, and `{% for table in nil %}`
+iterates zero times without complaining. A story with a fully authored table and no include line
+builds clean and ships without it.
+
+## What the story prose supports
+
+`.story-prose` styles `h2`, `p`, `ul`, `ol`, `figure`, `figcaption` and `a`. That is the whole list.
+
+Anything else gets browser defaults inside a stylesheet that has already zeroed the margins on
+`h1, h2, h3, p, dl, dd, dt, figure, table` -- so an `h3` renders as bold 18.7px jammed against its
+neighbours, and a Markdown table renders unstyled next to the designed tradeoff table it will be
+compared with. Neither looks like a mistake in the source; both look like a mistake on the page.
+
+So: chapters are `h2`, and everything under them is paragraphs, lists and figures. A story that
+genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed
+first -- it is not an authoring decision to make mid-story.
+
+Ordered lists are numbered by CSS, so author them as plain markdown ordered lists and let the
+counter supply `01`, `02`. Add `{: role="list"}` after a list, as the existing stories do: the
+`list-style: none` reset drops the implicit list role in Safari with VoiceOver.
+
 ## Assets
 
 Diagrams and cards are committed at final size; there is no build-time image processing. Story
@@ -96,9 +132,13 @@ fields because they say different things -- using one for both makes a screen re
 same sentence twice. Omitting `hero_alt` falls back to the story title, which is a weak description
 rather than a broken page, so the failure is quiet.
 
-Do not put a `README.md` inside these folders. The site-wide `defaults` block in `_config.yml`
-gives front matter to every markdown file, which turns a stray note into a published, indexed page.
-Placeholder folders are held by `.gitkeep`, which Jekyll ignores because it starts with a dot.
+Do not put a `README.md` inside these folders. Any `.md` in a publishable location becomes a page,
+so a stray note turns into a published, indexed URL. Placeholder folders are held by `.gitkeep`,
+which Jekyll ignores because it starts with a dot.
+
+(The `defaults` blocks in `_config.yml` are no longer the mechanism -- both are scoped to a `type`,
+which is the fix for exactly this problem. The advice stands on its own: Jekyll publishes markdown
+it can reach, defaults or no defaults.)
 
 ## Layout
 
