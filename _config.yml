@@ -127,19 +127,36 @@ og_image:
   height: 630
   alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
 
-# Structured data for the person, not just the site. jekyll-seo-tag reads
-# `social.links` into JSON-LD `sameAs`, but ONLY on the home page or an /about/
-# page -- Drop#links gates on homepage_or_about?, which matches ^/(about/)?
-# (index.html?)?$. It also prefers `social.name` over `title` for the JSON-LD
-# `name`, which is why the entity reads as the person rather than as the SEO
-# title string.
+# The person this site is about. Rendered as a ProfilePage + Person JSON-LD
+# block on the HOME PAGE ONLY, by _layouts/default.html. Data, not markup, so
+# adding a profile is an edit here rather than in a template.
 #
-# `sameAs` is what lets a search engine connect this site to the same person on
-# another platform, so it is worth having even with one link in it. Add profiles
-# here as they become worth claiming.
-social:
+# WHY THIS IS HAND-WRITTEN rather than driven through jekyll-seo-tag:
+#
+#   - Google does not support `Person` as a rich-result type at all. It is
+#     absent from the structured-data gallery, which does list Profile page. So
+#     `seo.type: Person` bought nothing and cost correctness -- the plugin also
+#     emits `author` and `headline` on whatever node it builds, and neither
+#     belongs on a Person.
+#   - `ProfilePage` IS supported, and Google's valid-use list names "an 'About
+#     Me' page on a blog site". The requirement is that the page's primary
+#     focus be a single person affiliated with the website, which is this page.
+#   - Be realistic about the payoff: Google's stated purpose for ProfilePage is
+#     understanding creators in online communities, tied to the Discussions and
+#     Forums feature. Do not expect a visible rich result. The value is entity
+#     clarity -- letting a crawler connect this site to this person to their
+#     profiles elsewhere.
+#
+# `social:` is deliberately NOT set. seo-tag would read social.links into
+# `sameAs` on the WebSite node, which asserts that the WEBSITE is the same
+# thing as the LinkedIn profile. sameAs belongs on the Person below.
+person:
   name: "Patrick Diggins"
-  links:
+  # Matches the role suffix in `title` above. Keep the two in step.
+  job_title: "Product Manager"
+  # A headshot is the right image for a Person; the share card is not.
+  image: "/assets/img/pat-diggins.jpg"
+  same_as:
     - "https://www.linkedin.com/in/patrick-diggins/"
 
 plugins:
