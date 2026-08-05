@@ -12,7 +12,7 @@
 # causal explanation for it here. The convention holds either way: seo-tag
 # supplies its own pipe between page title and site title, so a second one in
 # this string would read as a doubled separator regardless.
-title: "Pat Diggins &#8211; Product Manager"
+title: "Pat Diggins &#8211; Senior Product Manager"
 brand: "Pat Diggins"
 # tagline and description must NOT be the same string. jekyll-seo-tag appends
 # the tagline (falling back to the description) to the site title whenever the
@@ -152,8 +152,10 @@ og_image:
 # thing as the LinkedIn profile. sameAs belongs on the Person below.
 person:
   name: "Patrick Diggins"
-  # Matches the role suffix in `title` above. Keep the two in step.
-  job_title: "Product Manager"
+  # Matches the role suffix in `title` above. Keep the two in step -- this is
+  # the machine-readable claim search engines read, and `title` is the headline
+  # a human sees in the same result, so a mismatch is visible in one glance.
+  job_title: "Senior Product Manager"
   # A headshot is the right image for a Person; the share card is not.
   image: "/assets/img/pat-diggins.jpg"
   same_as:
