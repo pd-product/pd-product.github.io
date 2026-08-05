@@ -18,9 +18,11 @@ so that rule silently reduces the table to a run of generic blocks with no row
 or column relationships announced. Restating the roles keeps the structure
 readable at every width.
 
-This is the same bug class as D15, where `list-style: none` drops the implicit
-list role and every list therefore carries `role="list"`. The principle had
-been applied to lists and not to this table.
+This is the same bug class as the list-role rule elsewhere in this repo, where
+`list-style: none` drops the implicit list role in Safari with VoiceOver and
+every list therefore carries an explicit `role="list"`. A CSS display value
+that changes an element's implicit role has to be answered with an explicit
+role; that applies to this table exactly as it applies to lists.
 {%- endcomment -%}
 {%- for table in include.tradeoffs -%}
 <figure class="tradeoff">

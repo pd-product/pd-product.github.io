@@ -2,8 +2,14 @@
 layout: default
 ---
 {%- comment -%}
-Story page. Every field below is optional except title and order: a story that
-omits `partners`, `chips`, or a chapter simply renders without it.
+Story page. README.md holds the front-matter contract -- which keys are required
+and which of those fail silently -- and is the one place it is stated, so this
+comment does not restate it and cannot drift from it.
+
+What is true of THIS template: the presentational keys it reads (`partners`,
+`chips`, `hero_image` and friends) are genuinely optional and a story omitting
+one simply renders without it. That is not true of the required keys, two of
+which have silent wrong defaults rather than absent ones.
 {%- endcomment -%}
 
 {%- assign ordered = site.work | sort: "order" -%}
