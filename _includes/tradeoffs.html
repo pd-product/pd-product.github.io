@@ -40,9 +40,13 @@ been applied to lists and not to this table.
         {%- comment -%}
         data-label carries the option name into the sub-640px stacked view,
         where the dimension column is dropped and the pairs need naming.
+        `escape` because this is free-text front matter going into an
+        attribute: an option name containing a double quote would otherwise
+        terminate the attribute early, and a bare `&` is an invalid entity
+        reference.
         {%- endcomment -%}
-        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected }}">{{ row.rejected }}</td>
-        <td role="cell" class="tradeoff-chosen" data-label="{{ table.chosen }}">{{ row.chosen }}</td>
+        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected | escape }}">{{ row.rejected }}</td>
+        <td role="cell" class="tradeoff-chosen" data-label="{{ table.chosen | escape }}">{{ row.chosen }}</td>
       </tr>
       {%- endfor %}
     </tbody>

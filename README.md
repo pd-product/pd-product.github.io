@@ -90,6 +90,12 @@ v1 ships without diagrams by design decision. No story sets `hero_image`, so the
 home-page card do not render; the CSS for both is written and inert, so adding one later needs no
 CSS change.
 
+When a story does set `hero_image`, set `hero_alt` alongside it. `hero_alt` describes the image for
+someone who cannot see it; `hero_caption` is the visible caption everyone reads. They are separate
+fields because they say different things -- using one for both makes a screen reader announce the
+same sentence twice. Omitting `hero_alt` falls back to the story title, which is a weak description
+rather than a broken page, so the failure is quiet.
+
 Do not put a `README.md` inside these folders. The site-wide `defaults` block in `_config.yml`
 gives front matter to every markdown file, which turns a stray note into a published, indexed page.
 Placeholder folders are held by `.gitkeep`, which Jekyll ignores because it starts with a dot.

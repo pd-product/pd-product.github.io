@@ -38,10 +38,24 @@ omits `partners`, `chips`, or a chapter simply renders without it.
     {%- endif %}
   </header>
 
+  {%- comment -%}
+  Hero figure. Inert until a story sets hero_image; diagrams are the named next
+  content step.
+
+  `hero_alt` is a SEPARATE field from `hero_caption` on purpose. alt and caption
+  do different jobs: alt describes the image for someone who cannot see it, the
+  caption adds context everyone reads. Feeding the caption into alt made a
+  screen reader announce the same sentence twice, once as the image and once as
+  the caption. Falling back to the title keeps a diagram from being unlabelled
+  if a story sets hero_image and forgets hero_alt.
+
+  Both go through `escape`: one field, one treatment. The figcaption is escaped
+  too, which the attribute already was -- the pair used to differ.
+  {%- endcomment -%}
   {%- if page.hero_image %}
   <figure class="story-hero">
-    <img src="{{ page.hero_image | relative_url }}" alt="{{ page.hero_caption | default: page.title | escape }}">
-    {%- if page.hero_caption %}<figcaption>{{ page.hero_caption }}</figcaption>{% endif %}
+    <img src="{{ page.hero_image | relative_url }}" alt="{{ page.hero_alt | default: page.title | escape }}">
+    {%- if page.hero_caption %}<figcaption>{{ page.hero_caption | escape }}</figcaption>{% endif %}
   </figure>
   {%- endif %}
 
