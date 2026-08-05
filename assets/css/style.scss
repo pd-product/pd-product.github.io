@@ -872,6 +872,27 @@ a:hover { color: var(--text); }
   .page-simple p { font-size: 15px; }
   .story-body { padding: 24px var(--gutter) 32px; }
 
+  /* On a phone the story comes first and its metadata follows. At 960px the
+     rail stops being a sidebar and stacks ABOVE the prose, which put the
+     eyebrow, title, description, four metadata pairs and five chapter links --
+     736px, most of two screens on a 390x844 phone -- ahead of the first
+     sentence. Role and team are what someone checks after reading, not before.
+
+     `order` moves the box and does NOT move reading or focus order, so it is
+     only safe on content that nothing lands on. That is why the chapter rail is
+     display: none here rather than reordered with the rest: it holds five
+     links, and a jump list that a keyboard user reaches BEFORE the prose while
+     a sighted user sees it after is a focus-order mismatch. `display: none`
+     removes it from both trees, so there is nothing to mismatch. What moves is
+     the <dl>, which holds no focusable content.
+
+     The rail also carried a bottom border to separate it from the prose below.
+     Now that it sits underneath, that border moves to the top for the same
+     reason: it separates the metadata from the story either way. */
+  .story-rail { order: 2; border-bottom: 0; border-top: 1px solid var(--hairline); padding-top: 20px; }
+  .story-prose { order: 1; }
+  .chapter-rail { display: none; }
+
   .story-prose > h2 { font-size: 18px; }
   .story-prose p { font-size: 15px; line-height: 1.68; }
 
