@@ -816,7 +816,13 @@ a:hover { color: var(--text); }
      keeps a long crumb from pushing the nav links off the row. */
 
   .intro { padding: 34px var(--gutter) 28px; }
-  .intro h1 { font-size: 29px; letter-spacing: -.025em; }
+  /* Leading is raised here and nowhere else. 1.09 is display leading: it is
+     tuned for one or two lines at 47px, where the lines are long relative to
+     their height. At 29px in a ~350px column this headline runs five lines,
+     which is a paragraph, and paragraph-length text at display leading reads
+     dense. The size and the copy are unchanged. */
+  .intro h1 { font-size: 29px; line-height: 1.18; letter-spacing: -.025em; }
+  .story-title { line-height: 1.16; }
 
   .work-row > a { padding: 22px var(--gutter); }
   .work-title { font-size: 19px; }
