@@ -13,9 +13,7 @@
   {%- if page.layout == "story" %}
   {%- comment -%}
   The real breadcrumb pattern -- a labelled nav landmark wrapping an ordered
-  list -- not a <p> of spans. A two-item trail is still a breadcrumb, and
-  hand-rolling one here while item 3 was restoring list semantics elsewhere
-  would have been inconsistent.
+  list -- not a <p> of spans. A two-item trail is still a breadcrumb.
 
   The separator is a marked-up span carrying aria-hidden, NOT CSS generated
   content: generated text may be announced depending on browser and assistive
@@ -44,9 +42,8 @@
   <nav class="site-nav" aria-label="Main">
     {%- comment -%}
     role="list": the stylesheet's `ul, ol { list-style: none }` reset drops the
-    implicit list role in Safari with VoiceOver. See index.html. Not on the
-    design session's list -- added here so the sweep covers every list in the
-    repo rather than four of five. Flagged back to them.
+    implicit list role in Safari with VoiceOver. Every list in the repo carries
+    it; see index.html.
     {%- endcomment -%}
     <ul role="list">
       {% for item in site.nav %}

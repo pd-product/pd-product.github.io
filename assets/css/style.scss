@@ -5,20 +5,16 @@
 
 /* ==========================================================================
    Patrick Diggins -- career site
-   Paste everything below into assets/css/style.scss, BELOW the empty front
-   matter, replacing the placeholder rules. Keep the front matter. Keep the
-   .sr-only rule (it is included below, unchanged).
 
-   Written against the real markup at pd-product/pd-product.github.io@main:
-   _layouts/default.html, _layouts/story.html, _includes/{nav,footer,
-   chapter-rail,tradeoffs}.html, index.html.
+   Palette 6a. Dark is the default and light is a prefers-color-scheme
+   override, so every colour is a token on :root with a light counterpart.
 
-   Palette 6a. Dark is default, light is a prefers-color-scheme override.
-   Version 1 ships without diagrams; the image rules are present and inert
-   until a story sets hero_image.
+   The image rules are present and inert: no story sets hero_image, so the hero
+   figure and the home-page card do not render, and adding one needs no CSS.
 
-   Three template edits are required for the design to be complete --
-   see css-handoff.md. This file assumes they are made.
+   Rules are class-based and named after the markup they style, in the order
+   the page assembles: shell, nav, home, footer, story, responsive. Section
+   headers name the file each block belongs to.
    ========================================================================== */
 
 /* --- Functional utility. Do not remove. -------------------------------- */
@@ -184,7 +180,7 @@ a:hover { color: var(--text); }
   text-transform: lowercase;
 }
 
-/* Story pages only: replaces the wordmark (design session, comp 7b breadcrumb).
+/* Story pages only: replaces the wordmark (comp 7b breadcrumb).
    Same mono size and colour language as .site-nav, so the header reads as one
    row of small type.
 
@@ -350,10 +346,11 @@ a:hover { color: var(--text); }
 }
 
 /* --- Home: about + contact (index.html) --------------------------------
-   Two sections in <main>, styled to read as one panel. Per about-contact-fix.md
-   (design session, mock option 13b) they sit on the site's spine rather than
-   inventing their own left edges: the page previously had four different ones
-   (hero 46, work copy 262, about copy 150, contact 46) and now has two.      */
+   Two sections in <main>, styled to read as one panel (mock option 13b).
+   CONSTRAINT: both sit on the site's spine -- the 168px rail for the label, the
+   main column for the content -- rather than inventing their own left edges.
+   The page carries two left edges, and adding a third is what this is guarding
+   against.                                                                   */
 
 .about,
 .contact {
@@ -366,7 +363,8 @@ a:hover { color: var(--text); }
    panel-deep background run continuously, so they read as one block with two
    labelled parts. .about keeps its own top border, which separates the pair
    from the work list above. Separation between them is .about's bottom padding
-   alone. Retained unchanged at the design session's request. */
+   alone -- do not add a rule or a top border here to "fix" the spacing, or the
+   pair stops reading as one panel. */
 .contact {
   border-top: 0;
   padding-top: 0;
@@ -895,31 +893,20 @@ a:hover { color: var(--text); }
   .contact > h2 { margin-bottom: 14px; }
 }
 
-/* The `* { scroll-behavior: auto !important }` guard that used to live here was
-   removed. Nothing in this stylesheet sets scroll-behavior: smooth, so it
-   reversed something that never happened while implying smooth scrolling
-   existed.
+/* Nothing here sets scroll-behavior: smooth, so there is nothing to reverse.
+   If it is ever added -- the chapter rail is the plausible candidate -- opt in
+   at the point of use rather than adding a blanket
+   `* { scroll-behavior: auto !important }` sweeper:
 
-   IF SMOOTH SCROLLING IS EVER ADDED -- the chapter rail is the plausible
-   candidate -- do NOT restore the blanket guard. Two reasons it was the wrong
-   shape:
+     @media (prefers-reduced-motion: no-preference) {
+       html { scroll-behavior: smooth; }
+     }
 
-     1. Opt in at the point of use instead:
-          @media (prefers-reduced-motion: no-preference) {
-            html { scroll-behavior: smooth; }
-          }
-        That cannot be forgotten the way a distant sweeper can, and it needs no
-        universal !important.
-     2. The guard would not have covered a scripted smooth scroll. Per
-        CSSOM-View, the computed scroll-behavior governs fragment navigation
-        and any CSSOM scroll whose requested behavior is `auto` (the default) --
-        so it DOES cover the rail's own anchor links. What it does not override
-        is an explicit request: a scrollIntoView({behavior: 'smooth'}) call in
-        assets/js/chapter-rail.js wins over it. So JS-driven scrolling has to
-        branch on matchMedia('(prefers-reduced-motion: reduce)') itself
-        regardless of what this stylesheet says.
-
-   Reason 1 is what carries the decision. */
+   A sweeper would also be incomplete. Per CSSOM-View the computed
+   scroll-behavior governs fragment navigation and any CSSOM scroll requesting
+   `auto`, but an explicit scrollIntoView({behavior: 'smooth'}) beats it. So a
+   scripted smooth scroll in assets/js/chapter-rail.js has to branch on
+   matchMedia('(prefers-reduced-motion: reduce)') itself either way. */
 @media (prefers-reduced-motion: reduce) {
   /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
      but the preference is a preference. */
