@@ -52,7 +52,7 @@ of the text onto the page as visible content.
       name, get all of it. Pointing at the title gives the link a usable name
       while leaving the target area and the :focus-within hairline untouched.
       {%- endcomment -%}
-      <a href="{{ story.url | relative_url }}" aria-labelledby="work-title-{{ story.slug | default: forloop.index }}">
+      <a href="{{ story.url | relative_url }}" aria-labelledby="work-title-{{ story.slug | default: forloop.index | escape }}">
         {%- assign card = story.card_image | default: story.hero_image -%}
         {%- if card %}
         <img class="work-card-image" src="{{ card | relative_url }}" alt="">
@@ -79,7 +79,7 @@ of the text onto the page as visible content.
         the descendants keep their styling with no change to the stylesheet.
         {%- endcomment -%}
         <div class="work-copy">
-          <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index }}">{{ story.title }}</h3>
+          <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index | escape }}">{{ story.title }}</h3>
           {%- if story.description %}<p class="work-summary">{{ story.description }}</p>{% endif %}
           {%- comment -%}
           The lesson line is what makes the index specific rather than generic:
@@ -129,11 +129,16 @@ of the text onto the page as visible content.
     Labels are lowercase mono with a trailing north-east arrow, per the design.
     The arrow and the accent are HTML entities so the source stays ASCII.
     {%- endcomment -%}
+    {%- comment -%}
+    `escape` on both: these are raw config strings going straight into an href,
+    with no relative_url in between to normalise them. A bare `&` in a URL is an
+    invalid entity reference, and a double quote would end the attribute.
+    {%- endcomment -%}
     {%- if site.email %}
-    <li><a href="mailto:{{ site.email }}">email &#8599;</a></li>
+    <li><a href="mailto:{{ site.email | escape }}">email &#8599;</a></li>
     {%- endif %}
     {%- if site.linkedin %}
-    <li><a href="{{ site.linkedin }}" rel="me">linkedin &#8599;</a></li>
+    <li><a href="{{ site.linkedin | escape }}" rel="me">linkedin &#8599;</a></li>
     {%- endif %}
   </ul>
 </section>

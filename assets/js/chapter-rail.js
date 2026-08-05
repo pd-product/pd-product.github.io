@@ -2,8 +2,13 @@
    hairline as you move through the story. Vanilla, no dependencies, no build
    step. Safe to load on every page -- it exits if there is no rail.
 
-   Without this file the rail still works: every entry is a live anchor link,
-   and CSS handles hover and :target. This only adds the reading state. */
+   Without this file the rail still works as navigation: every entry is a live
+   anchor link and CSS handles hover. There is NO current-chapter indication
+   without it -- the accent bar is driven by the aria-current this script sets.
+   A `:target` rule cannot supply one: :target matches the element whose own id
+   equals the fragment, and the rail's anchors carry href="#situation" with no
+   id of their own. Putting ids on them would collide with the heading ids that
+   are the actual link targets. */
 
 (function () {
   var rail = document.querySelector('.chapter-rail');

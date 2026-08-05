@@ -26,8 +26,10 @@ timeframe: "Over a year, scoping to GA"
 chips:
   - "over a year"
   - "staged rollout"
-# No hero_image for v1 -- the site ships without diagrams. Adding one here is
-# the only change needed to bring the hero and home-page card back.
+# No hero_image for v1 -- the site ships without diagrams. Adding one here
+# brings the hero and home-page card back with no CSS change. Set `hero_alt`
+# alongside it (what the image shows, for someone who cannot see it);
+# `hero_caption` is the separate visible caption.
 tradeoffs:
   - rejected: "Leave the model alone"
     chosen: "Rebuild the targeting model"

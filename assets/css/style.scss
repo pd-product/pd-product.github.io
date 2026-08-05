@@ -81,6 +81,14 @@
 /* --- Tokens ------------------------------------------------------------ */
 
 :root {
+  /* Tells the UA which scheme the page is painted in, so IT matches: form
+     controls, scrollbars, the canvas behind the page, and the iOS overscroll
+     area. Without it a dark page rubber-bands onto a white band and Windows
+     draws a light scrollbar. This is a declaration TO the browser -- it does
+     not restyle anything below, and the light override in the media query
+     tracks the same switch. */
+  color-scheme: dark;
+
   --bg: #101214;
   --panel: #16191c;
   --panel-deep: #0c0e10;
@@ -106,6 +114,8 @@
 
 @media (prefers-color-scheme: light) {
   :root {
+    color-scheme: light;
+
     --bg: #fbfaf8;
     --panel: #f1efeb;
     --panel-deep: #f4f2ee;
@@ -560,7 +570,9 @@ a:hover { color: var(--text); }
 
 .chapter-rail a:hover { color: var(--text); }
 
-.chapter-rail a:target,
+/* aria-current only, set by assets/js/chapter-rail.js. A `:target` selector was
+   here and could never match: :target matches the element whose own id equals
+   the fragment, and these anchors carry href="#situation" with no id. */
 .chapter-rail a[aria-current] {
   color: var(--accent);
   padding-left: 9px;
@@ -609,8 +621,11 @@ a:hover { color: var(--text); }
   color: var(--muted);
 }
 
+/* decimal-leading-zero, not a hardcoded "0" prefix: the literal form renders
+   "010" at ten items. The templates already derive their own numbers this way
+   (`{% if display_index < 10 %}0{% endif %}`); this matches them. */
 .story-prose ol > li::before {
-  content: "0" counter(constraint);
+  content: counter(constraint, decimal-leading-zero);
   flex: none;
   padding-top: 4px;
   font: 400 12px var(--mono);
@@ -851,8 +866,12 @@ a:hover { color: var(--text); }
     padding-bottom: 6px;
   }
 
+  /* The trailing space is its OWN string, deliberately. A CSS hex escape is
+     terminated by one whitespace character and that character is consumed, so
+     the obvious `" \2014 "` produces "label ---" with nothing after the dash.
+     Do not collapse these back into one string. */
   .tradeoff tbody td::before {
-    content: attr(data-label) " \2014 ";
+    content: attr(data-label) " \2014" " ";
     color: var(--faint);
   }
 
