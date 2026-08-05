@@ -1,13 +1,11 @@
 ---
 layout: default
 permalink: /
-# The entity this page is about is the person, not the website. Without this
-# jekyll-seo-tag defaults the home page to @type: WebSite (Drop#type returns
-# "WebSite" for anything matching homepage_or_about?), which describes the
-# container rather than the subject. Person is what carries `sameAs` usefully
-# and what a search engine can connect to the same person elsewhere.
-seo:
-  type: Person
+# No `seo: type:` override. seo-tag's default for this page is WebSite, which is
+# correct for the node it builds -- it also emits `author` and `headline`, and
+# both belong on a CreativeWork rather than on a Person. The person is described
+# by a SEPARATE ProfilePage block that _layouts/default.html emits on this page
+# only, from the `person:` data in _config.yml.
 ---
 {%- comment -%}
 No `title` here on purpose. With one, jekyll-seo-tag renders "Home | Pat

@@ -40,6 +40,47 @@
     <meta property="og:image:alt" content="{{ site.og_image.alt | escape }}">
     <meta name="twitter:image:alt" content="{{ site.og_image.alt | escape }}">
     {%- endif %}
+    {%- comment -%}
+    ProfilePage, home page only. This is the SECOND ld+json block on `/` and the
+    only page that carries two -- the record's Verification block allows for
+    that explicitly, so do not "fix" it back to one.
+
+    Why hand-written rather than driven through seo-tag: the plugin builds one
+    node per page and always hangs `author` and `headline` on it, and both
+    belong on a CreativeWork. Asking it for `@type: Person` produced a Person
+    described as having an author. Google supports multiple separate items on a
+    page, so the clean shape is to leave seo-tag its valid WebSite node and
+    describe the person separately.
+
+    `mainEntity` is what makes this a profile OF someone rather than a page that
+    merely mentions them, and the `@id` values give both nodes stable
+    identifiers a crawler can reference. `jsonify` handles the escaping -- do
+    not hand-quote these values.
+    {%- endcomment -%}
+    {%- if page.url == "/" and site.person %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "@id": {{ "/" | absolute_url | append: "#profile" | jsonify }},
+      "mainEntity": {
+        "@type": "Person",
+        "@id": {{ "/" | absolute_url | append: "#person" | jsonify }},
+        "name": {{ site.person.name | jsonify }},
+        {%- if site.person.job_title %}
+        "jobTitle": {{ site.person.job_title | jsonify }},
+        {%- endif %}
+        {%- if site.person.image %}
+        "image": {{ site.person.image | absolute_url | jsonify }},
+        {%- endif %}
+        "url": {{ "/" | absolute_url | jsonify }}
+        {%- if site.person.same_as %},
+        "sameAs": {{ site.person.same_as | jsonify }}
+        {%- endif %}
+      }
+    }
+    </script>
+    {%- endif %}
     <link rel="icon" href="{{ '/assets/favicon-32.png' | relative_url }}" sizes="32x32">
     <link rel="icon" href="{{ '/assets/favicon-512.png' | relative_url }}" sizes="512x512">
     <link rel="apple-touch-icon" href="{{ '/assets/favicon-180.png' | relative_url }}">
