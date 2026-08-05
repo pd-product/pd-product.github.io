@@ -907,7 +907,17 @@ a:hover { color: var(--text); }
 
   .intro { padding: 34px var(--gutter) 28px; }
   .page-simple { padding: 34px var(--gutter) 28px; }
-  .intro h1 { font-size: 29px; letter-spacing: -.025em; }
+  /* Leading is raised HERE and nowhere else. The global 1.09 is display
+     leading, tuned for the one or two lines this headline occupies at 47px,
+     where each line is long relative to its height. At 29px in a ~350px column
+     the same copy wraps to FIVE lines -- measured, not estimated -- which is a
+     paragraph, and paragraph-length text at display leading reads dense.
+
+     Deliberately NOT applied to .story-title. Every story title measures one or
+     two lines at both 390 and 1280, which is the case 1.10 is already tuned
+     for; loosening it there would spend leading on the problem it was chosen to
+     solve. Re-measure before extending this to any other heading. */
+  .intro h1 { font-size: 29px; line-height: 1.18; letter-spacing: -.025em; }
 
   .work-row > a { padding: 22px var(--gutter); }
   .work-title { font-size: 19px; }
