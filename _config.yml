@@ -87,18 +87,49 @@ kramdown:
 # Share-card default. These scopes are deliberately narrow: an empty `path: ""`
 # scope with no `type` applies repo-wide and turned three stray notes under
 # assets/ into published, indexed pages. Scope every default to a type.
+#
+# `image` is a HASH, not a bare path string. jekyll-seo-tag only emits
+# og:image:width, og:image:height and og:image:alt when the keys are present,
+# and only builds a JSON-LD imageObject when the hash has more than one key.
+# Dimensions must match the real file (assets/og/default.png is 1200x630);
+# stating them lets a scraper reserve the right box before the image loads.
+# `alt` is the card's own text, transcribed -- keep them in step if the card is
+# ever regenerated.
 defaults:
   - scope:
       path: ""
       type: "work"
     values:
       layout: "story"
-      image: "/assets/og/default.png"
+      image:
+        path: "/assets/og/default.png"
+        width: 1200
+        height: 630
+        alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
   - scope:
       path: ""
       type: "pages"
     values:
-      image: "/assets/og/default.png"
+      image:
+        path: "/assets/og/default.png"
+        width: 1200
+        height: 630
+        alt: "Pat Diggins, senior PM for ad platforms and AI. I own platform businesses and build on them. These are the calls I made, including the ones I would make differently."
+
+# Structured data for the person, not just the site. jekyll-seo-tag reads
+# `social.links` into JSON-LD `sameAs`, but ONLY on the home page or an /about/
+# page -- Drop#links gates on homepage_or_about?, which matches ^/(about/)?
+# (index.html?)?$. It also prefers `social.name` over `title` for the JSON-LD
+# `name`, which is why the entity reads as the person rather than as the SEO
+# title string.
+#
+# `sameAs` is what lets a search engine connect this site to the same person on
+# another platform, so it is worth having even with one link in it. Add profiles
+# here as they become worth claiming.
+social:
+  name: "Patrick Diggins"
+  links:
+    - "https://www.linkedin.com/in/patrick-diggins/"
 
 plugins:
   - jekyll-seo-tag
