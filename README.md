@@ -118,7 +118,13 @@ the site-wide default in `_config.yml`, so nothing is ever missing a card.
   publish; re-derive from there rather than upscaling a shipped file when a display size grows.
 - `assets/og/` -- share cards at 1200x630. `default.png` is the site-wide fallback; per-story cards
   override it via `image:` in the story front matter.
-- `assets/fonts/` -- self-hosted IBM Plex Mono Regular and Medium woff2, with `OFL.txt` alongside.
+- `assets/fonts/` -- IBM Plex Mono Regular and Medium, self-hosted as woff2 and **subset** to the
+  ~107 glyphs the site renders, which cut each file from about 46KB to about 11.6KB. They are
+  declared in CSS as `"Site Mono"`: the SIL OFL reserves the name "Plex" and forbids a modified
+  version from presenting a reserved name, and a subset is a modified version. The IBM copyright
+  notice is retained inside both files. Regenerate with `fonttools subset` if the character set
+  ever needs to grow -- adding a character the subset lacks makes that one glyph silently fall back
+  to another font.
   The SIL Open Font License requires its text to travel with the font, and this repo is public and
   therefore redistributes it. `OFL.txt` is the one file exempt from the ASCII-only convention.
 

@@ -56,10 +56,23 @@
 
 /* --- Fonts -------------------------------------------------------------
    Self-hosted woff2, two weights, both used. Commit OFL.txt alongside.
-   Headings and body use the Helvetica Neue system stack -- no webfont.     */
+   Headings and body use the Helvetica Neue system stack -- no webfont.
+
+   "Site Mono" is IBM Plex Mono, subset to the ~107 glyphs this site renders
+   (printable ASCII, plus the handful of characters that arrive as HTML
+   entities or CSS escapes). That cut each file from ~46KB to ~11.6KB.
+
+   The RENAME IS A LICENCE REQUIREMENT, not a preference. The SIL OFL that
+   ships with IBM Plex reserves the name "Plex", and clause 3 forbids a
+   Modified Version from presenting a Reserved Font Name to users. A subset is
+   a Modified Version. The internal name records were changed to match, the IBM
+   copyright notice is retained inside both files, and OFL.txt travels with
+   them. Do not rename this back to "IBM Plex Mono" while the files are
+   subset -- and if the full fonts are ever restored, drop the alias with
+   them.                                                                     */
 
 @font-face {
-  font-family: "IBM Plex Mono";
+  font-family: "Site Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
@@ -67,7 +80,7 @@
 }
 
 @font-face {
-  font-family: "IBM Plex Mono";
+  font-family: "Site Mono";
   font-style: normal;
   font-weight: 500;
   font-display: swap;
@@ -100,7 +113,7 @@
   --accent-ink: #0c0e10;
 
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: "Site Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 
   --page: 1180px;   /* content cap */
   --gutter: 46px;
