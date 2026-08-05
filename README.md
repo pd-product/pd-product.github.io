@@ -95,9 +95,21 @@ builds clean and ships without it.
 `.story-prose` styles `h2`, `p`, `ul`, `ol`, `figure`, `figcaption` and `a`. That is the whole list.
 
 Anything else gets browser defaults inside a stylesheet that has already zeroed the margins on
-`h1, h2, h3, p, dl, dd, dt, figure, table` -- so an `h3` renders as bold 18.7px jammed against its
-neighbours, and a Markdown table renders unstyled next to the designed tradeoff table it will be
-compared with. Neither looks like a mistake in the source; both look like a mistake on the page.
+`h1, h2, h3, p, dl, dd, dt, figure, table`. Measured on the built site, the two an author is most
+likely to reach for are both worse than "unstyled" -- and neither looks like a mistake in the
+source, only on the page:
+
+- An **`h3`** renders as browser-default bold 18.72px with no margin at all. At 1280 that is just
+  jammed against its neighbours. **At 390 it INVERTS the hierarchy**: the story `h2` drops to 18px
+  at that breakpoint while the unstyled `h3` stays at 18.72px, so a subheading renders LARGER than
+  the chapter heading above it.
+- A **Markdown table** is unstyled next to the designed tradeoff table it will be compared with.
+  It also used to break the page: at 390 a five-column table pushed the document to `scrollWidth`
+  461 against `clientWidth` 390, giving the whole page a horizontal scrollbar and clipping every
+  line of body prose at the right edge -- a WCAG 1.4.10 reflow failure, from one authoring slip.
+  `.story-prose > table` now carries a containment guard so that cannot happen. **The guard is not
+  support.** It keeps the page conformant and makes the table look cramped and wrong, which is the
+  intended signal.
 
 So: chapters are `h2`, and everything under them is paragraphs, lists and figures. A story that
 genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed

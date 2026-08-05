@@ -695,6 +695,41 @@ a:hover { color: var(--text); }
   color: var(--accent);
 }
 
+/* Containment guard for a Markdown table in prose. NOT support for one --
+   README still says a story needing a table needs styles designed first, and
+   this deliberately does not style anything. It stops one authoring slip from
+   breaking the whole page.
+
+   Measured at 390px before this existed: a five-column table pushed the
+   document to scrollWidth 461 against clientWidth 390, so the page gained a
+   horizontal scrollbar and EVERY line of body prose was clipped at the right
+   edge, not just the table. That is a WCAG 1.4.10 reflow failure produced by a
+   file nobody would think of as risky.
+
+   `table-layout: fixed` divides the width evenly instead of letting content
+   dictate it, and `overflow-wrap` lets cell text break rather than push the
+   column wider. The result is cramped and ugly at a phone width -- which is the
+   intended signal that the table does not belong there -- but nothing is
+   clipped and nothing overlaps.
+
+   The child combinator is load-bearing. kramdown emits a Markdown table as a
+   DIRECT child of .story-prose, while the designed tradeoff table is nested in
+   `figure.tradeoff`. A descendant selector would reach that one too: the
+   width rules would be a no-op on it, since it already computes
+   `table-layout: fixed` at full width, but `overflow-wrap` would not be, and
+   its cell text would start breaking mid-word. Verified with the scoped rules
+   in place that the tradeoff table is unchanged at 1280 and 390 -- identical
+   box, identical cell geometry, `overflow-wrap` still `normal`. */
+.story-prose > table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.story-prose > table th,
+.story-prose > table td {
+  overflow-wrap: anywhere;
+}
+
 .story-prose figure { margin: 15px 0; }
 
 .story-prose figure img {
