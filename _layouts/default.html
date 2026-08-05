@@ -13,8 +13,12 @@
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   </head>
   <body>
+    <!-- First focusable element on every page, and invisible until focused.
+         Three nav items is a short thing to tab past, but on a story page the
+         breadcrumb and the chapter rail sit ahead of the prose too. -->
+    <a class="skip-link" href="#main">Skip to content</a>
     {% include nav.html %}
-    <main class="content">
+    <main class="content" id="main" tabindex="-1">
       {{ content }}
     </main>
     {% include footer.html %}

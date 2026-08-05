@@ -9,28 +9,40 @@ keep the source ASCII.
 needs more than ~5 dimensions is meant to use a second table for a second
 decision rather than a taller one, and a list supports that without a later
 change to every existing story.
+
+The explicit ARIA roles below are NOT redundant markup and must not be
+"cleaned up". At 640px and below the stylesheet sets `display: block` on the
+table, thead, tbody, tr, th and td so each row can stack as labelled pairs.
+Browsers derive the implicit table/row/cell roles from the CSS display value,
+so that rule silently reduces the table to a run of generic blocks with no row
+or column relationships announced. Restating the roles keeps the structure
+readable at every width.
+
+This is the same bug class as D15, where `list-style: none` drops the implicit
+list role and every list therefore carries `role="list"`. The principle had
+been applied to lists and not to this table.
 {%- endcomment -%}
 {%- for table in include.tradeoffs -%}
 <figure class="tradeoff">
   {%- if table.title %}<figcaption>{{ table.title }}</figcaption>{% endif -%}
-  <table>
-    <thead>
-      <tr>
-        <th scope="col" class="tradeoff-dimension"><span class="sr-only">Dimension</span></th>
-        <th scope="col" class="tradeoff-rejected">{{ table.rejected }}</th>
-        <th scope="col" class="tradeoff-chosen">{{ table.chosen }} <span aria-hidden="true">&#10003;</span><span class="sr-only">(chosen)</span></th>
+  <table role="table">
+    <thead role="rowgroup">
+      <tr role="row">
+        <th role="columnheader" scope="col" class="tradeoff-dimension"><span class="sr-only">Dimension</span></th>
+        <th role="columnheader" scope="col" class="tradeoff-rejected">{{ table.rejected }}</th>
+        <th role="columnheader" scope="col" class="tradeoff-chosen">{{ table.chosen }} <span aria-hidden="true">&#10003;</span><span class="sr-only">(chosen)</span></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody role="rowgroup">
       {%- for row in table.rows %}
-      <tr>
-        <th scope="row" class="tradeoff-dimension">{{ row.dimension }}</th>
+      <tr role="row">
+        <th role="rowheader" scope="row" class="tradeoff-dimension">{{ row.dimension }}</th>
         {%- comment -%}
         data-label carries the option name into the sub-640px stacked view,
         where the dimension column is dropped and the pairs need naming.
         {%- endcomment -%}
-        <td class="tradeoff-rejected" data-label="{{ table.rejected }}">{{ row.rejected }}</td>
-        <td class="tradeoff-chosen" data-label="{{ table.chosen }}">{{ row.chosen }}</td>
+        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected }}">{{ row.rejected }}</td>
+        <td role="cell" class="tradeoff-chosen" data-label="{{ table.chosen }}">{{ row.chosen }}</td>
       </tr>
       {%- endfor %}
     </tbody>

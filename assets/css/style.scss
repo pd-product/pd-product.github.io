@@ -35,6 +35,29 @@
   border: 0;
 }
 
+/* Skip link. Off-canvas rather than .sr-only, because it has to become VISIBLE
+   on focus and a clipped 1px box cannot. Sighted keyboard users need to see
+   where focus went; `left` alone moving it back on screen is enough.
+   z-index keeps it above the sticky story rail. */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: -9999px;
+  z-index: 10;
+  padding: 8px 12px;
+  font: 400 12px var(--mono);
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+}
+
+.skip-link:focus { left: 8px; }
+
+/* The skip target takes tabindex="-1" so focus actually lands there. Suppress
+   the outline it would otherwise draw on a programmatic focus: the user asked
+   to move, not to select a region, and the heading they land on is the cue. */
+.content:focus { outline: none; }
+
 /* --- Fonts -------------------------------------------------------------
    Self-hosted woff2, two weights, both used. Commit OFL.txt alongside.
    Headings and body use the Helvetica Neue system stack -- no webfont.     */
@@ -235,17 +258,6 @@ a:hover { color: var(--text); }
 }
 
 /* --- Home: work list (index.html) -------------------------------------- */
-
-/* The design has no visible "Work" heading; the nav anchor still needs the
-   landmark, so the heading is hidden rather than removed. */
-.work-list > h2 {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
 
 /* The whole row is the click target, so the whole row responds: its top
    hairline goes accent on hover and focus. The title colour change below

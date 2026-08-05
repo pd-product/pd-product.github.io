@@ -25,7 +25,13 @@ of the text onto the page as visible content.
 </section>
 
 <section id="work" class="work-list">
-  <h2>Work</h2>
+  {%- comment -%}
+  The design has no visible "Work" heading, but the nav anchors here and a
+  labelled landmark needs one, so it is hidden rather than removed. Uses the
+  shared .sr-only utility; the stylesheet previously carried a second,
+  near-identical hiding rule for this one element.
+  {%- endcomment -%}
+  <h2 class="sr-only">Work</h2>
   {%- comment -%}
   role="list" is not redundant here. The stylesheet's `ul, ol { list-style:
   none }` reset removes the implicit list role in Safari with VoiceOver, so
@@ -38,7 +44,15 @@ of the text onto the page as visible content.
     {%- assign ordered = site.work | sort: "order" -%}
     {%- for story in ordered %}
     <li class="work-row">
-      <a href="{{ story.url | relative_url }}">
+      {%- comment -%}
+      The whole row is the click target, which is the design. Without
+      aria-labelledby the link's accessible name is therefore the whole row --
+      eyebrow, title, summary, lesson and chips, around 450 characters. Screen
+      reader users listing links, and voice-control users trying to speak a link
+      name, get all of it. Pointing at the title gives the link a usable name
+      while leaving the target area and the :focus-within hairline untouched.
+      {%- endcomment -%}
+      <a href="{{ story.url | relative_url }}" aria-labelledby="work-title-{{ story.slug | default: forloop.index }}">
         {%- assign card = story.card_image | default: story.hero_image -%}
         {%- if card %}
         <img class="work-card-image" src="{{ card | relative_url }}" alt="">
@@ -65,7 +79,7 @@ of the text onto the page as visible content.
         the descendants keep their styling with no change to the stylesheet.
         {%- endcomment -%}
         <div class="work-copy">
-          <h3 class="work-title">{{ story.title }}</h3>
+          <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index }}">{{ story.title }}</h3>
           {%- if story.description %}<p class="work-summary">{{ story.description }}</p>{% endif %}
           {%- comment -%}
           The lesson line is what makes the index specific rather than generic:
