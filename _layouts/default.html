@@ -3,7 +3,14 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    {%- if site.noindex %}
+    {%- comment -%}
+    Two switches, deliberately ORed rather than merged. `site.noindex` is the D11
+    withdrawal switch and pulls the WHOLE site out of search; `page.noindex` is a
+    per-page opt-out for a page that should exist but should not be indexed,
+    which is 404.html today. Neither can mask the other: if the site switch is on,
+    every page carries the tag regardless of what a page says.
+    {%- endcomment -%}
+    {%- if site.noindex or page.noindex %}
     <meta name="robots" content="noindex">
     {%- endif %}
     {% seo %}

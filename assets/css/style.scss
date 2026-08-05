@@ -439,6 +439,38 @@ a:hover { color: var(--text); }
   padding: 5px 9px;
 }
 
+/* --- Simple page (404.html) --------------------------------------------
+   For a page that is only a heading and a line of text. Nothing here is new
+   design: the padding is .intro's and the type is .story-title over
+   .story-summary, so this page sits on the same spine and the same scale as
+   every other one.
+
+   Without it a bare <h1> in <main> gets .content > * -- max-width and
+   margin-inline: auto, no padding -- and the global margin reset. It then
+   renders at browser-default bold 2em, flush against the left edge of the
+   content box, a full gutter to the LEFT of the header wordmark above it. */
+
+.page-simple {
+  padding: 76px var(--gutter) 60px;
+}
+
+.page-simple h1 {
+  font: 400 41px/1.1 var(--sans);
+  letter-spacing: -.03em;
+  max-width: 24ch;
+  margin-bottom: 16px;
+  text-wrap: pretty;
+}
+
+.page-simple p {
+  font: 400 18px/1.55 var(--sans);
+  color: var(--muted);
+  max-width: 62ch;
+  text-wrap: pretty;
+}
+
+.page-simple p + p { margin-top: 12px; }
+
 /* --- Footer (_includes/footer.html) -----------------------------------
    The copyright is required content on every page. Never hide, collapse,
    reduce to an icon, or place behind an interaction.                      */
@@ -782,8 +814,10 @@ a:hover { color: var(--text); }
   :root { --gutter: 32px; --rail-gap: 32px; }
 
   .intro { padding: 56px var(--gutter) 44px; }
+  .page-simple { padding: 56px var(--gutter) 44px; }
   .intro h1 { font-size: 38px; }
   .story-title { font-size: 34px; }
+  .page-simple h1 { font-size: 34px; }
 
   .work-row > a { grid-template-columns: 1fr; gap: 12px; }
 
@@ -824,6 +858,7 @@ a:hover { color: var(--text); }
      keeps a long crumb from pushing the nav links off the row. */
 
   .intro { padding: 34px var(--gutter) 28px; }
+  .page-simple { padding: 34px var(--gutter) 28px; }
   .intro h1 { font-size: 29px; letter-spacing: -.025em; }
 
   .work-row > a { padding: 22px var(--gutter); }
@@ -833,6 +868,8 @@ a:hover { color: var(--text); }
   .story-header { padding: 30px var(--gutter) 24px; }
   .story-title { font-size: 27px; letter-spacing: -.025em; }
   .story-summary { font-size: 15px; }
+  .page-simple h1 { font-size: 27px; letter-spacing: -.025em; }
+  .page-simple p { font-size: 15px; }
   .story-body { padding: 24px var(--gutter) 32px; }
 
   .story-prose > h2 { font-size: 18px; }
