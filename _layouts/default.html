@@ -14,6 +14,32 @@
     <meta name="robots" content="noindex">
     {%- endif %}
     {% seo %}
+    {%- comment -%}
+    og:image:* by hand, and it has to stay that way. seo-tag will emit these
+    three itself if `image` is given as a hash instead of a path -- but its
+    JSON-LD drop then forwards every key of that hash into the structured data
+    and hardcodes `"@type": "imageObject"`, lowercase. Schema.org type names are
+    case-sensitive, `imageObject` is not a registered type, and `alt` is not a
+    Schema.org property, so the hash form buys three meta tags at the cost of a
+    malformed image node on every page.
+
+    These MUST follow {% seo %}: Open Graph structured properties describe the
+    og:image immediately preceding them, and seo-tag emits that.
+
+    The equality test is load-bearing. A story may override `image` with its own
+    card, and these dimensions would then describe a DIFFERENT file -- a wrong
+    width is worse than an absent one, because a scraper reserves the wrong box
+    and the card renders letterboxed or cropped. So the three tags are emitted
+    only when the page is actually using the default card. A per-story card
+    still gets its og:image from seo-tag; it just goes without dimensions until
+    someone adds a per-story block here too.
+    {%- endcomment -%}
+    {%- if site.og_image and page.image == site.og_image.path %}
+    <meta property="og:image:width" content="{{ site.og_image.width }}">
+    <meta property="og:image:height" content="{{ site.og_image.height }}">
+    <meta property="og:image:alt" content="{{ site.og_image.alt | escape }}">
+    <meta name="twitter:image:alt" content="{{ site.og_image.alt | escape }}">
+    {%- endif %}
     <link rel="icon" href="{{ '/assets/favicon-32.png' | relative_url }}" sizes="32x32">
     <link rel="icon" href="{{ '/assets/favicon-512.png' | relative_url }}" sizes="512x512">
     <link rel="apple-touch-icon" href="{{ '/assets/favicon-180.png' | relative_url }}">
