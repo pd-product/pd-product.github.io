@@ -127,8 +127,9 @@ defaults:
 # Dimensions and alt for the share card above, emitted by hand in
 # _layouts/default.html because routing them through seo-tag corrupts the
 # JSON-LD (see the note on `image`). Keep these true of the real file:
-# assets/og/default.png is 1200x630, and the alt is a transcription of the
-# card's own text.
+# assets/og/default.png is 1200x630, and the alt describes the card's
+# composition -- deliberately not a transcription of it, for the reason on
+# `alt` below.
 og_image:
   # Must match the `image:` value in BOTH defaults scopes above. The layout
   # compares them, and emits the dimensions only when the page is really using
