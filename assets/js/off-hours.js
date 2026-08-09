@@ -77,22 +77,23 @@
     window.matchMedia('(prefers-reduced-motion: reduce)');
   if (reduced && reduced.matches) return;
 
-  /* The four numbers this file runs on. THREE OF THEM ARE COUPLED TO
-     style.scss and cannot be changed alone:
+  /* The four numbers this file runs on. TWO ARE COUPLED TO style.scss and
+     cannot be changed alone:
 
-       TRIGGER and TRIM are the same threshold written twice, once for the
-       arming pass in JavaScript and once for the observer's root margin, which
-       only takes a CSS length. 0.94 and -6% must always sum to 1.
+       TRIGGER is the reveal threshold, as a fraction of viewport height, and
+       it lives in exactly one place. The observer's root margin is derived
+       from it in pixels rather than restating it as a percentage -- see the
+       note on rootMargin() for why that matters. It is NOT the same number as
+       the arming test, which uses the fold; a card partly on screen counts as
+       seen.
 
        TRANSITION mirrors the .5s on .off-hours-card. It sizes the backstop
        that closes the in-flight window when transitionend cannot fire.
        SETTLE_SLACK is a whole extra TRANSITION on purpose: overshooting that
-       window is free, undershooting it silently breaks the visibilitychange
-       floor, and no wall clock can know when the transition actually started.
+       window is free, and the backstop fails open in any case.
 
        STAGGER is per column index, so a 3-up row runs 0 / 70 / 140ms. */
   var TRIGGER = 0.94;
-  var TRIM = '-6%';
   var TRANSITION = 500;
   var SETTLE_SLACK = 500;
   var STAGGER = 70;
@@ -121,24 +122,34 @@
      only one, because it does not fire in a background tab -- which is the
      case this bookkeeping exists for. So a timer backs it up.
 
-     The timer is sized to OVERSHOOT. Leaving a card in `flying` too long costs
-     nothing: settleFlying would set a done flag on a card that already looks
-     done. Leaving it too short is the actual bug -- the card drops out while
-     still fading and a later hide no longer settles it -- and a wall clock
-     cannot know when the transition really began, since style resolution and
-     the first frame can both be delayed. Hence a full extra TRANSITION of
-     slack rather than a tight cushion. */
+     THE BACKSTOP FAILS OPEN, which is the part that makes the wall clock
+     acceptable. It does not merely drop the card from `flying` -- if it did,
+     a style or render delay longer than the slack would land a card that is
+     still fading, and the next hide would not settle it. Instead it forces the
+     card into its finished state on the way out. Overshooting is then free
+     (the card already looks finished, so forcing it changes nothing) and
+     undershooting is harmless too (the card is snapped rather than abandoned
+     mid-fade). transitionend remains the precise signal and lands the card
+     without forcing anything; it cannot be the only one, because it does not
+     fire in a background tab, which is the case this bookkeeping exists for. */
   function reveal(card, delay) {
     card.style.transitionDelay = delay + 'ms';
     card.removeAttribute('data-reveal');
     flying.push(card);
 
-    var done = function () {
-      card.removeEventListener('transitionend', done);
+    var ended = function () {
+      card.removeEventListener('transitionend', ended);
       land(card);
     };
-    card.addEventListener('transitionend', done);
-    setTimeout(done, delay + TRANSITION + SETTLE_SLACK);
+    card.addEventListener('transitionend', ended);
+
+    setTimeout(function () {
+      card.removeEventListener('transitionend', ended);
+      if (flying.indexOf(card) === -1) return;
+      card.style.transitionDelay = '';
+      card.setAttribute('data-reveal-done', '');
+      land(card);
+    }, delay + TRANSITION + SETTLE_SLACK);
   }
 
   /* Finish just the cards that are mid-animation, and leave everything else
@@ -169,6 +180,10 @@
   function showAll() {
     rescued = true;
     flying.length = 0;
+    /* Print-at-mount can reach here before the first scroll, so the listener
+       may still be attached. `rescued` already makes arm() a no-op; this stops
+       a dead listener sitting on the page for the rest of its life. */
+    removeEventListener('scroll', arm);
     /* May be null when a floor fires before the observer is built -- the
        print-at-mount check does exactly that. `rescued` is what stops one
        being constructed afterwards. */
@@ -204,10 +219,15 @@
      simply visible, which is the correct rendering for anything that reads the
      document without scrolling it: a capture, an archiver, a reader-mode
      extraction, a print. On the first scroll -- of any kind, including a
-     fragment jump -- the cards still below the trigger line are hidden and the
-     observer takes over. Those are exactly the cards that were going to
-     animate anyway, and they are off-screen when it happens, so there is
-     nothing to see. A reader gets the full reveal; a machine gets the content.
+     fragment jump -- the cards still below the FOLD are hidden and the observer
+     takes over. A reader gets the full reveal; a machine gets the content.
+
+     BELOW THE FOLD, NOT BELOW THE TRIGGER LINE, and the difference is a visible
+     bug. The trigger line sits at 94% of the viewport, so a card at 95% is on
+     screen -- a sliver of it is being looked at right now -- and hiding it
+     would blink it out from under the reader. Anything with any part of itself
+     in the viewport counts as already seen and is left alone. Only what is
+     genuinely past the bottom edge can be hidden without being noticed.
 
      This also makes the floors below narrower in scope: they now only ever run
      against a page a human has already scrolled. */
@@ -216,10 +236,10 @@
     armed = true;
     removeEventListener('scroll', arm);
 
-    var line = window.innerHeight * TRIGGER;
+    var fold = window.innerHeight;
     var pending = [];
     for (var i = 0; i < cards.length; i++) {
-      if (cards[i].getBoundingClientRect().top > line) {
+      if (cards[i].getBoundingClientRect().top >= fold) {
         cards[i].setAttribute('data-reveal', 'hidden');
         pending.push(cards[i]);
       }
@@ -304,20 +324,25 @@
     }
   }
 
-  /* Without IntersectionObserver there is nothing to arm: the scroll listener
-     is never attached, so the cards are never hidden and simply stay visible
-     content. Nothing to fall back to, because nothing was taken away. */
+  /* Without IntersectionObserver there is nothing to arm, so the listener comes
+     straight back off and the cards are never hidden. Nothing to fall back to,
+     because nothing was taken away. */
   if (typeof IntersectionObserver !== 'function') {
     removeEventListener('scroll', arm);
     return;
   }
 
-  /* Trigger when a card's top passes 94% of the viewport height. Trimming 6%
-     off the root's bottom edge is what expresses that: intersection begins
-     once the element reaches the remaining 94%. Top and bottom percentages
-     resolve against the root's HEIGHT -- probed at 1440x900, 390x844,
-     1000x1000 and 1600x500, the trigger sat at 93.1 to 93.8 percent of height
-     at every aspect ratio.
+  /* Trigger when a card's top passes TRIGGER of the viewport height, expressed
+     as a PIXEL bottom margin computed from innerHeight.
+
+     It used to be `-6%`, and that cost three review rounds arguing about what
+     a percentage rootMargin resolves against. Measured in Chrome at 1440x900,
+     390x844, 1000x1000 and 1600x500, the trigger sat at 93.1-93.8% of HEIGHT
+     every time -- but the spec describes these offsets as behaving like CSS
+     margins, where percentages resolve against inline size, and two careful
+     readers took it the other way. Pixels make the question moot and keep one
+     threshold in one place instead of the same number written twice. The cost
+     is recomputing on resize, which is a handful of lines below.
 
      THE ENORMOUS TOP MARGIN IS NOT PADDING, IT IS WHAT MAKES THE TEST
      MONOTONIC. IntersectionObserver reports CHANGES to isIntersecting. With a
@@ -342,7 +367,13 @@
      Extending the root 100000px upward means anything at or above the line is
      always inside it. isIntersecting then only ever goes false -> true, the
      jump is a change, and a card that has been passed counts as seen. */
+  function rootMargin() {
+    return '100000px 0px -' + Math.round(window.innerHeight * (1 - TRIGGER)) +
+      'px 0px';
+  }
+
   function startObserving(pending) {
+    if (observer) observer.disconnect();
     observer = new IntersectionObserver(function (entries) {
       /* Proof of life: reaching this line at all means the observer runs, so
          the dead-observer floor stands down. See the header for why one
@@ -356,8 +387,27 @@
         reveal(card, (index % columns()) * STAGGER);
         observer.unobserve(card);
       }
-    }, { rootMargin: '100000px 0px ' + TRIM + ' 0px' });
+    }, { rootMargin: rootMargin() });
 
     for (var k = 0; k < pending.length; k++) observer.observe(pending[k]);
   }
+
+  /* A pixel margin is tied to the viewport it was computed from, so a resize
+     has to rebuild the observer. Only cards still marked hidden are re-observed
+     -- anything already revealed is finished with. Debounced, because a desktop
+     window drag emits a resize per frame and each rebuild is a fresh set of
+     observations. */
+  var resizeTimer = null;
+  addEventListener('resize', function () {
+    if (!armed || rescued || !observer) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function () {
+      var stillHidden = [];
+      for (var i = 0; i < cards.length; i++) {
+        if (cards[i].hasAttribute('data-reveal')) stillHidden.push(cards[i]);
+      }
+      if (stillHidden.length) startObserving(stillHidden);
+      else observer.disconnect();
+    }, 150);
+  }, { passive: true });
 })();

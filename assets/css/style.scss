@@ -687,12 +687,13 @@ a:hover { color: var(--text); }
   text-wrap: pretty;
 }
 
-/* The reveal. THE HIDDEN STATE IS APPLIED BY JAVASCRIPT, never by this file:
-   assets/js/off-hours.js sets data-reveal="hidden" at mount and removes it to
-   play the card in. Written the other way round -- hidden in CSS, revealed by
-   script -- a page with no JavaScript, a script that 404s, or any of the
-   several ways an observer can deliver nothing would leave the whole section
-   blank. See the floors in that file.
+/* The reveal. THE HIDDEN STATE IS APPLIED BY JAVASCRIPT, never by this file,
+   and not until the reader's FIRST SCROLL: assets/js/off-hours.js sets
+   data-reveal="hidden" then, on the cards still below the fold, and removes it
+   to play each one in. Written the other way round -- hidden in CSS, revealed
+   by script -- a page with no JavaScript, a script that 404s, a full-page
+   screen capture, or any of the several ways an observer can deliver nothing
+   would leave the whole section blank. See the floors in that file.
 
    transition-delay is set inline by the script, because the stagger depends on
    how many columns the grid currently has and CSS cannot count them. */
