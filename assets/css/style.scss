@@ -432,7 +432,14 @@ a:hover { color: var(--text); }
   border-top: 1px solid var(--hairline);
   display: grid;
   grid-template-columns: var(--rail) minmax(0, 1fr);
-  gap: var(--rail-gap);
+  /* column-gap, NOT the gap shorthand. This value is the rail-to-copy distance
+     and nothing else. The eyebrow is a direct child sitting in its own row, so
+     a row gap here also lands between the eyebrow and the title -- 48px on top
+     of the eyebrow's own 12px margin, which reads as a hole under the category.
+     The shared .about/.contact grid is on column-gap for the same reason --
+     .about's heading sits above its photo and copy in a second row. The 960px
+     block sets both axes explicitly and is unaffected either way. */
+  column-gap: var(--rail-gap);
   align-items: start;
   padding: 38px var(--gutter);
 }
@@ -832,6 +839,17 @@ a:hover { color: var(--text); }
   column-gap: var(--rail-gap);
   align-items: start;
 }
+
+/* Contact's two items share a row, and `start` above puts a 12.5px mono link
+   and a 34px display heading on the same top edge -- which floats the link
+   about 18px above the heading's baseline. Baseline puts them on one line.
+   BOTH selectors need the rule: an item aligned to baseline whose only partner
+   is still on `start` has nothing to align against and falls back to `start`,
+   so deleting either half silently restores the defect. Not `end`, which aligns
+   the boxes including descender space and lands the link low. Inert at 640px,
+   where the two are in separate rows. */
+.contact > h2,
+.contact-links { align-self: baseline; }
 
 .about > h2 { grid-column: 1; grid-row: 1; margin-bottom: 16px; }
 
