@@ -82,18 +82,25 @@
 
        TRIGGER is the reveal threshold, as a fraction of viewport height, and
        it lives in exactly one place. A card fades in once its top has come up
-       past this line, so a SMALLER number means the card is further into view
-       before it moves. It was 0.94, which fired while only a sliver of the
-       card was showing at the very bottom edge: by the time a reader's eye
-       reached it the fade had finished in their peripheral vision. 0.80 lets
-       the card get most of the way in first. The cost is the other side of the
-       same coin -- between the fold and this line the card is on screen and
-       still blank, about 20% of viewport height of travel -- so pushing it much
-       lower trades an unseen animation for a visible empty box. The observer's root margin is derived
-       from it in pixels rather than restating it as a percentage -- see the
-       note on rootMargin() for why that matters. It is NOT the same number as
-       the arming test, which uses the fold; a card partly on screen counts as
-       seen.
+       past this line, so a SMALLER number means the card travels further into
+       view before it moves.
+
+       It was 0.94, which fired while only a sliver of the card was showing at
+       the very bottom edge: by the time a reader's eye reached it, the fade had
+       finished in their peripheral vision. At 0.80 a card crosses 20% of the
+       viewport's height between entering and firing -- 180px at 900 tall, 114px
+       at 568 -- which is what buys the animation somewhere visible to happen.
+       Whether that is most of the CARD depends on the card's own height against
+       the viewport's, so it is not a promise about how much of the card shows.
+
+       The cost is the other side of the same coin: for that same 20% of travel
+       the card is on screen and still blank. Pushing the number lower trades an
+       unseen animation for a visible empty box.
+
+       The observer's root margin is derived from this in pixels rather than
+       restating it as a percentage -- see the note on rootMargin(). It is NOT
+       the same number as the arming test, which uses the fold: a card already
+       partly on screen counts as seen and is never hidden.
 
        TRANSITION mirrors the 1s on .off-hours-card. It sizes the backstop
        that closes the in-flight window when transitionend cannot fire.
@@ -428,9 +435,10 @@
      COALESCED PER FRAME, NOT DEBOUNCED ON A TRAILING EDGE. A trailing debounce
      was the obvious choice and it is wrong here: through a sustained window
      drag it leaves the OLD margin in force, computed from the viewport the
-     drag started in. Growing 500px to 1000px keeps a -30px bottom margin, so
-     the trigger sits well below where it should and a card in that band stays
-     visibly blank until the drag stops; shrinking reveals early. One rebuild
+     drag started in. Growing 500px tall to 1000px keeps the -100px bottom
+     margin computed from the old height, so the trigger sits at 90% of the new
+     viewport instead of 80% and a card in that 10% band stays visibly blank
+     until the drag stops; shrinking reveals early. One rebuild
      per animation frame keeps the margin honest for every frame the reader
      actually sees, and still collapses the several resize events a drag emits
      within a single frame. */
