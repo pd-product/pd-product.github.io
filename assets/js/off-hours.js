@@ -126,7 +126,26 @@
 
   /* Trigger when a card's top passes 94% of the viewport height. Trimming 6%
      off the root's bottom edge is what expresses that: intersection begins
-     once the element reaches the remaining 94%. */
+     once the element reaches the remaining 94%.
+
+     THE ENORMOUS TOP MARGIN IS NOT PADDING, IT IS WHAT MAKES THE TEST
+     MONOTONIC, and without it the section can be left permanently blank.
+     IntersectionObserver reports CHANGES to isIntersecting. With a plain root,
+     a card that is below the viewport and then above it -- one jump, no
+     intermediate frame -- is not intersecting at either end, so no change is
+     reported and the callback never runs. The card stays hidden for the rest
+     of the page's life, and scrolling back up does not help: it is above the
+     trigger line, not below it.
+
+     That is reachable in one click. `contact` is in the nav on every page and
+     `/#contact` lands well past this section. Measured at 320x568 before this
+     margin existed: after that jump all six cards sat above the viewport,
+     all six still hidden, and scrolling back up revealed only the three that
+     happened to re-cross the line.
+
+     Extending the root 100000px upward means anything at or above the line is
+     always inside it. isIntersecting then only ever goes false -> true, the
+     jump is a change, and the callback fires. */
   var observer = new IntersectionObserver(function (entries) {
     /* Proof of life. The spec guarantees an initial notification per observed
        element, so reaching this line at all means the observer works and the
@@ -140,7 +159,7 @@
       reveal(card, (index % columns()) * 70);
       observer.unobserve(card);
     }
-  }, { rootMargin: '0px 0px -6% 0px' });
+  }, { rootMargin: '100000px 0px -6% 0px' });
 
   for (var k = 0; k < cards.length; k++) observer.observe(cards[k]);
 })();
