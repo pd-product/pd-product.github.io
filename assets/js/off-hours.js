@@ -109,7 +109,14 @@
      rescuing when the tab goes away; see the visibilitychange floor. */
   var flying = [];
 
+  /* Out of the in-flight set, and back to a clean element. Clearing the inline
+     delay here matters because the rescue paths were the only ones doing it:
+     a card that revealed normally kept `transition-delay: 140ms` for the life
+     of the page, so anything that transitioned it later -- a resize rebuild
+     re-revealing it, or any future transition on this class -- would inherit a
+     stagger meant for one moment in one layout. */
   function land(card) {
+    card.style.transitionDelay = '';
     var i = flying.indexOf(card);
     if (i !== -1) flying.splice(i, 1);
   }
@@ -374,7 +381,19 @@
 
   function startObserving(pending) {
     if (observer) observer.disconnect();
-    observer = new IntersectionObserver(function (entries) {
+
+    /* `mine` rather than the shared `observer`, because a rebuild can leave a
+       superseded instance with records already queued: disconnect() stops
+       future observations but does not guarantee that a notification already
+       scheduled is dropped. A stale callback would then act on the geometry of
+       the previous viewport, and could reveal a card the new observer is also
+       about to reveal -- two `reveal` calls on one card, two entries in
+       `flying`, two timers. Comparing identity makes a superseded callback a
+       no-op, and the data-reveal guard below makes a duplicate one harmless
+       even if both fire in the same frame. */
+    var mine = new IntersectionObserver(function (entries) {
+      if (mine !== observer) return;
+
       /* Proof of life: reaching this line at all means the observer runs, so
          the dead-observer floor stands down. See the header for why one
          callback always arrives on a working observer. */
@@ -383,31 +402,43 @@
       for (var j = 0; j < entries.length; j++) {
         if (!entries[j].isIntersecting) continue;
         var card = entries[j].target;
+        if (!card.hasAttribute('data-reveal')) continue;
         var index = cards.indexOf(card);
         reveal(card, (index % columns()) * STAGGER);
-        observer.unobserve(card);
+        mine.unobserve(card);
       }
     }, { rootMargin: rootMargin() });
 
-    for (var k = 0; k < pending.length; k++) observer.observe(pending[k]);
+    observer = mine;
+    for (var k = 0; k < pending.length; k++) mine.observe(pending[k]);
   }
 
   /* A pixel margin is tied to the viewport it was computed from, so a resize
-     has to rebuild the observer. Only cards still marked hidden are re-observed
-     -- anything already revealed is finished with. Debounced, because a desktop
-     window drag emits a resize per frame and each rebuild is a fresh set of
-     observations. */
-  var resizeTimer = null;
+     has to rebuild the observer. Only cards still marked hidden are
+     re-observed; anything already revealed is finished with.
+
+     COALESCED PER FRAME, NOT DEBOUNCED ON A TRAILING EDGE. A trailing debounce
+     was the obvious choice and it is wrong here: through a sustained window
+     drag it leaves the OLD margin in force, computed from the viewport the
+     drag started in. Growing 500px to 1000px keeps a -30px bottom margin, so
+     the trigger sits at 97% instead of 94% and a card in that band stays
+     visibly blank until the drag stops; shrinking reveals early. One rebuild
+     per animation frame keeps the margin honest for every frame the reader
+     actually sees, and still collapses the several resize events a drag emits
+     within a single frame. */
+  var resizePending = false;
   addEventListener('resize', function () {
-    if (!armed || rescued || !observer) return;
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(function () {
+    if (!armed || rescued || !observer || resizePending) return;
+    resizePending = true;
+    requestAnimationFrame(function () {
+      resizePending = false;
+      if (!armed || rescued || !observer) return;
       var stillHidden = [];
       for (var i = 0; i < cards.length; i++) {
         if (cards[i].hasAttribute('data-reveal')) stillHidden.push(cards[i]);
       }
       if (stillHidden.length) startObserving(stillHidden);
       else observer.disconnect();
-    }, 150);
+    });
   }, { passive: true });
 })();
