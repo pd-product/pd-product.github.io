@@ -4,14 +4,16 @@ title: "The spreadsheet that became a toolkit"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "personal finance tools"
-# Shown under the title on the story page and on the home-page row, AND read by
-# jekyll-seo-tag as the meta description. The key must be `description`: with
-# any other name seo-tag falls back to page.excerpt, which is the first block of
-# the body -- the opening `## ` heading. Search and link previews then read
-# "The situation".
+# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
+# meta description. It no longer renders on the home-page row -- that is a
+# template decision in index.html, not a reason to drop the key. The key must
+# be `description`: with any other name seo-tag falls back to page.excerpt,
+# which is the first block of the body -- the opening `## ` heading. Search and
+# link previews then read that heading instead.
 description: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
-# One line, shown on the home-page row under the description. A trim of this
-# story's own "What I would redo" chapter, approved as written.
+# One line, and the only prose on the home-page row now that the description
+# does not render there. A trim of this story's own "What I would redo"
+# chapter, approved as written.
 lesson: "When building feels cheap, the discipline that protects you is the one you stop noticing you dropped."
 category: "personal"
 order: 3

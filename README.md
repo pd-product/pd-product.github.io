@@ -39,19 +39,21 @@ visible failure, so set it whenever you set `hero_image`.
 
 Nothing guards `category`, `description` or `date`, and each fails silently rather than visibly:
 
-- `category` renders a dangling `01 /` in the eyebrow, on both the home row and the story page,
-  when it is missing.
-- `description` is also the page's meta description. Omit it and `jekyll-seo-tag` falls back to the
-  page excerpt -- the first block of the body -- so the story goes to search results and link
-  previews described by its own opening heading.
+- `category` leaves an empty eyebrow on the home row and a dangling `01 /` on the story page when
+  it is missing. It also drops the story-header field tint, since that is keyed to the value.
+- `description` does not render on the home row, but it is still required: it is the line under the
+  story title AND the page's meta description. Omit it and `jekyll-seo-tag` falls back to the page
+  excerpt -- the first block of the body -- so the story goes to search results and link previews
+  described by its own opening heading. Nothing on the page shows you it is gone.
 - `date` has a silent WRONG default rather than an absent one. Without it Jekyll stamps build time,
   so `datePublished` and the sitemap's `lastmod` move on every deploy and re-announce the story as
   new. Use the date the story was published, not the date you are editing.
 
 `order` is the global reading position and is required. It is a **sort key only**: the zero-padded
-eyebrow number is derived from the story's position in the sorted list, not from the value itself,
-so duplicate, missing, zero, or negative values cannot render a duplicate number, a blank, `00`, or
-`0-1`. Home row and story page derive it the same way and therefore always agree. Use unique
+number is derived from the story's position in the sorted list, not from the value itself, so
+duplicate, missing, zero, or negative values cannot render a duplicate number, a blank, `00`, or
+`0-1`. The home row prints it as the large display numeral and the story page prints it inside the
+eyebrow, but both derive it the same way and therefore always agree. Use unique
 integers anyway -- ties have no defined order. No index needs editing.
 
 Set `published: false` to keep a story in the repo but out of the built site. That is Jekyll's own
@@ -68,6 +70,11 @@ Each chapter is an `h2` with an explicit anchor:
 The rail is generated from those headings, so a story may omit a chapter that does not apply or add
 one -- delete the section and its rail entry goes with it. The explicit anchor is what keeps a shared
 deep link such as `/work/<slug>/#situation` working after the heading is reworded.
+
+Chapters are numbered `01`, `02` by CSS, in the prose and in the rail. Do not write the number into
+the heading text: the two counters walk the same set of headings in the same order, so adding or
+dropping a chapter renumbers both and nothing needs editing. A hand-written number would survive
+that renumbering and disagree with the rail.
 
 Standard anchors: `#situation`, `#constraints`, `#the-call`, `#shipped`, `#redo`.
 

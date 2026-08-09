@@ -4,11 +4,12 @@ title: "Rebuilding targeting around how publishers sell"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "targeting architecture"
-# Shown under the title on the story page and on the home-page row, AND read by
-# jekyll-seo-tag as the meta description. The key must be `description`: with
-# any other name seo-tag falls back to page.excerpt, which is the first block of
-# the body -- the opening `## ` heading. Search and link previews then read
-# "The situation".
+# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
+# meta description. It no longer renders on the home-page row -- that is a
+# template decision in index.html, not a reason to drop the key. The key must
+# be `description`: with any other name seo-tag falls back to page.excerpt,
+# which is the first block of the body -- the opening `## ` heading. Search and
+# link previews then read that heading instead.
 description: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
 # One line, shown on the home-page row. A trim of this story's own "What I
 # would redo" chapter, approved as written; the full sentence stays in that

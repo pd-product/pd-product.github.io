@@ -180,6 +180,27 @@
   --accent: #63b79b;
   --accent-ink: #0c0e10;
 
+  /* Field tints. Green marks work, warm marks personal, and the pairing is the
+     whole point -- a reader who has seen the green band on a case page reads
+     the warm one as "this is the other kind of thing". Used on the story
+     header, keyed to `category`, and behind the Off hours section. */
+  --field-work: rgba(99, 183, 155, .055);
+  --field-personal: rgba(198, 166, 120, .055);
+
+  /* The two decorative-numeral colours, and DELIBERATELY below text contrast.
+     Every numeral they paint is a ghost: the large work-row numerals, which
+     are aria-hidden because the <ol> already announces position, and the Off
+     hours numerals, which are ordinals beside their own labels. The label is
+     the content in both cases.
+
+     Do NOT raise these to meet 4.5:1. That test applies to text a reader has
+     to be able to read, and nothing here qualifies -- raising them would put a
+     row of large numbers in front of the titles they sit beside. If a numeral
+     ever does carry information, the fix is to give that one a text colour,
+     not to move the token. */
+  --numeral: #20262a;
+  --dim: #2f353a;
+
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: "Site Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
   /* Display only: headlines, titles, section headings, the pager, and the
@@ -215,6 +236,12 @@
     --faint: #6a6d66;
     --accent: #2c7059;
     --accent-ink: #fbfaf8;
+
+    --field-work: rgba(44, 112, 89, .07);
+    --field-personal: rgba(150, 110, 45, .075);
+
+    --numeral: #e0dcd3;
+    --dim: #d5d0c6;
   }
 }
 
@@ -375,7 +402,7 @@ a:hover { color: var(--text); }
 /* the whole row is one anchor in the template */
 .work-row > a {
   display: grid;
-  grid-template-columns: var(--rail) 1fr;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
   gap: var(--rail-gap);
   align-items: start;
   padding: 38px var(--gutter);
@@ -384,13 +411,40 @@ a:hover { color: var(--text); }
 
 .work-row > a:hover { color: inherit; }
 
+/* EVERY child of this anchor states its own column, and that is the fix for
+   the bug the .work-copy note in index.html describes: with automatic
+   placement the children alternated between the rail and the main column, so
+   which field landed where depended on how many optional fields a story set.
+   Columns are pinned here; ROWS are left automatic on purpose, so that the
+   inert card image can still take a full-width row above everything without
+   any of these rules changing. Adding a bare child without a column puts the
+   bug straight back.
+
+   The numeral spans two rows so that row 1 is sized by the eyebrow alone. Give
+   it a single row instead and row 1 becomes 103px tall, which drops the title
+   most of a numeral-height below its own eyebrow. */
+.work-numeral {
+  grid-column: 1;
+  grid-row: span 2;
+  font: 400 132px/.78 var(--display);
+  color: var(--numeral);
+}
+
+/* Category only on this row -- the numeral above carries the number. The story
+   page keeps the full `01 / supply` eyebrow, which is why .eyebrow-index and
+   .eyebrow-sep are still styled below. */
 .work-row .eyebrow {
+  grid-column: 2;
+  margin-bottom: 12px;
   font: 400 11.5px var(--mono);
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
+.work-row .work-copy { grid-column: 2; }
+
+/* Story-page eyebrow only, now that the home row prints the category alone. */
 .eyebrow-sep { margin: 0 .4em; }
 
 .work-title {
@@ -402,6 +456,12 @@ a:hover { color: var(--text); }
 
 .work-row > a:hover .work-title { color: var(--accent); }
 
+/* Inert, like the image rules above: index.html no longer prints `description`
+   on the home row. Kept rather than deleted because restoring that line is one
+   `{% if %}` in the template and should not also need a stylesheet change --
+   the same reason the hero-figure rules are written and unused. The 62ch here
+   is what .work-lesson and .about p are matched to, so it is also the record
+   of what the row's measure is. */
 .work-summary {
   font: 400 15px/1.62 var(--sans);
   color: var(--muted);
@@ -582,6 +642,25 @@ a:hover { color: var(--text); }
   border-bottom: 1px solid var(--hairline);
 }
 
+/* The field tint, keyed to the story's own `category`. Green is the work
+   signal, warm is the personal one, and the same pair marks the Off hours
+   section on the home page.
+
+   Matched on the ATTRIBUTE VALUE rather than a class, so the failure mode is
+   the right one: a category that is missing, misspelt, or newly invented
+   matches neither selector and the header renders untinted -- which is exactly
+   how every story page looked before this existed. A class emitted from the
+   same field would instead need a `.story-header-{{ category }}` rule for
+   every value and would silently render unstyled markup for the rest.
+
+   The home-page work rows do NOT take this. They sit on the .work-list panel,
+   and three tinted bands inside one panel stops the tint meaning anything --
+   it marks a page you have opened, not a row in an index. */
+.story-header[data-category="supply"],
+.story-header[data-category="platform"] { background: var(--field-work); }
+
+.story-header[data-category="personal"] { background: var(--field-personal); }
+
 .story-header .eyebrow {
   display: block;
   margin-bottom: 20px;
@@ -678,6 +757,19 @@ a:hover { color: var(--text); }
   flex-direction: column;
   gap: 8px;
   font: 400 13px/1.35 var(--sans);
+  counter-reset: chapter;
+}
+
+.chapter-rail li { counter-increment: chapter; }
+
+/* The rail half of the chapter counter; see the note on .story-prose > h2.
+   No colour of its own, deliberately -- it inherits the anchor's, so the
+   number goes accent with the label when chapter-rail.js marks it current and
+   there is no second rule to keep in step with the reading state. */
+.chapter-rail a::before {
+  content: counter(chapter, decimal-leading-zero);
+  margin-right: 8px;
+  font: 400 11px var(--mono);
 }
 
 .chapter-rail a {
@@ -701,6 +793,7 @@ a:hover { color: var(--text); }
 
 .story-prose {
   max-width: 66ch;
+  counter-reset: chapter;
 }
 
 .story-prose > h2 {
@@ -709,6 +802,27 @@ a:hover { color: var(--text); }
   color: var(--text);
   margin: 36px 0 13px;
   scroll-margin-top: 24px;
+  counter-increment: chapter;
+}
+
+/* Chapter numbers are CSS, not markup, for the same reason the constraint
+   numbers were: the source stays a plain heading and nothing has to be
+   renumbered when a story adds or drops a chapter.
+
+   The rail carries the matching counter and the two CANNOT drift, which is
+   worth being explicit about because it is a property of the include rather
+   than of these rules: _includes/chapter-rail.html generates exactly one entry
+   per `.story-prose > h2`, in document order, so both counters walk the same
+   set in the same sequence from the same origin.
+
+   decimal-leading-zero, not a literal "0" prefix -- the literal form renders
+   "010" at ten chapters. Same reasoning as the constraint counter and the
+   zero-padding in the templates. */
+.story-prose > h2::before {
+  content: counter(chapter, decimal-leading-zero);
+  margin-right: 12px;
+  font: 400 12px var(--mono);
+  color: var(--accent);
 }
 
 .story-prose > h2:first-child { margin-top: 0; }
@@ -764,10 +878,28 @@ a:hover { color: var(--text); }
   color: var(--muted);
 }
 
+/* An accent square, not the em dash this rule used to emit. The constraints
+   chapter moved from an ordered list to an unordered one, so this is now the
+   marker that chapter is read with, and the numbers it gave up are the ones
+   the chapter HEADINGS now carry.
+
+   Deliberately NOT scoped to the constraints list. It is the only unordered
+   list in any story today, and there is no class to scope to -- kramdown emits
+   a bare <ul>. Scoping would mean inventing an attribute for the authoring
+   contract to carry, which is a worse trade than one shared marker. If a story
+   ever needs a second, differently marked list, that is the point to add the
+   hook, not before.
+
+   The 9px top margin is what sits the square on the first line's optical
+   centre at the 16px/1.66 the list items use. It is tied to that type, so
+   re-measure it if the list type changes. */
 .story-prose ul > li::before {
-  content: "\2014";
+  content: "";
   flex: none;
-  color: var(--accent);
+  width: 5px;
+  height: 5px;
+  margin-top: 9px;
+  background: var(--accent);
 }
 
 /* Containment guard for a Markdown table in prose. NOT support for one --
@@ -942,7 +1074,30 @@ a:hover { color: var(--text); }
   .story-title { font-size: 34px; }
   .page-simple h1 { font-size: 34px; }
 
-  .work-row > a { grid-template-columns: 1fr; gap: 12px; }
+  /* The rail column collapses, but the numeral does NOT stack above the
+     eyebrow -- the two share one baseline-aligned row and the title drops
+     below both. `auto` sizes the first column to the numeral itself.
+
+     Rows go back to automatic here. The desktop rule spans the numeral across
+     two rows to keep row 1 shallow; at one column that span would push the
+     eyebrow and the copy out of position instead. Left automatic, the numeral
+     and the eyebrow fall into the same row because each names a column, and
+     .work-copy takes the next row on its own. The inert card image still lands
+     in a full-width row above all three.
+
+     This is why index.html has the eyebrow as a direct child of the anchor
+     rather than the first thing inside .work-copy: no alignment relationship
+     can reach across the wrapper's box. */
+  .work-row > a {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 14px;
+    row-gap: 12px;
+    align-items: baseline;
+  }
+
+  .work-numeral { grid-row: auto; font-size: 64px; }
+  .work-row .eyebrow { margin-bottom: 0; }
+  .work-row .work-copy { grid-column: 1 / -1; }
 
   .story-body { grid-template-columns: 1fr; gap: 28px; }
 

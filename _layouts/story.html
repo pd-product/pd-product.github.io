@@ -18,7 +18,18 @@ which have silent wrong defaults rather than absent ones.
 {%- endfor -%}
 
 <article class="story">
-  <header class="story-header">
+  {%- comment -%}
+  data-category drives the field tint behind this header: green for the work
+  cases, warm for the personal one. An attribute rather than a class because
+  the stylesheet matches on the VALUE, so an unknown or missing category
+  simply matches nothing and the header renders untinted -- which is exactly
+  how the page looked before the tint existed. A new category therefore
+  degrades to the old design instead of inheriting the wrong signal.
+
+  `escape` because this is free-text front matter going into an attribute; a
+  double quote in a category would otherwise end it early.
+  {%- endcomment -%}
+  <header class="story-header" data-category="{{ page.category | escape }}">
     {%- comment -%}
     The eyebrow number is the story's position in the sorted list, NOT the raw
     `order` value. `order` is a sort key only. Deriving the display from

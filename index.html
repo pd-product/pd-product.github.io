@@ -84,28 +84,63 @@ of the text onto the page as visible content.
         {%- endif %}
         {%- comment -%}
         Position in the sorted list, not the raw `order` value. See the same
-        note in _layouts/story.html; both derive it this way so they agree.
-        {%- endcomment -%}
-        <p class="eyebrow">
-          <span class="eyebrow-index">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
-          <span class="eyebrow-sep">/</span>
-          <span class="eyebrow-category">{{ story.category }}</span>
-        </p>
-        {%- comment -%}
-        Everything except the eyebrow goes in ONE wrapper. `.work-row > a` is a
-        two-column grid with automatic placement, so separate direct children
-        alternate between the rail and the main column: the summary and chips
-        landed in the 168px rail. Worse, placement then depended on how many
-        optional fields a story happened to set, so omitting `description` moved
-        the lesson into the rail too.
+        note in _layouts/story.html; both derive it this way so they agree --
+        the home row now prints it as a display numeral and the story page
+        still prints it inside its eyebrow, but the number itself is the same
+        derivation in both places.
 
-        The wrapper is deliberately unstyled. It occupies the main column as a
-        single grid item, and every rule in the design CSS is class-based, so
-        the descendants keep their styling with no change to the stylesheet.
+        aria-hidden because it is decorative here, and because the information
+        is already carried: the rows are an <ol>, so a screen reader announces
+        the position anyway. Without this it is read twice, once as list
+        position and once as a bare "01". The colour token says the same thing
+        -- --numeral is deliberately near-invisible and no content depends on
+        it being read.
+        {%- endcomment -%}
+        <p class="work-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
+        {%- comment -%}
+        Category only. The number moved to the numeral above, so the index and
+        separator spans are gone from this row -- the story page keeps the full
+        `01 / supply` form.
+
+        A DIRECT child of the anchor rather than the first thing inside
+        .work-copy, which is where it reads like it belongs. It has to be a
+        grid item in its own right so that at 960px and below it can share a
+        baseline row with the numeral while the title drops beneath both. Kept
+        inside the wrapper it could not: a flex or baseline relationship cannot
+        reach across .work-copy's box.
+        {%- endcomment -%}
+        <p class="eyebrow">{{ story.category }}</p>
+        {%- comment -%}
+        Title, lesson and chips go in ONE wrapper so they move as a block.
+        `.work-row > a` is a two-column grid, and the bug this guards against
+        is real history: with automatic placement, separate direct children
+        alternated between the rail and the main column, so the summary and
+        chips landed in the 168px rail -- and which field went where depended
+        on how many optional fields a story happened to set.
+
+        The stylesheet now pins a column on every direct child, which is the
+        actual fix, and this wrapper is what keeps the group from needing three
+        more of them. A NEW DIRECT CHILD STILL NEEDS ITS OWN `grid-column`;
+        adding a bare one puts the bug back.
+
+        The wrapper is otherwise unstyled beyond its column. Every rule in the
+        design CSS is class-based, so the descendants keep their styling with no
+        change to the stylesheet.
         {%- endcomment -%}
         <div class="work-copy">
           <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index | escape }}">{{ story.title }}</h3>
-          {%- if story.description %}<p class="work-summary">{{ story.description }}</p>{% endif %}
+          {%- comment -%}
+          `description` deliberately does NOT render here. The row is title,
+          lesson and chips; the lesson is the line that makes it specific.
+
+          This is a TEMPLATE change, not a front-matter one. `description` is
+          still required on every story and is still the page's meta
+          description -- deleting the key would send the story to search
+          results described by its own opening heading. The .work-summary rules
+          in the stylesheet are kept and marked inert for the same reason the
+          hero-image rules are: restoring this line is a one-line change here
+          and nothing in the CSS.
+          {%- endcomment -%}
           {%- comment -%}
           The lesson line is what makes the index specific rather than generic:
           each row states what the case taught, not only what it achieved.
