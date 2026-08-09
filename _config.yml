@@ -212,3 +212,16 @@ exclude:
 # keep it equal to what is deployed.
 sass:
   style: compressed
+
+# NO `timezone` KEY, and that is deliberate rather than an omission. Jekyll has
+# no timezone default, so it stamps dates in the build machine's zone; GitHub's
+# builders are UTC, which is what every deployed date carries. Setting
+# `timezone: UTC` here would express that -- and would break the local build on
+# Windows, where Ruby has no zoneinfo database and tzinfo raises
+# "No source of timezone data could be found". There is no committed Gemfile to
+# declare tzinfo-data in, and adding a build dependency to a repo that has none
+# is the wrong trade for a value production already supplies.
+#
+# Pass the zone to the local build instead: `TZ=UTC` in front of the build
+# command reproduces the deployed timestamps with no gem and no config. See the
+# Verifying section of CLAUDE.md.

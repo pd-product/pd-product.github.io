@@ -101,3 +101,22 @@ as a page. After adding or editing a story, load it and confirm:
 - the page loads at its `/work/<slug>/` URL and the home row links to it
 
 Pushing to `main` publishes. There is no staging environment and no CI.
+
+A local `jekyll build` is a useful witness, and `_config.yml` pins the two things that would
+silently make it disagree with production: the Sass output style, and `temp/`. Build with `TZ=UTC`
+for the
+third -- Jekyll stamps dates in the build machine's zone, so without it `datePublished`,
+`dateModified`, `article:published_time` and the sitemap's `lastmod` all carry the local offset
+instead of the `+00:00` every deployed date has. The zone is passed to the build rather than set in
+`_config.yml`; the comment on that decision is beside the `sass:` block.
+
+Even then it is NOT the same build. GitHub Pages force-enables ten plugins on top of whatever
+`plugins:` lists, and a local build loads only what `plugins:` lists. Five of those ten can publish
+or retitle content: `jekyll-optional-front-matter`, `jekyll-readme-index`,
+`jekyll-titles-from-headings`, `jekyll-default-layout` and `jekyll-relative-links`.
+
+All five are inert here today, which is why local output otherwise matches deployed byte for byte.
+They stop being inert the moment a front-matter-less `.md` or a directory `README.md` reaches a
+publishable location -- the exact hazard README.md warns about. THAT CLASS FAILS SILENTLY LOCALLY:
+the file is copied as a static asset by a local build and becomes a live indexed URL on Pages. A
+local build cannot clear it; only the deployed site can.
