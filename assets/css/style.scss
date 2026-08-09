@@ -142,10 +142,13 @@
    string at 47px: 2018.1px against 2061.6px, a 2.15% difference, so wrap
    points hold.
 
-   WIDTH is matched, not x-height, and that is the deliberate half of the
-   trade. Matching x-height would leave the fallback 6% narrow and put the
-   reflow back. The swap is therefore slightly visible as weight, never as
-   layout.
+   WIDTH is matched, not x-height, and the trade is real in both directions.
+   Matching x-height instead would put size-adjust at 94.30% and leave the
+   fallback 16.6% narrow -- 1719.7px against 2018.1px on the hero string, a
+   14.79% miss and a reflow of whole lines. The price of matching width is that
+   the fallback's x-height runs 19.9% large, so the swap is visible as a change
+   of weight and size. That is the right way round: a heavier first paint is a
+   flicker, a reflow moves the text the reader is already reading.
 
    Arial is the reference because it is the stack's realistic resolution on
    Windows and Android. macOS resolves Helvetica Neue first and will be a
