@@ -15,9 +15,12 @@ own title prefixed.
 {%- endcomment -%}
 
 {%- comment -%}
-The headline claim is display copy, not metadata, so it lives here rather than
-in _config.yml. site.title and site.tagline stay in config for the seo tag but
-are deliberately not printed on the page.
+The h1 below is the authoritative hero claim and lives here as page markup. It
+is NOT the only copy of that sentence: `description` in _config.yml carries a
+prefixed version as metadata, and assets/og/default.png sets it as type in the
+share card. Rewording it here means moving all three, or the page's own search
+snippet and link preview contradict the page. site.title and site.tagline stay
+in config for the seo tag and are deliberately not printed on the page.
 
 This MUST be a Liquid comment, not an HTML one. Liquid executes tags inside
 HTML comments: naming the seo tag in a `<!-- -->` block expanded it, and its
@@ -29,13 +32,13 @@ The ONE section on this page with no aria-labelledby, deliberately. The only
 heading inside it is the page h1, which names the WHOLE PAGE rather than a
 region within it, and the nav does not anchor here. Left unnamed this stays a
 generic box inside <main>, which is correct: pointing at the h1 would put a
-landmark named "I turn problems people have learned to work around..." in the
+landmark named "I build products that solve problems people have..." in the
 landmark list, and that heading is already reachable by heading navigation.
 The five anchored sections below are the named regions; see the note on #work.
 {%- endcomment -%}
 <section class="intro">
   <p class="eyebrow">solving problems with ai</p>
-  <h1>I turn problems people have learned to work around into products they can actually use.</h1>
+  <h1>I build products that solve problems people have learned to work around.</h1>
   {%- comment -%}
   Four facts and three separators, each its own element. The separators are
   marked up rather than generated for the same reason as .site-crumb-sep:

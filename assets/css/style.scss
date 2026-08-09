@@ -146,17 +146,24 @@
    metrics against Arial: normalised average lowercase advance 0.54456 against
    0.48170 gives 113.05%, and the ascent, descent and line gap are Space
    Grotesk's own (984/-292/0 per 1000 upm) divided back through that scale.
-   Re-derive them if either font is ever replaced. Checked on the real hero
-   string at 47px: 2018.1px against 2061.6px, a 2.15% difference, so wrap
-   points hold.
+   Re-derive them if either font is ever replaced. Checked on the current hero
+   string at 47px: 1556.3px real against 1611.5px adjusted, a 3.55% difference.
+   Close, but NOT close enough to hold the wrap at every width. At the 1280 cap
+   of 813px the real face takes two lines and the fallback takes three, so this
+   headline DOES reflow by one line if the fallback paints first; at the 960 cap
+   both take three. The preload in _layouts/default.html is what keeps that
+   window short. Re-measure whenever the hero copy changes: the margin is a
+   property of the particular string, not of the two fonts, and the previous
+   copy held at both widths where this one does not.
 
    WIDTH is matched, not x-height, and the trade is real in both directions.
    Matching x-height instead would put size-adjust at 94.30%, which sets 16.6%
-   narrow per character. On the hero string that comes out as 1719.7px against
-   2018.1px -- a 14.79% shortfall rather than 16.6%, because the two numbers
-   measure different things: the first is the average advance ratio, the second
-   is this particular string. Either way it is a reflow of whole lines, against
-   the 2.15% the shipped values give. The price of matching width is that
+   narrow per character. On the current hero string that comes out as 1327.4px
+   against 1556.3px -- a 14.70% shortfall rather than 16.6%, because the two
+   numbers measure different things: the first is the average advance ratio, the
+   second is this particular string. That is a reflow of whole lines at every
+   width, against the one width where the shipped values lose a line. The price
+   of matching width is that
    the fallback's x-height runs 19.9% large, so the swap is visible as a change
    of weight and size. That is the right way round: a heavier first paint is a
    flicker, a reflow moves the text the reader is already reading.
@@ -1506,8 +1513,9 @@ a:hover { color: var(--text); }
   /* Leading is raised HERE and nowhere else. The global 1.09 is display
      leading, tuned for the one or two lines this headline occupies at 47px,
      where each line is long relative to its height. At 29px in a ~350px column
-     the same copy wraps to FIVE lines -- measured, not estimated -- which is a
-     paragraph, and paragraph-length text at display leading reads dense.
+     the same copy wraps to THREE lines, and to four at 320 -- measured, not
+     estimated -- which reads as a block of text rather than a display line, and
+     text at display leading reads dense.
 
      Deliberately NOT applied to .story-title. Every story title measures one or
      two lines at both 390 and 1280, which is the case 1.10 is already tuned
