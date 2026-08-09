@@ -26,7 +26,7 @@ brand: "Pat Diggins"
 # The tagline is used only as metadata and is not printed anywhere, since the
 # hero claim lives in index.html.
 tagline: "Solving problems with AI"
-description: "Senior PM. I turn problems people have learned to work around into products they can actually use."
+description: "Senior PM. I build products that solve problems people have learned to work around."
 author: "Patrick Diggins"
 
 # Rendered by _includes/footer.html. Year of first publication, per the US
