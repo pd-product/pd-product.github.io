@@ -20,8 +20,30 @@ allow a few minutes.
 
 ## Page set
 
-`/` is the whole site apart from the stories. About and contact are anchored blocks on the home
-page (`/#about`, `/#contact`), not separate pages. Stories live at `/work/<slug>/`.
+`/` is the whole site apart from the stories. Everything else is an anchored block on the home page
+rather than a separate page: `/#work`, `/#path-here`, `/#off-hours`, `/#about`, `/#contact`. Four of
+those five are in the nav; `#path-here` deliberately is not, and `_config.yml` says why. Stories
+live at `/work/<slug>/`.
+
+## The two data-driven home sections
+
+Off hours and The path here are edited in `_data/`, not in `index.html`, for the same reason the
+nav is: adding, dropping or reordering an entry is a data edit and the template does not change.
+Each file carries its own constraints at the top -- read them, because both have one that is not
+obvious from the markup:
+
+- `off-hours.yml` has no `numeral` key. The displayed `01`, `02` comes from position in the list,
+  as everything numbered on this site does, so reordering renumbers itself.
+- `path-here.yml` describes a career whose **third stop is current**. The fourth is a change in how
+  the work is done, not a job.
+
+Both files carry HTML entities in some strings -- `&amp;`, `&gt;`, `&middot;` -- to keep the source
+ASCII, and both are printed without the `escape` filter for that reason. Adding an entry means
+writing the entity, not the character. Escaping them renders the entity text on the page.
+
+Grid shape is why the counts are what they are: six Off hours entries fill a 3-up and a 2-up grid
+exactly, and four path stops fill a 4-up and a 2-up. A seventh or a fifth leaves a gap at a
+breakpoint, which is a design question rather than only a data one.
 
 ## Adding a story
 
@@ -37,21 +59,26 @@ omits one renders without it. Two carry a fallback rather than nothing: `crumb` 
 `title`, and `hero_alt` falls back to `title`, which is a weak image description rather than a
 visible failure, so set it whenever you set `hero_image`.
 
-Nothing guards `category`, `description` or `date`, and each fails silently rather than visibly:
+Nothing guards `category`, `description` or `date`, and each fails differently. `category` and
+`description` leave something visibly wrong on the page; `date` is the only one that fails with no
+sign at all:
 
-- `category` renders a dangling `01 /` in the eyebrow, on both the home row and the story page,
-  when it is missing.
-- `description` is also the page's meta description. Omit it and `jekyll-seo-tag` falls back to the
-  page excerpt -- the first block of the body -- so the story goes to search results and link
-  previews described by its own opening heading.
+- `category` leaves an empty eyebrow on the home row and a dangling `01 /` on the story page when
+  it is missing. It also drops the story-header field tint, since that is keyed to the value.
+- `description` does not render on the home row, but it is still required: it is the line under the
+  story title AND the page's meta description. Omitting it visibly removes that summary line from
+  the story page, and silently corrupts the metadata -- `jekyll-seo-tag` falls back to the page
+  excerpt, which is the first block of the body, so the story goes to search results and link
+  previews described by its own opening heading. Only the second half is quiet.
 - `date` has a silent WRONG default rather than an absent one. Without it Jekyll stamps build time,
   so `datePublished` and the sitemap's `lastmod` move on every deploy and re-announce the story as
   new. Use the date the story was published, not the date you are editing.
 
 `order` is the global reading position and is required. It is a **sort key only**: the zero-padded
-eyebrow number is derived from the story's position in the sorted list, not from the value itself,
-so duplicate, missing, zero, or negative values cannot render a duplicate number, a blank, `00`, or
-`0-1`. Home row and story page derive it the same way and therefore always agree. Use unique
+number is derived from the story's position in the sorted list, not from the value itself, so
+duplicate, missing, zero, or negative values cannot render a duplicate number, a blank, `00`, or
+`0-1`. The home row prints it as the large display numeral and the story page prints it inside the
+eyebrow, but both derive it the same way and therefore always agree. Use unique
 integers anyway -- ties have no defined order. No index needs editing.
 
 Set `published: false` to keep a story in the repo but out of the built site. That is Jekyll's own
@@ -68,6 +95,11 @@ Each chapter is an `h2` with an explicit anchor:
 The rail is generated from those headings, so a story may omit a chapter that does not apply or add
 one -- delete the section and its rail entry goes with it. The explicit anchor is what keeps a shared
 deep link such as `/work/<slug>/#situation` working after the heading is reworded.
+
+Chapters are numbered `01`, `02` by CSS, in the prose and in the rail. Do not write the number into
+the heading text: the two counters walk the same set of headings in the same order, so adding or
+dropping a chapter renumbers both and nothing needs editing. A hand-written number would survive
+that renumbering and disagree with the rail.
 
 Standard anchors: `#situation`, `#constraints`, `#the-call`, `#shipped`, `#redo`.
 
@@ -129,9 +161,11 @@ So: chapters are `h2`, and everything under them is paragraphs, lists and figure
 genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed
 first -- it is not an authoring decision to make mid-story.
 
-Ordered lists are numbered by CSS, so author them as plain markdown ordered lists and let the
-counter supply `01`, `02`. Add `{: role="list"}` after a list, as the existing stories do: the
-`list-style: none` reset drops the implicit list role in Safari with VoiceOver.
+Both list forms are styled and neither takes a marker in the source. An unordered list gets an
+accent square, which is what the constraints chapter uses. An ordered list is numbered by CSS, so
+author it as a plain markdown ordered list and let the counter supply `01`, `02`. Add
+`{: role="list"}` after a list, as the existing stories do: the `list-style: none` reset drops the
+implicit list role in Safari with VoiceOver.
 
 ## Assets
 
@@ -151,15 +185,26 @@ the site-wide default in `_config.yml`, so nothing is ever missing a card.
   not a real type, and `alt` is not a Schema.org property. The dimensions come from `og_image:` in
   `_config.yml` and are printed by `_layouts/default.html` instead. A story that sets its own
   `image:` gets no dimension tags, deliberately: they would describe the wrong file.
-- `assets/fonts/` -- IBM Plex Mono Regular and Medium, self-hosted as woff2 and **subset** to the
-  ~107 glyphs the site renders, which cut each file from about 46KB to about 11.6KB. They are
-  declared in CSS as `"Site Mono"`: the SIL OFL reserves the name "Plex" and forbids a modified
-  version from presenting a reserved name, and a subset is a modified version. The IBM copyright
-  notice is retained inside both files. Regenerate with `fonttools subset` if the character set
-  ever needs to grow -- adding a character the subset lacks makes that one glyph silently fall back
+- `assets/fonts/` -- two families, both self-hosted as woff2 and both **subset**, which is what
+  keeps each file near 11KB instead of 46KB. Regenerate with `fonttools subset` if a character set
+  ever needs to grow: adding a character the subset lacks makes that one glyph silently fall back
   to another font.
-  The SIL Open Font License requires its text to travel with the font, and this repo is public and
-  therefore redistributes it. `OFL.txt` is the one file exempt from the ASCII-only convention.
+
+  **IBM Plex Mono** Regular and Medium, subset to the ~107 glyphs the site renders, declared in CSS
+  as `"Site Mono"`. The rename is required: the SIL OFL reserves the name "Plex" and forbids a
+  modified version from presenting a reserved name, and a subset is a modified version.
+
+  **Space Grotesk** Regular and Medium, subset to printable ASCII plus five characters a display
+  string could reach for, declared under its own name. Its OFL reserves no name -- the notice is
+  "Copyright 2020 The Space Grotesk Project Authors" with nothing specified after it -- so the
+  clause that forced the Plex rename does not apply and the upstream name records are untouched.
+  Do not copy the Plex precedent onto a third family without reading that family's own licence.
+
+  The copyright notice is retained inside all four files. The SIL Open Font License requires its
+  text to travel with the font, and this repo is public and therefore redistributes it, so each
+  family ships its own: `OFL-IBMPlexMono.txt` and `OFL-SpaceGrotesk.txt`. The Plex one is the one
+  file exempt from the ASCII-only convention -- it carries a UTF-8 copyright sign. Space Grotesk's
+  is already pure ASCII, but both must travel unaltered either way.
 
 v1 ships without diagrams by design decision. No story sets `hero_image`, so the hero figure and
 home-page card do not render; the CSS for both is written and inert, so adding one later needs no
@@ -185,9 +230,11 @@ it can reach, defaults or no defaults.)
 _config.yml      site metadata, contact links, nav list, collection config, share-card default
 _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
+_data/           off-hours.yml, path-here.yml -- the two data-driven home sections
 _work/           one file per story
 assets/css/      style.scss compiles to /assets/css/style.css
-assets/fonts/    self-hosted woff2 + its license
+assets/js/       chapter-rail.js, off-hours.js -- both optional, both vanilla
+assets/fonts/    self-hosted woff2, two families, each with its own license
 assets/img/      diagrams
 assets/og/       share cards
 ```

@@ -15,6 +15,17 @@
    Rules are class-based and named after the markup they style, in the order
    the page assembles: shell, nav, home, footer, story, responsive. Section
    headers name the file each block belongs to.
+
+   ID SELECTORS ARE AVOIDED even where an id is the obvious hook. One outranks
+   every single-class rule in this file, and several blocks below depend on
+   equal specificity with source order deciding the winner.
+
+   NO LIQUID IN THIS FILE, INCLUDING INSIDE COMMENTS. The front matter above
+   means Jekyll renders this through Liquid before Sass ever sees it, and a CSS
+   comment is not a Liquid comment. A tag written to illustrate a point in
+   prose is executed: an `if` tag failed the whole build, and an output tag
+   silently rendered as nothing and left a hole mid-sentence. Describe the
+   template in words, or name the file to read.
    ========================================================================== */
 
 /* --- Functional utility. Do not remove. -------------------------------- */
@@ -55,8 +66,9 @@
 .content:focus { outline: none; }
 
 /* --- Fonts -------------------------------------------------------------
-   Self-hosted woff2, two weights, both used. Commit OFL.txt alongside.
-   Headings and body use the Helvetica Neue system stack -- no webfont.
+   Two self-hosted families, two weights each, all four used. Each family's
+   licence file travels with it: OFL-IBMPlexMono.txt and OFL-SpaceGrotesk.txt.
+   Body copy uses the Helvetica Neue system stack -- no webfont.
 
    "Site Mono" is IBM Plex Mono, subset to the ~107 glyphs this site renders
    (printable ASCII, plus the handful of characters that arrive as HTML
@@ -66,10 +78,19 @@
    ships with IBM Plex reserves the name "Plex", and clause 3 forbids a
    Modified Version from presenting a Reserved Font Name to users. A subset is
    a Modified Version. The internal name records were changed to match, the IBM
-   copyright notice is retained inside both files, and OFL.txt travels with
+   copyright notice is retained inside both files, and the licence travels with
    them. Do not rename this back to "IBM Plex Mono" while the files are
    subset -- and if the full fonts are ever restored, drop the alias with
-   them.                                                                     */
+   them.
+
+   SPACE GROTESK IS NOT RENAMED, and the difference is the licence, not a
+   change of policy. Its OFL carries no Reserved Font Name: the notice reads
+   "Copyright 2020 The Space Grotesk Project Authors" with no names specified
+   after it, and clause 3 only bites on names that are reserved. Checked
+   against the upstream OFL.txt, not assumed from the Plex precedent. So the
+   subset keeps the real family name and the upstream name records are
+   untouched. If a future release adds a reserved name, this has to be
+   revisited -- the clause applies per family and per version.               */
 
 @font-face {
   font-family: "Site Mono";
@@ -85,6 +106,70 @@
   font-weight: 500;
   font-display: swap;
   src: url("/assets/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/SpaceGrotesk-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/SpaceGrotesk-Medium.woff2") format("woff2");
+}
+
+/* Metric-matched stand-in for the display face, and the reason `font-display:
+   swap` does not throw the headline around on first paint.
+
+   Space Grotesk sets about 13% WIDER per character than Arial. Unadjusted,
+   the hero headline reflows -- often by a whole line -- the moment the webfont
+   arrives, and the headline is the largest thing on the page. size-adjust
+   scales the fallback to match the real face's advance widths; the three
+   overrides then restore the line box, because size-adjust scales the metrics
+   with the glyphs.
+
+   MEASURED, not estimated. All four values come from the shipped subset's own
+   metrics against Arial: normalised average lowercase advance 0.54456 against
+   0.48170 gives 113.05%, and the ascent, descent and line gap are Space
+   Grotesk's own (984/-292/0 per 1000 upm) divided back through that scale.
+   Re-derive them if either font is ever replaced. Checked on the real hero
+   string at 47px: 2018.1px against 2061.6px, a 2.15% difference, so wrap
+   points hold.
+
+   WIDTH is matched, not x-height, and the trade is real in both directions.
+   Matching x-height instead would put size-adjust at 94.30%, which sets 16.6%
+   narrow per character. On the hero string that comes out as 1719.7px against
+   2018.1px -- a 14.79% shortfall rather than 16.6%, because the two numbers
+   measure different things: the first is the average advance ratio, the second
+   is this particular string. Either way it is a reflow of whole lines, against
+   the 2.15% the shipped values give. The price of matching width is that
+   the fallback's x-height runs 19.9% large, so the swap is visible as a change
+   of weight and size. That is the right way round: a heavier first paint is a
+   flicker, a reflow moves the text the reader is already reading.
+
+   Arial is the reference because it is the stack's realistic resolution on
+   Windows and Android. macOS resolves Helvetica Neue first and will be a
+   little off; that is accepted rather than solved, since one @font-face
+   cannot carry two sets of metrics.
+
+   The `local()` sources fail quietly. If none of the three resolve, this face
+   simply drops out and the stack falls through to the plain families listed
+   after it in --display.                                                    */
+@font-face {
+  font-family: "Display Fallback";
+  font-style: normal;
+  font-weight: 400 500;
+  src: local("Helvetica Neue"), local("Helvetica"), local("Arial");
+  size-adjust: 113.05%;
+  ascent-override: 87.04%;
+  descent-override: 25.83%;
+  line-gap-override: 0%;
 }
 
 /* --- Tokens ------------------------------------------------------------ */
@@ -112,8 +197,38 @@
   --accent: #63b79b;
   --accent-ink: #0c0e10;
 
+  /* Field tints. Green marks work, warm marks personal, and the pairing is the
+     whole point -- a reader who has seen the green band on a case page reads
+     the warm one as "this is the other kind of thing". Used on the story
+     header, keyed to `category`, and behind the Off hours section. */
+  --field-work: rgba(99, 183, 155, .055);
+  --field-personal: rgba(198, 166, 120, .055);
+
+  /* The two decorative-numeral colours, and DELIBERATELY below text contrast.
+     Every numeral they paint is a ghost: the large work-row numerals, which
+     are aria-hidden because the <ol> already announces position, and the Off
+     hours numerals, which are ordinals beside their own labels. The label is
+     the content in both cases.
+
+     Do NOT raise these to meet 4.5:1. That test applies to text a reader has
+     to be able to read, and nothing here qualifies -- raising them would put a
+     row of large numbers in front of the titles they sit beside. If a numeral
+     ever does carry information, the fix is to give that one a text colour,
+     not to move the token. */
+  --numeral: #20262a;
+  --dim: #2f353a;
+
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: "Site Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Display only: headlines, titles, section headings, the pager, and the
+     large numerals. A SEPARATE token rather than a change to --sans, because
+     body copy, the meta rail, chips, eyebrows, the fact strip and the mono
+     labels all deliberately stay where they are.
+
+     "Display Fallback" is the metric-matched face declared above and has to
+     stay ahead of the plain families -- it is what makes the swap invisible.
+     The plain families behind it are the floor if `local()` finds nothing. */
+  --display: "Space Grotesk", "Display Fallback", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --page: 1180px;   /* content cap */
   --gutter: 46px;
@@ -138,6 +253,12 @@
     --faint: #6a6d66;
     --accent: #2c7059;
     --accent-ink: #fbfaf8;
+
+    --field-work: rgba(44, 112, 89, .07);
+    --field-personal: rgba(150, 110, 45, .075);
+
+    --numeral: #e0dcd3;
+    --dim: #d5d0c6;
   }
 }
 
@@ -270,13 +391,20 @@ a:hover { color: var(--text); }
 }
 
 .intro h1 {
-  font: 400 47px/1.09 var(--sans);
+  font: 400 47px/1.09 var(--display);
   letter-spacing: -.03em;
   max-width: 27ch;
   text-wrap: pretty;
 }
 
 /* --- Home: work list (index.html) -------------------------------------- */
+
+/* The three cases read as one band rather than three rules on the page
+   ground. No border-top here on purpose: the first .work-row already carries
+   one, and that hairline IS the boundary under the hero -- a border on this
+   element too would draw it twice, 1px apart. The tone change does the rest of
+   the separating. */
+.work-list { background: var(--panel); }
 
 /* The whole row is the click target, so the whole row responds: its top
    hairline goes accent on hover and focus. The title colour change below
@@ -298,7 +426,7 @@ a:hover { color: var(--text); }
 /* the whole row is one anchor in the template */
 .work-row > a {
   display: grid;
-  grid-template-columns: var(--rail) 1fr;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
   gap: var(--rail-gap);
   align-items: start;
   padding: 38px var(--gutter);
@@ -307,17 +435,44 @@ a:hover { color: var(--text); }
 
 .work-row > a:hover { color: inherit; }
 
+/* EVERY child of this anchor states its own column, and that is the fix for
+   the bug the .work-copy note in index.html describes: with automatic
+   placement the children alternated between the rail and the main column, so
+   which field landed where depended on how many optional fields a story set.
+   Columns are pinned here; ROWS are left automatic on purpose, so that the
+   inert card image can still take a full-width row above everything without
+   any of these rules changing. Adding a bare child without a column puts the
+   bug straight back.
+
+   The numeral spans two rows so that row 1 is sized by the eyebrow alone. Give
+   it a single row instead and row 1 becomes 103px tall, which drops the title
+   most of a numeral-height below its own eyebrow. */
+.work-numeral {
+  grid-column: 1;
+  grid-row: span 2;
+  font: 400 132px/.78 var(--display);
+  color: var(--numeral);
+}
+
+/* Category only on this row -- the numeral above carries the number. The story
+   page keeps the full `01 / supply` eyebrow, which is why .eyebrow-index and
+   .eyebrow-sep are still styled below. */
 .work-row .eyebrow {
+  grid-column: 2;
+  margin-bottom: 12px;
   font: 400 11.5px var(--mono);
   letter-spacing: .12em;
   text-transform: uppercase;
   color: var(--accent);
 }
 
+.work-row .work-copy { grid-column: 2; }
+
+/* Story-page eyebrow only, now that the home row prints the category alone. */
 .eyebrow-sep { margin: 0 .4em; }
 
 .work-title {
-  font: 500 23px/1.22 var(--sans);
+  font: 500 23px/1.22 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   margin-bottom: 11px;
@@ -325,6 +480,12 @@ a:hover { color: var(--text); }
 
 .work-row > a:hover .work-title { color: var(--accent); }
 
+/* Inert, like the image rules above: index.html no longer prints `description`
+   on the home row. Kept rather than deleted because restoring that line is one
+   conditional in the template and should not also need a stylesheet change --
+   the same reason the hero-figure rules are written and unused. The 62ch here
+   is what .work-lesson and .about p are matched to, so it is also the record
+   of what the row's measure is. */
 .work-summary {
   font: 400 15px/1.62 var(--sans);
   color: var(--muted);
@@ -358,6 +519,207 @@ a:hover { color: var(--text); }
   margin-bottom: 18px;
 }
 
+/* --- Home: fact strip (index.html .facts) ------------------------------
+   Sits inside .intro under the headline. Not a section and not a landmark --
+   it is four facts, and the last one takes the accent so the row ends on the
+   least corporate of them rather than trailing off.
+
+   The separators are their own list items, which is why they are marked up in
+   index.html rather than generated: a pseudo-element cannot carry aria-hidden.
+   --dim rather than --faint on them: they are punctuation between items, and
+   at full text contrast they read as a fifth thing in the row.             */
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  font: 400 11.5px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--nav-muted);
+}
+
+.facts-sep { color: var(--dim); }
+
+/* The last ITEM, which is always a fact and never a separator -- the row is
+   four facts and three separators, so it cannot end on one. */
+.facts li:last-child { color: var(--accent); }
+
+/* --- Home: section headings (index.html) -------------------------------
+   One rule for all four home-page section headings. This REPLACES the 11.5px
+   mono accent label that About and Contact used to carry; their grid
+   placement in the 168px rail is untouched, only the type changed. Both words
+   measure under 140px at 34px, so neither wraps in the rail.
+
+   The mono accent label is still the treatment everywhere else it appears --
+   .story-meta dt, .chapter-rail > h2, .work-lesson-label, the eyebrows and the
+   pager labels. It is simply no longer what a home-page section heading looks
+   like.
+
+   Selected by CLASS, not by id, even though these are the only four elements
+   that match. An id selector would outrank every single-class rule in this
+   file and break the equal-specificity, source-order discipline the About and
+   Contact placement rules below depend on.                                 */
+
+.about > h2,
+.contact > h2,
+.path-here > h2,
+.off-hours > h2 {
+  font: 400 34px/1.1 var(--display);
+  letter-spacing: -.025em;
+  text-transform: none;
+  color: var(--text);
+}
+
+/* --- Home: the path here (index.html) ----------------------------------
+   Four stops, hairline-separated, reading left to right. The last stop's year
+   takes the accent because it is the current chapter -- see the constraint in
+   _data/path-here.yml before touching that: it must not read as "current
+   employer", because the stop before it is.                                */
+
+.path-here {
+  border-top: 1px solid var(--hairline);
+  padding: 56px var(--gutter);
+}
+
+.path-here > h2 { margin-bottom: 34px; }
+
+.path-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+}
+
+.path-stop {
+  padding: 20px 20px 0 0;
+  border-right: 1px solid var(--hairline);
+}
+
+.path-stop:last-child { border-right: 0; }
+.path-stop + .path-stop { padding-left: 20px; }
+
+.path-year {
+  margin-bottom: 8px;
+  font: 400 12px var(--mono);
+  color: var(--nav-muted);
+}
+
+.path-stop:last-child .path-year { color: var(--accent); }
+
+/* A CLASS, not `.path-stop p`, and that is a correctness fix rather than a
+   style preference. The handoff specified the descendant form, which scores
+   (0,1,1) and therefore outranks the single-class `.path-year` above it: the
+   year rendered at 15px Helvetica in --meta instead of 12px mono in
+   --nav-muted, at every width. Measured before this change, `.path-year`
+   computed to 15px / Helvetica Neue / rgb(200,205,210). (`.path-year` has no
+   responsive override of its own; the Off hours pair below did, and those lost
+   too, being single-class themselves.)
+
+   The same trap sits in `.off-hours-card`. Both are class-based now, which is
+   also what the file header asks for, and neither can be outranked by a
+   sibling in the same block. */
+.path-copy {
+  font: 400 15px/1.5 var(--sans);
+  color: var(--meta);
+  text-wrap: pretty;
+}
+
+/* --- Home: off hours (index.html) --------------------------------------
+   The warm half of the field pair: green marks work, this marks personal.
+
+   The hairlines between cards are the 1px grid gap showing the --border
+   underneath, which is why no card carries a border of its own. Cards sit on
+   --bg rather than on the tint, deliberately -- the tint marks the section in
+   the padding around the grid, and the copy keeps exactly the contrast it has
+   everywhere else on the page.                                             */
+
+.off-hours {
+  border-top: 1px solid var(--hairline);
+  background: var(--field-personal);
+  padding: 56px var(--gutter);
+}
+
+.off-hours > h2 { margin-bottom: 34px; }
+
+.off-hours-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.off-hours-card {
+  background: var(--bg);
+  padding: 26px 24px;
+}
+
+.off-hours-numeral {
+  margin-bottom: 14px;
+  font: 400 34px/.9 var(--display);
+  color: var(--dim);
+}
+
+/* Only the first is accent. A :first-child rule rather than a field in the
+   data, so reordering the entries cannot leave the accent behind. */
+.off-hours-card:first-child .off-hours-numeral { color: var(--accent); }
+
+.off-hours-label {
+  margin-bottom: 8px;
+  font: 500 11px var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+/* A class, for the reason spelled out on .path-copy above: the handoff's
+   `.off-hours-card p` outranked both `.off-hours-numeral` and
+   `.off-hours-label`, so the 34px display numeral rendered at 15px Helvetica
+   and the 11px mono label rendered at 15px Helvetica as well. The 640px
+   overrides on both lost to it too, being single-class themselves. Only `font`
+   and `color` were affected, which is why it did not look obviously broken --
+   text-transform and letter-spacing still applied, so the labels were
+   uppercase in the wrong face at the wrong size. */
+.off-hours-copy {
+  font: 400 15px/1.6 var(--sans);
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* The reveal. THE HIDDEN STATE IS APPLIED BY JAVASCRIPT, never by this file,
+   and not until the reader's FIRST SCROLL: assets/js/off-hours.js sets
+   data-reveal="hidden" then, on the cards still below the fold, and removes it
+   to play each one in. Written the other way round -- hidden in CSS, revealed
+   by script -- a page with no JavaScript, a script that 404s, a full-page
+   screen capture, or any of the several ways an observer can deliver nothing
+   would leave the whole section blank. See the floors in that file.
+
+   transition-delay is set inline by the script, because the stagger depends on
+   how many columns the grid currently has and CSS cannot count them. */
+.off-hours-card { transition: opacity .5s ease, transform .5s ease; }
+
+.off-hours-card[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+/* The rescue state. assets/js/off-hours.js sets this PER CARD, so a floor can
+   settle the two cards mid-animation without touching the four that have not
+   been triggered. It has to beat both the hidden rule above and any in-flight
+   transition -- printing during the reveal captured cards at opacity 0.22 and
+   0.014 before this existed, because removing the hidden attribute alone
+   leaves the transition running.
+
+   Same specificity as the hidden rule (0,2,0), so SOURCE ORDER is what makes
+   this win. It must stay below it. `transition: none` is the load-bearing
+   declaration; opacity and transform are what it lands on. */
+.off-hours-card[data-reveal-done] {
+  transition: none;
+  opacity: 1;
+  transform: none;
+}
+
 /* --- Home: about + contact (index.html) --------------------------------
    Two sections in <main>, styled to read as one panel (mock option 13b).
    CONSTRAINT: both sit on the site's spine -- the 168px rail for the label, the
@@ -383,21 +745,15 @@ a:hover { color: var(--text); }
   padding-top: 0;
 }
 
-.about > h2,
-.contact > h2 {
-  font: 400 11.5px var(--mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
-}
+/* Heading TYPE for these two comes from the shared home-page section-heading
+   rule above; only their placement and margins are set here. */
 
 /* Label in the 168px rail where every work-row eyebrow sits, content in the
-   main column at 262px where every summary starts. Rows are explicit so the
+   main column at 262px where every summary started. Rows are explicit so the
    photo and the copy share row 2 and their top edges line up; auto-placement
    would drop the copy to row 1 and the second paragraph past the photo.
-   These rules must stay AFTER the shared h2 rule above: same specificity, so
-   source order is what lets the margins below win. */
+   These rules must stay AFTER the shared heading rule above: same
+   specificity, so source order is what lets the margins below win. */
 .about,
 .contact {
   display: grid;
@@ -466,7 +822,7 @@ a:hover { color: var(--text); }
 }
 
 .page-simple h1 {
-  font: 400 41px/1.1 var(--sans);
+  font: 400 41px/1.1 var(--display);
   letter-spacing: -.03em;
   max-width: 24ch;
   margin-bottom: 16px;
@@ -505,6 +861,25 @@ a:hover { color: var(--text); }
   border-bottom: 1px solid var(--hairline);
 }
 
+/* The field tint, keyed to the story's own `category`. Green is the work
+   signal, warm is the personal one, and the same pair marks the Off hours
+   section on the home page.
+
+   Matched on the ATTRIBUTE VALUE rather than a class, so the failure mode is
+   the right one: a category that is missing, misspelt, or newly invented
+   matches neither selector and the header renders untinted -- which is exactly
+   how every story page looked before this existed. A class emitted from the
+   same field would instead need one `.story-header-<value>` rule per
+   category and would silently render unstyled markup for anything else.
+
+   The home-page work rows do NOT take this. They sit on the .work-list panel,
+   and three tinted bands inside one panel stops the tint meaning anything --
+   it marks a page you have opened, not a row in an index. */
+.story-header[data-category="supply"],
+.story-header[data-category="platform"] { background: var(--field-work); }
+
+.story-header[data-category="personal"] { background: var(--field-personal); }
+
 .story-header .eyebrow {
   display: block;
   margin-bottom: 20px;
@@ -515,7 +890,7 @@ a:hover { color: var(--text); }
 }
 
 .story-title {
-  font: 400 41px/1.1 var(--sans);
+  font: 400 41px/1.1 var(--display);
   letter-spacing: -.03em;
   max-width: 24ch;
   margin-bottom: 16px;
@@ -601,6 +976,19 @@ a:hover { color: var(--text); }
   flex-direction: column;
   gap: 8px;
   font: 400 13px/1.35 var(--sans);
+  counter-reset: chapter;
+}
+
+.chapter-rail li { counter-increment: chapter; }
+
+/* The rail half of the chapter counter; see the note on .story-prose > h2.
+   No colour of its own, deliberately -- it inherits the anchor's, so the
+   number goes accent with the label when chapter-rail.js marks it current and
+   there is no second rule to keep in step with the reading state. */
+.chapter-rail a::before {
+  content: counter(chapter, decimal-leading-zero);
+  margin-right: 8px;
+  font: 400 11px var(--mono);
 }
 
 .chapter-rail a {
@@ -624,14 +1012,43 @@ a:hover { color: var(--text); }
 
 .story-prose {
   max-width: 66ch;
+  counter-reset: chapter;
 }
 
 .story-prose > h2 {
-  font: 500 21px/1.25 var(--sans);
+  font: 500 21px/1.25 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   margin: 36px 0 13px;
   scroll-margin-top: 24px;
+  counter-increment: chapter;
+}
+
+/* Chapter numbers are CSS, not markup, for the same reason the constraint
+   numbers were: the source stays a plain heading and nothing has to be
+   renumbered when a story adds or drops a chapter.
+
+   The rail carries the matching counter, and the two agree FOR A STORY THAT
+   HONOURS THE ANCHOR CONTRACT -- which is a property of the include, not of
+   these rules. _includes/chapter-rail.html emits one entry per heading whose
+   rendered opener starts `<h2 id="`, in document order, so on a conforming
+   story both counters walk the same set in the same sequence.
+
+   They CAN disagree, and it is worth knowing how: this rule counts every
+   direct h2, while the include matches only anchored ones. A heading written
+   without `{#id}`, or with the `{: .class #id}` form that renders the class
+   first, is numbered in the prose and absent from the rail, so every rail
+   number after it lags. README already calls a missing anchor a visible
+   failure; this is the second way it shows.
+
+   decimal-leading-zero, not a literal "0" prefix -- the literal form renders
+   "010" at ten chapters. Same reasoning as the constraint counter and the
+   zero-padding in the templates. */
+.story-prose > h2::before {
+  content: counter(chapter, decimal-leading-zero);
+  margin-right: 12px;
+  font: 400 12px var(--mono);
+  color: var(--accent);
 }
 
 .story-prose > h2:first-child { margin-top: 0; }
@@ -663,8 +1080,8 @@ a:hover { color: var(--text); }
 }
 
 /* decimal-leading-zero, not a hardcoded "0" prefix: the literal form renders
-   "010" at ten items. The templates already derive their own numbers this way
-   (`{% if display_index < 10 %}0{% endif %}`); this matches them. */
+   "010" at ten items. The templates already derive their own numbers with a
+   conditional zero prefix; this matches them. */
 .story-prose ol > li::before {
   content: counter(constraint, decimal-leading-zero);
   flex: none;
@@ -687,10 +1104,30 @@ a:hover { color: var(--text); }
   color: var(--muted);
 }
 
+/* An accent square, not the em dash this rule used to emit. The constraints
+   chapter moved from an ordered list to an unordered one, so this is now the
+   marker that chapter is read with, and the numbers it gave up are the ones
+   the chapter HEADINGS now carry.
+
+   Deliberately NOT scoped to the constraints list. It is the only unordered
+   list in any story today, and there is no class to scope to -- kramdown emits
+   a bare <ul>. Scoping would mean inventing an attribute for the authoring
+   contract to carry, which is a worse trade than one shared marker. If a story
+   ever needs a second, differently marked list, that is the point to add the
+   hook, not before.
+
+   The 9px top margin is tuned to the 16px/1.66 the list items use: measured,
+   it puts the square's centre at 11.5px against a 26.6px line box, so it sits
+   just above the line's geometric middle and level with the lowercase text
+   rather than the full line height. It is tied to that type -- re-measure if
+   the list type changes. */
 .story-prose ul > li::before {
-  content: "\2014";
+  content: "";
   flex: none;
-  color: var(--accent);
+  width: 5px;
+  height: 5px;
+  margin-top: 9px;
+  background: var(--accent);
 }
 
 /* Containment guard for a Markdown table in prose. NOT support for one --
@@ -822,7 +1259,7 @@ a:hover { color: var(--text); }
 }
 
 .story-pager a {
-  font: 500 19px/1.3 var(--sans);
+  font: 500 19px/1.3 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   max-width: 34ch;
@@ -865,7 +1302,49 @@ a:hover { color: var(--text); }
   .story-title { font-size: 34px; }
   .page-simple h1 { font-size: 34px; }
 
-  .work-row > a { grid-template-columns: 1fr; gap: 12px; }
+  /* The rail column collapses, but the numeral does NOT stack above the
+     eyebrow -- the two share one baseline-aligned row and the title drops
+     below both. `auto` sizes the first column to the numeral itself.
+
+     Rows go back to automatic here. The desktop rule spans the numeral across
+     two rows to keep row 1 shallow; at one column that span would push the
+     eyebrow and the copy out of position instead. Left automatic, the numeral
+     and the eyebrow fall into the same row because each names a column, and
+     .work-copy takes the next row on its own. The inert card image still lands
+     in a full-width row above all three.
+
+     This is why index.html has the eyebrow as a direct child of the anchor
+     rather than the first thing inside .work-copy: no alignment relationship
+     can reach across the wrapper's box. */
+  .work-row > a {
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 14px;
+    row-gap: 12px;
+    align-items: baseline;
+  }
+
+  .work-numeral { grid-row: auto; font-size: 64px; }
+  .work-row .eyebrow { margin-bottom: 0; }
+  .work-row .work-copy { grid-column: 1 / -1; }
+
+  /* Two up. Three consequences of halving the columns, all of which have to be
+     handled or the second row reads as a mistake:
+
+     - the right-hand hairline has to come off the SECOND cell of each pair,
+       not just the last one, or a rule runs down the middle of nothing;
+     - the first cell of each ROW has to lose the left padding that
+       `.path-stop + .path-stop` gives every stop after the first, or stop 3
+       sits indented 20px further than stop 1 directly above it;
+     - the rows need a rule and space between them. At four-across there is
+       only one row, so the grid's single top border was the whole treatment.  */
+  .path-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .path-stop { padding-bottom: 20px; }
+  .path-stop:nth-child(2n) { border-right: 0; }
+  .path-stop:nth-child(2n + 1) { padding-left: 0; }
+  .path-stop:nth-child(n + 3) { border-top: 1px solid var(--hairline); }
+
+  .off-hours-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .story-body { grid-template-columns: 1fr; gap: 28px; }
 
@@ -900,6 +1379,34 @@ a:hover { color: var(--text); }
   .site-header { padding: 16px var(--gutter); }
   .site-nav ul { gap: 16px; }
 
+  /* The header drops the nav onto its own row rather than breaking words.
+     Four nav items do not fit beside the wordmark below about 384px: measured
+     at 375, which is the iPhone SE and the 13 mini, the row overflowed and
+     flex shrank both items until "pat diggins" broke to two lines and "off
+     hours" broke to "off / hours". The header went 51px to 69px and read as
+     damaged. Three items fitted, so this arrived with the fourth.
+
+     nowrap is what makes it a WRAP rather than a squeeze: it stops each item
+     shrinking below its own text, so the header has no choice but to move the
+     nav down. flex-wrap then does it at exactly the width where it stops
+     fitting, which is why there is no new breakpoint here -- add one and it is
+     wrong for the next label the nav gains.
+
+     This is the header wrap CLAUDE.md already names as the remedy for header
+     crowding.
+
+     SCOPED TO THE WORDMARK HEADER, and that scope is load-bearing. Story pages
+     carry a breadcrumb instead, and the crumb is MEANT to absorb the squeeze
+     by truncating -- CLAUDE.md calls that the thing keeping a long crumb from
+     pushing the nav off the row. `flex-wrap: wrap` would defeat it: wrapping
+     is decided on each item's hypothetical size, so an over-long item moves to
+     the next line INSTEAD of shrinking, and flex-shrink never runs. Applied
+     unscoped, this grew the story header from 48px to 75px at every width
+     below 640 and stopped the ellipsis engaging at all. */
+  .site-header-wordmark { flex-wrap: wrap; row-gap: 12px; }
+  .site-title,
+  .site-nav a { white-space: nowrap; }
+
   /* Do NOT hide the first crumb here to save room. It is the only link inside
      <nav aria-label="Breadcrumb">, and hiding it leaves a navigation landmark
      with nothing to navigate to. The ellipsis on the current crumb is what
@@ -919,9 +1426,46 @@ a:hover { color: var(--text); }
      solve. Re-measure before extending this to any other heading. */
   .intro h1 { font-size: 29px; line-height: 1.18; letter-spacing: -.025em; }
 
+  .facts { margin-top: 22px; gap: 8px 14px; font-size: 10.5px; }
+
   .work-row > a { padding: 22px var(--gutter); }
   .work-title { font-size: 19px; }
   .work-summary { max-width: none; }
+
+  .about > h2,
+  .contact > h2,
+  .path-here > h2,
+  .off-hours > h2 { font-size: 27px; }
+
+  /* One column, and the grid's rules turn into a single left rule down the
+     list. Every 960px addition above has to be undone as well as the desktop
+     one -- the row border and the row padding both stop applying once there
+     are no rows to separate. */
+  .path-here { padding: 38px var(--gutter); }
+
+  .path-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    padding-left: 18px;
+  }
+
+  .path-stop { padding: 0; border-right: 0; }
+  .path-stop + .path-stop { padding-left: 0; }
+  .path-stop:nth-child(n + 3) { border-top: 0; }
+
+  .off-hours { padding: 38px var(--gutter); }
+
+  /* Both, not just Off hours. The two sections mirror each other exactly at
+     every other width, and the delta tightened only one of them at this
+     breakpoint. */
+  .path-here > h2,
+  .off-hours > h2 { margin-bottom: 22px; }
+  .off-hours-grid { grid-template-columns: minmax(0, 1fr); }
+  .off-hours-card { padding: 20px; }
+  .off-hours-numeral { font-size: 28px; margin-bottom: 10px; }
+  .off-hours-label { font-size: 10.5px; }
 
   .story-header { padding: 30px var(--gutter) 24px; }
   .story-title { font-size: 27px; letter-spacing: -.025em; }
@@ -1062,6 +1606,13 @@ a:hover { color: var(--text); }
   /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
      but the preference is a preference. */
   .work-row { transition: none; }
+
+  /* Belt to the script's braces. assets/js/off-hours.js checks the same
+     preference and returns before it hides anything, so under reduce there is
+     normally no transition to suppress. This is here for the window between
+     the stylesheet applying and the deferred script running, and for the case
+     where the preference changes after mount. */
+  .off-hours-card { transition: none; }
 }
 
 /* --- Signature elements ------------------------------------------------

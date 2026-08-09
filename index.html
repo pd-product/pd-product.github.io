@@ -25,18 +25,50 @@ own `<!-- End Jekyll SEO tag -->` closed this comment early, leaking the rest
 of the text onto the page as visible content.
 {%- endcomment -%}
 <section class="intro">
-  <p class="eyebrow">senior pm &middot; solving problems with ai</p>
-  <h1>I own platform businesses and build on them. These are the calls I made, including the ones I would make differently.</h1>
+  <p class="eyebrow">solving problems with ai</p>
+  <h1>I turn problems people have learned to work around into products they can actually use.</h1>
+  {%- comment -%}
+  Four facts and three separators, each its own element. The separators are
+  marked up rather than generated for the same reason as .site-crumb-sep:
+  generated text may be announced depending on browser and assistive
+  technology, and a pseudo-element cannot carry aria-hidden. Decorative text
+  has to be marked up to be hideable.
+
+  role="list" for the reason every other list here carries it -- the
+  `list-style: none` reset drops the implicit list role in Safari with
+  VoiceOver.
+  {%- endcomment -%}
+  <ul class="facts" role="list">
+    <li>new york</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>senior pm at microsoft</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>pc gamer</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>ice cream, all seasons</li>
+  </ul>
 </section>
 
-<section id="work" class="work-list">
+<section id="work" class="work-list" aria-labelledby="work-heading">
   {%- comment -%}
-  The design has no visible "Work" heading, but the nav anchors here and a
-  labelled landmark needs one, so it is hidden rather than removed. Uses the
-  shared .sr-only utility; the stylesheet previously carried a second,
-  near-identical hiding rule for this one element.
+  The design has no visible "Work" heading, but the nav anchors here and the
+  section needs a name, so it is hidden rather than removed. Uses the shared
+  .sr-only utility; the stylesheet previously carried a second, near-identical
+  hiding rule for this one element.
+
+  THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and
+  every section on this page carries one for that reason. A <section> maps to
+  role="region" ONLY when it has an accessible name, and an accessible name
+  comes from aria-label or aria-labelledby, never from a descendant heading.
+  Verified in the rendered accessibility tree: before these attributes existed
+  the page exposed banner, main, contentinfo and one navigation, and not one
+  of the five sections appeared at all. The headings were reachable by heading
+  navigation the whole time; the landmarks the nav mirrors were not.
+
+  Removing an aria-labelledby, or an id it points at, silently demotes that
+  section back to a generic box. Nothing on screen changes.
   {%- endcomment -%}
-  <h2 class="sr-only">Work</h2>
+  <h2 class="sr-only" id="work-heading">Work</h2>
   {%- comment -%}
   role="list" is not redundant here. The stylesheet's `ul, ol { list-style:
   none }` reset removes the implicit list role in Safari with VoiceOver, so
@@ -64,28 +96,63 @@ of the text onto the page as visible content.
         {%- endif %}
         {%- comment -%}
         Position in the sorted list, not the raw `order` value. See the same
-        note in _layouts/story.html; both derive it this way so they agree.
-        {%- endcomment -%}
-        <p class="eyebrow">
-          <span class="eyebrow-index">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</span>
-          <span class="eyebrow-sep">/</span>
-          <span class="eyebrow-category">{{ story.category }}</span>
-        </p>
-        {%- comment -%}
-        Everything except the eyebrow goes in ONE wrapper. `.work-row > a` is a
-        two-column grid with automatic placement, so separate direct children
-        alternate between the rail and the main column: the summary and chips
-        landed in the 168px rail. Worse, placement then depended on how many
-        optional fields a story happened to set, so omitting `description` moved
-        the lesson into the rail too.
+        note in _layouts/story.html; both derive it this way so they agree --
+        the home row now prints it as a display numeral and the story page
+        still prints it inside its eyebrow, but the number itself is the same
+        derivation in both places.
 
-        The wrapper is deliberately unstyled. It occupies the main column as a
-        single grid item, and every rule in the design CSS is class-based, so
-        the descendants keep their styling with no change to the stylesheet.
+        aria-hidden because it is decorative here, and because the information
+        is already carried: the rows are an <ol>, so a screen reader announces
+        the position anyway. Without this it is read twice, once as list
+        position and once as a bare "01". The colour token says the same thing
+        -- --numeral is deliberately near-invisible and no content depends on
+        it being read.
+        {%- endcomment -%}
+        <p class="work-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
+        {%- comment -%}
+        Category only. The number moved to the numeral above, so the index and
+        separator spans are gone from this row -- the story page keeps the full
+        `01 / supply` form.
+
+        A DIRECT child of the anchor rather than the first thing inside
+        .work-copy, which is where it reads like it belongs. It has to be a
+        grid item in its own right so that at 960px and below it can share a
+        baseline row with the numeral while the title drops beneath both. Kept
+        inside the wrapper it could not: a flex or baseline relationship cannot
+        reach across .work-copy's box.
+        {%- endcomment -%}
+        <p class="eyebrow">{{ story.category }}</p>
+        {%- comment -%}
+        Title, lesson and chips go in ONE wrapper so they move as a block.
+        `.work-row > a` is a two-column grid, and the bug this guards against
+        is real history: with automatic placement, separate direct children
+        alternated between the rail and the main column, so the summary and
+        chips landed in the 168px rail -- and which field went where depended
+        on how many optional fields a story happened to set.
+
+        The stylesheet now pins a column on every direct child, which is the
+        actual fix, and this wrapper is what keeps the group from needing three
+        more of them. A NEW DIRECT CHILD STILL NEEDS ITS OWN `grid-column`;
+        adding a bare one puts the bug back.
+
+        The wrapper is otherwise unstyled beyond its column. Every rule in the
+        design CSS is class-based, so the descendants keep their styling with no
+        change to the stylesheet.
         {%- endcomment -%}
         <div class="work-copy">
           <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index | escape }}">{{ story.title }}</h3>
-          {%- if story.description %}<p class="work-summary">{{ story.description }}</p>{% endif %}
+          {%- comment -%}
+          `description` deliberately does NOT render here. The row is title,
+          lesson and chips; the lesson is the line that makes it specific.
+
+          This is a TEMPLATE change, not a front-matter one. `description` is
+          still required on every story and is still the page's meta
+          description -- deleting the key would send the story to search
+          results described by its own opening heading. The .work-summary rules
+          in the stylesheet are kept and marked inert for the same reason the
+          hero-image rules are: restoring this line is a one-line change here
+          and nothing in the CSS.
+          {%- endcomment -%}
           {%- comment -%}
           The lesson line is what makes the index specific rather than generic:
           each row states what the case taught, not only what it achieved.
@@ -109,8 +176,52 @@ of the text onto the page as visible content.
   </ol>
 </section>
 
-<section id="about" class="about">
-  <h2>About</h2>
+{%- comment -%}
+Four stops, hairline-separated. Content comes from _data/path-here.yml, which
+also carries the constraint this section is easy to get wrong: the third stop
+is the CURRENT role and the fourth is not a job. Read that file before editing
+anything here.
+
+`year` prints unescaped because it carries `&middot;` as an entity; see the
+same note in the data file.
+{%- endcomment -%}
+<section id="path-here" class="path-here" aria-labelledby="path-here-heading">
+  <h2 id="path-here-heading">The path here</h2>
+  <ol class="path-grid" role="list">
+    {%- for stop in site.data['path-here'] %}
+    <li class="path-stop">
+      <p class="path-year">{{ stop.year }}</p>
+      <p class="path-copy">{{ stop.copy }}</p>
+    </li>
+    {%- endfor %}
+  </ol>
+</section>
+
+{%- comment -%}
+Six cards from _data/off-hours.yml. The numeral is derived from position, not
+stored, so reordering the data renumbers the grid; see the note in that file.
+
+`label` and `copy` both print unescaped because both carry HTML entities --
+two labels have `&amp;`, and one card's copy has `&gt;`. The card
+is a plain <li> and the reveal animation attaches nothing here -- the hidden
+state is applied by assets/js/off-hours.js at runtime, so a page loaded with
+no JavaScript shows every card. That is the point of doing it that way round.
+{%- endcomment -%}
+<section id="off-hours" class="off-hours" aria-labelledby="off-hours-heading">
+  <h2 id="off-hours-heading">Off hours</h2>
+  <ul class="off-hours-grid" role="list">
+    {%- for entry in site.data['off-hours'] %}
+    <li class="off-hours-card">
+      <p class="off-hours-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
+      <p class="off-hours-label">{{ entry.label }}</p>
+      <p class="off-hours-copy">{{ entry.copy }}</p>
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+
+<section id="about" class="about" aria-labelledby="about-heading">
+  <h2 id="about-heading">About</h2>
   <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
   {%- comment -%}
   Same pattern and the same reason as .work-copy: without this wrapper the two
@@ -118,13 +229,13 @@ of the text onto the page as visible content.
   rail-height below the photo. The wrapper is unstyled apart from its placement.
   {%- endcomment -%}
   <div class="about-copy">
-    <p>I work on the platforms that sit between publishers and the demand that pays for their content. My career has moved steadily toward the decisions behind technical products, and I got there by taking on that work before it was mine to do. Lately that includes writing code with AI agents.</p>
-    <p>In January 2026 I went from AI skeptic to AI native, now building work and personal tools daily.</p>
+    <p>I started in customer-facing roles and moved into product by taking on technical problems before they were mine to solve. Today I own publisher platforms and follow problems from customer workflow through data, architecture, implementation, and adoption.</p>
+    <p>I make the product call, stay close enough to test it, and use AI to investigate, build, and ship.</p>
   </div>
 </section>
 
-<section id="contact" class="contact">
-  <h2>Contact</h2>
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <h2 id="contact-heading">Contact</h2>
   <!-- Links only: GitHub Pages has no server, so there is no form to submit.
        Each link renders only once its value is set in _config.yml, so an
        unfinished site shows a short list rather than live broken links. The

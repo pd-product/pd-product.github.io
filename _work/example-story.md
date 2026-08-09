@@ -17,10 +17,11 @@ category: "supply"
 order: 99
 
 # --- Strongly recommended ---------------------------------------------------
-# Shown under the title and on the home row, AND used as the meta description.
-# Omit it and jekyll-seo-tag falls back to the page excerpt, which is the first
-# block of the body -- your opening "## " heading. Google truncates near 155
-# characters, so put the point first.
+# Shown under the title on the STORY PAGE, and used as the meta description.
+# It does not render on the home row -- still required, still what a search
+# result and a pasted link show. Omit it and jekyll-seo-tag falls back to the
+# page excerpt, which is the first block of the body -- your opening "## "
+# heading. Google truncates near 155 characters, so put the point first.
 description: "One or two sentences: the situation, the call, and what it cost. This is what a search result and a pasted link both show."
 # Publication date of the page, not of the work it describes. Without it Jekyll
 # uses BUILD time, so the date moves on every deploy. Set once, then leave it.
@@ -30,8 +31,8 @@ date: 2026-01-01
 # Header breadcrumb label ("work / <crumb>"). Falls back to `title`, which is
 # usually too long for the slot.
 crumb: "example story"
-# One line under the description on the home row. Usually a trim of this story's
-# own "What I would redo" chapter.
+# One line, and the only prose the home row shows. Usually a trim of this
+# story's own "What I would redo" chapter.
 lesson: "The one sentence you would want someone to remember."
 role: "Your role, and what you owned."
 team: "Who you worked with."
@@ -86,10 +87,10 @@ h3, a blockquote, code or a Markdown table.
 
 ## Constraints I was handed    {#constraints}
 
-1. Author ordered lists as plain markdown; the CSS supplies the `01`, `02`.
-2. Keep them short -- they sit beside the prose measure, not inside it.
-3. The `role="list"` line below is not decoration: the `list-style: none` reset
-   drops the implicit list role in Safari with VoiceOver.
+- Author ordered lists as plain markdown; the CSS supplies the `01`, `02`.
+- Keep them short -- they sit beside the prose measure, not inside it.
+- The `role="list"` line below is not decoration: the `list-style: none` reset
+  drops the implicit list role in Safari with VoiceOver.
 {: role="list"}
 
 ## The call I made    {#the-call}

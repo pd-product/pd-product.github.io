@@ -1,4 +1,14 @@
-<header class="site-header">
+{%- comment -%}
+The wordmark modifier is a LAYOUT capability, not decoration. At the phone
+breakpoint the stylesheet lets this header wrap the nav onto its own row, and
+that must not apply to a story page: `flex-wrap: wrap` moves an over-long item
+to the next line INSTEAD of shrinking it, which is exactly the behaviour the
+breadcrumb's ellipsis depends on. Story pages keep a single-line header and
+truncate the crumb, as before. See the rule in assets/css/style.scss.
+{%- endcomment -%}
+{%- assign header_class = "site-header site-header-wordmark" -%}
+{%- if page.layout == "story" -%}{%- assign header_class = "site-header" -%}{%- endif -%}
+<header class="{{ header_class }}">
   {%- comment -%}
   Story pages replace the wordmark with a breadcrumb, per comp 7b: on a case
   page the useful information is which case you are in, not the site's name,

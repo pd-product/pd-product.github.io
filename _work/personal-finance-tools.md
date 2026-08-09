@@ -4,14 +4,16 @@ title: "The spreadsheet that became a toolkit"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "personal finance tools"
-# Shown under the title on the story page and on the home-page row, AND read by
-# jekyll-seo-tag as the meta description. The key must be `description`: with
-# any other name seo-tag falls back to page.excerpt, which is the first block of
-# the body -- the opening `## ` heading. Search and link previews then read
-# "The situation".
+# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
+# meta description. It no longer renders on the home-page row -- that is a
+# template decision in index.html, not a reason to drop the key. The key must
+# be `description`: with any other name seo-tag falls back to page.excerpt,
+# which is the first block of the body -- the opening `## ` heading. Search and
+# link previews then read that heading instead.
 description: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
-# One line, shown on the home-page row under the description. A trim of this
-# story's own "What I would redo" chapter, approved as written.
+# One line, and the only prose on the home-page row now that the description
+# does not render there. A trim of this story's own "What I would redo"
+# chapter, approved as written.
 lesson: "When building feels cheap, the discipline that protects you is the one you stop noticing you dropped."
 category: "personal"
 order: 3
@@ -44,17 +46,17 @@ tradeoffs:
 published: true
 ---
 
-## The situation    {#situation}
+## How it started    {#situation}
 
 Early in 2026 I spent a while researching investment and tax strategy to revamp our portfolios, then hired a financial planner for a short engagement to pressure-test what I had come up with. That left me with several jobs that would recur indefinitely, the most tedious being portfolio rebalancing and estimated tax payments. Both are the kind of work that is straightforward in principle and miserable in practice, because doing them properly means holding a lot of interacting rules in your head at once.
 
 I started building the rebalancing model in a spreadsheet. Fairly early on it became clear that it would be too tedious and time consuming to maintain. This was the same period I was learning what agentic coding tools could actually do at work, so I decided to find out what I could build instead. The tension was mundane and familiar: the obvious solution was the one I would end up avoiding.
 
-## Constraints I was handed    {#constraints}
+## Constraints I set myself    {#constraints}
 
-1. The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
-2. Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
-3. The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
+- The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
+- Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
+- The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
 {: role="list"}
 
 ## The call I made    {#the-call}
@@ -65,7 +67,7 @@ The expected option was a spreadsheet, or paying for a product that does some of
 
 I kept Monarch for aggregating and exporting the data, which is the part it does better than anything I would write, and built tools that consume that export. That boundary meant I never had to rebuild aggregation. The tools now cover rebalancing, estimated tax payments, spend analysis, and budgeting.
 
-## What shipped    {#shipped}
+## What I built    {#shipped}
 
 A suite of Python tools covering rebalancing, estimated tax payments, spend analysis, and budgeting. The obvious benefit is that they save me the manual work. The one I did not anticipate is that they let me run each exercise as often as I want, more accurately and in more depth than I otherwise would. That turned out to be the actual value, and it matches what I found using the same tools at work. The real gain was reaching analysis I would otherwise have skipped.
 

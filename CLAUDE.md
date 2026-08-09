@@ -24,8 +24,13 @@ not raise them again unprompted.
   is deliberately not an open-source licence. Adopting a recognised one to make GitHub's label
   tidier would grant rights the owner withholds.
 - **No analytics, JS libraries, CDN dependencies, or dark/light toggle.** Dark and light are pure
-  `prefers-color-scheme`. The only JavaScript is the chapter-rail reading state, which is
-  progressive enhancement and must stay optional.
+  `prefers-color-scheme`. There are exactly two executable JavaScript assets -- the chapter-rail
+  reading state and the Off hours reveal -- both vanilla, both progressive enhancement, and both of
+  which must stay optional. (The `<script type="application/ld+json">` blocks in
+  `_layouts/default.html` and from `{% seo %}` are structured data, not behaviour, and are not
+  counted here.) The bar for a third is that the page is complete and correct without it. For the
+  reveal that means the hidden state is applied FROM the script and never from the stylesheet, so
+  no JavaScript means no animation rather than no content.
 
 ## Do not "clean these up"
 
@@ -56,7 +61,9 @@ failure mode in every case is silent.
   oddly to you. These are the owner's own words about their own work. Front matter is editable;
   bodies are not, absent an explicit instruction to change one.
 - **ASCII only in source files.** HTML entities in markup, CSS escapes in stylesheets.
-  `assets/fonts/OFL.txt` is the single exempt file and must travel unaltered.
+  `assets/fonts/OFL-IBMPlexMono.txt` is the single exempt file -- it carries a UTF-8 copyright
+  sign -- and must travel unaltered. `assets/fonts/OFL-SpaceGrotesk.txt` is ASCII already and is
+  equally unalterable, for the licence's reasons rather than this convention's.
 - **No in-source change logs.** Comment the durable CONSTRAINT, never the change that introduced it.
   If a comment addresses a past session or a document outside this repo, it is handoff apparatus and
   should be removed rather than preserved.

@@ -96,9 +96,18 @@
       {{ content }}
     </main>
     {% include footer.html %}
-    <!-- Reading state for the story chapter rail. Progressive enhancement: it
-         exits immediately where there is no rail, and without it the rail is
-         still a list of working anchor links. -->
+    <!-- Both scripts are progressive enhancement, both are vanilla with no
+         dependencies, and both exit immediately on a page that does not carry
+         their element. Loaded site-wide rather than gated on a page test for
+         that reason: the exit is one querySelector.
+
+         Reading state for the story chapter rail. Without it the rail is still
+         a list of working anchor links. -->
     <script src="{{ '/assets/js/chapter-rail.js' | relative_url }}" defer></script>
+    <!-- Reveal for the Off hours cards. Without it every card is simply
+         visible: the hidden state is applied by the script, never by the
+         stylesheet, so a failure here costs the animation and never the
+         content. See the floors in the file. -->
+    <script src="{{ '/assets/js/off-hours.js' | relative_url }}" defer></script>
   </body>
 </html>
