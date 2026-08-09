@@ -414,39 +414,34 @@ a:hover { color: var(--text); }
    the separating. */
 .work-list { background: var(--panel); }
 
-/* The whole row is the click target, so the whole row responds: its top
-   hairline goes accent on hover and focus. The title colour change below
-   stays. Transition is on border-color only, so nothing else animates.
-   :focus-within gives keyboard users the same cue as the pointer.
+/* THE ROW IS THE GRID, and it is not a link. The grid and the padding sit here
+   rather than on a row-sized anchor; the only interactive element is .work-cta
+   at the end of .work-copy. See the note on the row in index.html.
 
-   The FIRST row's top hairline doubles as the boundary below the hero and the
-   last row has no bottom border, so the highlight always reads as "the line
-   above this row". Deliberate: the About panel's own top border closes the
-   set, so no border-bottom is added to :last-child. */
+   NO :hover OR :focus-within RULE MAY BE ADDED HERE. Accent means interactive
+   everywhere else in this file, so a row that responds to the pointer
+   advertises a click it cannot accept. The button carries every interactive
+   state, and the keyboard cue is the button's own focus ring.
+
+   Only a top border, and only on the row. The FIRST row's hairline doubles as
+   the boundary below the hero, and the last row has none of its own at the
+   bottom because the About panel's top border closes the set -- so nothing is
+   added to :last-child, and .work-list carries no border either or the line
+   under the hero would be drawn twice, 1px apart. */
 .work-row {
   border-top: 1px solid var(--hairline);
-  transition: border-color .15s ease;
-}
-
-.work-row:hover,
-.work-row:focus-within { border-top-color: var(--accent); }
-
-/* the whole row is one anchor in the template */
-.work-row > a {
   display: grid;
   grid-template-columns: var(--rail) minmax(0, 1fr);
   gap: var(--rail-gap);
   align-items: start;
   padding: 38px var(--gutter);
-  color: inherit;
 }
 
-.work-row > a:hover { color: inherit; }
-
-/* EVERY child of this anchor states its own column, and that is the fix for
+/* EVERY child of this row states its own column, and that is the fix for
    the bug the .work-copy note in index.html describes: with automatic
    placement the children alternated between the rail and the main column, so
    which field landed where depended on how many optional fields a story set.
+   .work-cta is exempt because it lives inside .work-copy, not beside it.
    Columns are pinned here; ROWS are left automatic on purpose, so that the
    inert card image can still take a full-width row above everything without
    any of these rules changing. Adding a bare child without a column puts the
@@ -479,14 +474,15 @@ a:hover { color: var(--text); }
 /* Story-page eyebrow only, now that the home row prints the category alone. */
 .eyebrow-sep { margin: 0 .4em; }
 
+/* NO HOVER RULE. The title used to go accent when the row was hovered, back
+   when the row was the anchor. It is not a link now and must not colour like
+   one; the button is the only thing that responds. */
 .work-title {
   font: 500 23px/1.22 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   margin-bottom: 11px;
 }
-
-.work-row > a:hover .work-title { color: var(--accent); }
 
 /* Inert, like the image rules above: index.html no longer prints `description`
    on the home row. Kept rather than deleted because restoring that line is one
@@ -513,6 +509,73 @@ a:hover { color: var(--text); }
   color: var(--nav-muted);
   border: 1px solid var(--border);
   padding: 4px 8px;
+}
+
+/* The row's only interactive element. Another bordered box under the chips,
+   which are optional and any number, and the separation from them is
+   deliberate and has to hold: the chip border is --border and this one is
+   --accent, chips are 11px with 4px 8px padding and no tracking or capitals
+   while this is 11.5px with 9px 15px, uppercase and tracked. DO NOT SOFTEN
+   THIS BORDER TO --border. If the two ever read as one group, widen the gap
+   above the button rather than restyling the chips. A story with no chips
+   simply puts this under the lesson instead.
+
+   --accent-ink is the fill's text colour, NOT --bg. The rows sit on --panel,
+   so --bg is not the colour behind them and would read as a near miss rather
+   than a knockout. Measured on the built page: the filled state is 8.08:1 in
+   dark and 5.64:1 in light, and the outlined state 7.38 and 5.12.
+
+   THE BORDER STAYS ON WHEN FILLED, same width, same colour as the fill, so the
+   box does not resize and the text does not shift under the pointer.
+
+   inline-flex rather than inline-block so the 44px floor at the touch widths
+   below can centre its own text without a hand-computed padding.
+
+   `gap` IS WHAT SPACES THE ARROW, and it is required rather than cosmetic. The
+   label and the arrow are two elements because the arrow has to carry
+   aria-hidden and sit outside the span the accessible name points at. A flex
+   container discards the whitespace between its items, so a space written in
+   the markup renders as nothing and the arrow butts against the E of CASE. */
+.work-cta { margin-top: 20px; }
+
+.work-cta a {
+  display: inline-flex;
+  align-items: center;
+  gap: .5em;
+  font: 400 11.5px var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 9px 15px;
+  /* background-color, not the `background` shorthand: the shorthand also
+     animates background-image and background-position, which is work on every
+     hover for no visible difference. */
+  transition: background-color .15s ease, color .15s ease;
+}
+
+/* :focus-visible, not :focus -- a mouse click must not leave the button stuck
+   in its filled state. The global focus ring still draws outside this. */
+.work-cta a:hover,
+.work-cta a:focus-visible {
+  background-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+/* The 44px floor again, keyed to the INPUT rather than the width. The 640px
+   block below carries it for phones, but a tablet is a touch device at 1024
+   and would otherwise get the 35px desktop button as its only way into a
+   story. This is the one pointer query in the file; the width breakpoints
+   cannot answer the question it asks.
+
+   `any-pointer`, NOT `pointer`. `pointer` describes only the PRIMARY input, so
+   a touchscreen laptop with a mouse attached reports `fine` and would have
+   been missed while still being tapped. `any-pointer: coarse` is true when any
+   available input is coarse, which is the question worth asking when the
+   element is the only way into the page. The cost of the wider query is a
+   slightly taller button on a desktop that happens to have a touchscreen. */
+@media (any-pointer: coarse) {
+  .work-cta a { min-height: 44px; }
 }
 
 /* card image -- inert until a story sets hero_image / card_image */
@@ -1321,10 +1384,10 @@ a:hover { color: var(--text); }
      .work-copy takes the next row on its own. The inert card image still lands
      in a full-width row above all three.
 
-     This is why index.html has the eyebrow as a direct child of the anchor
+     This is why index.html has the eyebrow as a direct child of the row
      rather than the first thing inside .work-copy: no alignment relationship
      can reach across the wrapper's box. */
-  .work-row > a {
+  .work-row {
     grid-template-columns: auto minmax(0, 1fr);
     column-gap: 14px;
     row-gap: 12px;
@@ -1436,9 +1499,18 @@ a:hover { color: var(--text); }
 
   .facts { margin-top: 22px; gap: 8px 14px; font-size: 10.5px; }
 
-  .work-row > a { padding: 22px var(--gutter); }
+  .work-row { padding: 22px var(--gutter); }
   .work-title { font-size: 19px; }
   .work-summary { max-width: none; }
+
+  /* 44px FLOOR, and it is not the same call the spec made. That draft kept the
+     button at ~33px on the argument that the row was the target and the button
+     merely a label. The row is not a target any more -- this button is the only
+     way into a story -- so the floor applies to it directly. 33px clears the
+     24px WCAG 2.2 minimum but sits under both platform guidelines, and there is
+     no larger target behind it to fall back on. */
+  .work-cta { margin-top: 18px; }
+  .work-cta a { font-size: 11px; padding: 8px 13px; min-height: 44px; }
 
   .about > h2,
   .contact > h2,
@@ -1611,9 +1683,11 @@ a:hover { color: var(--text); }
    scripted smooth scroll in assets/js/chapter-rail.js has to branch on
    matchMedia('(prefers-reduced-motion: reduce)') itself either way. */
 @media (prefers-reduced-motion: reduce) {
-  /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
-     but the preference is a preference. */
-  .work-row { transition: none; }
+  /* The work-row button's fill. Colour-only and 150ms, so it is mild, but the
+     preference is a preference -- and this replaced the row hairline
+     transition that carried the same rule for the same reason, so dropping it
+     would have quietly reversed that call rather than restated it. */
+  .work-cta a { transition: none; }
 
   /* Belt to the script's braces. assets/js/off-hours.js checks the same
      preference and returns before it hides anything, so under reduce there is

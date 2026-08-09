@@ -91,95 +91,141 @@ The five anchored sections below are the named regions; see the note on #work.
     {%- for story in ordered %}
     <li class="work-row">
       {%- comment -%}
-      The whole row is the click target, which is the design. Without
-      aria-labelledby the link's accessible name is therefore the whole row --
-      eyebrow, title, summary, lesson and chips, around 450 characters. Screen
-      reader users listing links, and voice-control users trying to speak a link
-      name, get all of it. Pointing at the title gives the link a usable name
-      while leaving the target area and the :focus-within hairline untouched.
+      THE ROW IS NOT A LINK, and nothing in it may become one except the Read
+      the case button at the end of .work-copy. A row-sized anchor is what this
+      replaced: it offered no affordance at rest, and none at all on a phone,
+      where there is no hover to reveal one.
+
+      NOTHING AT ROW LEVEL MAY TAKE A HOVER STATE either, and that is the same
+      decision rather than a second one. Accent means interactive everywhere
+      else on this site, so a row that lit up would advertise a click it can no
+      longer accept -- which is the original defect inverted, not fixed.
+
+      The cost is real and was accepted: the target went from the whole row to
+      one button, so the button carries a 44px floor on touch (see the
+      stylesheet). A second link to the same story is not the way to win that
+      back; it would list twice in a screen reader's link list.
       {%- endcomment -%}
-      <a href="{{ story.url | relative_url }}" aria-labelledby="work-title-{{ story.slug | default: forloop.index | escape }}">
-        {%- assign card = story.card_image | default: story.hero_image -%}
-        {%- if card %}
-        <img class="work-card-image" src="{{ card | relative_url }}" alt="">
+      {%- assign card = story.card_image | default: story.hero_image -%}
+      {%- if card %}
+      <img class="work-card-image" src="{{ card | relative_url }}" alt="">
+      {%- endif %}
+      {%- comment -%}
+      Position in the sorted list, not the raw `order` value. See the same
+      note in _layouts/story.html; both derive it this way so they agree --
+      the home row now prints it as a display numeral and the story page
+      still prints it inside its eyebrow, but the number itself is the same
+      derivation in both places.
+
+      aria-hidden because it is decorative here, and because the information
+      is already carried: the rows are an <ol>, so a screen reader announces
+      the position anyway. Without this it is read twice, once as list
+      position and once as a bare "01". The colour token says the same thing
+      -- --numeral is deliberately near-invisible and no content depends on
+      it being read.
+      {%- endcomment -%}
+      <p class="work-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
+      {%- comment -%}
+      Category only. The number moved to the numeral above, so the index and
+      separator spans are gone from this row -- the story page keeps the full
+      `01 / supply` form.
+
+      A DIRECT child of the row rather than the first thing inside .work-copy,
+      which is where it reads like it belongs. It has to be a grid item in its
+      own right so that at 960px and below it can share a baseline row with the
+      numeral while the title drops beneath both. Kept inside the wrapper it
+      could not: a flex or baseline relationship cannot reach across
+      .work-copy's box.
+      {%- endcomment -%}
+      <p class="eyebrow">{{ story.category }}</p>
+      {%- comment -%}
+      Title, lesson, chips and the button go in ONE wrapper so they move as a
+      block. `.work-row` is a two-column grid, and the bug this guards against
+      is real history: with automatic placement, separate direct children
+      alternated between the rail and the main column, so the summary and
+      chips landed in the 168px rail -- and which field went where depended
+      on how many optional fields a story happened to set.
+
+      The stylesheet now pins a column on every direct child, which is the
+      actual fix, and this wrapper is what keeps the group from needing three
+      more of them. A NEW DIRECT CHILD OF .work-row STILL NEEDS ITS OWN
+      `grid-column`; adding a bare one puts the bug back. Anything inside this
+      wrapper is exempt, which is why the button goes here.
+
+      The wrapper is otherwise unstyled beyond its column. Every rule in the
+      design CSS is class-based, so the descendants keep their styling with no
+      change to the stylesheet.
+      {%- endcomment -%}
+      <div class="work-copy">
+        {%- comment -%}
+        The id is the LOOP POSITION, not the slug, and one `row_id` feeds both
+        this heading and the button below so the two cannot drift apart.
+
+        `slug | default: forloop.index` collided: a story whose slug is "2" and
+        a slugless story sitting second both mint work-title-2, and duplicate
+        ids mean getElementById returns the first, so the second button would
+        borrow the first story's accessible name. The position is unique inside
+        the loop by construction, and these ids are referenced nowhere but the
+        aria-labelledby in this row -- they are not URLs and nothing links to
+        them -- so nothing depends on them being readable.
+        {%- endcomment -%}
+        {%- assign row_id = forloop.index -%}
+        <h3 class="work-title" id="work-title-{{ row_id }}">{{ story.title }}</h3>
+        {%- comment -%}
+        `description` deliberately does NOT render here. The row is title,
+        lesson and chips; the lesson is the line that makes it specific.
+
+        This is a TEMPLATE change, not a front-matter one. `description` is
+        still required on every story and is still the page's meta
+        description -- deleting the key would send the story to search
+        results described by its own opening heading. The .work-summary rules
+        in the stylesheet are kept and marked inert for the same reason the
+        hero-image rules are: restoring this line is a one-line change here
+        and nothing in the CSS.
+        {%- endcomment -%}
+        {%- comment -%}
+        The lesson line is what makes the index specific rather than generic:
+        each row states what the case taught, not only what it achieved.
+        Guarded, so a story without `lesson` renders as before.
+        {%- endcomment -%}
+        {%- if story.lesson %}
+        <div class="work-lesson">
+          <p class="work-lesson-label">Lesson</p>
+          <p class="work-lesson-text">{{ story.lesson }}</p>
+        </div>
+        {%- endif %}
+        {%- if story.chips %}
+        <ul class="chips" role="list">
+          {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
+        </ul>
         {%- endif %}
         {%- comment -%}
-        Position in the sorted list, not the raw `order` value. See the same
-        note in _layouts/story.html; both derive it this way so they agree --
-        the home row now prints it as a display numeral and the story page
-        still prints it inside its eyebrow, but the number itself is the same
-        derivation in both places.
+        The row's ONLY interactive element, and the only one that is never
+        guarded -- the numeral, eyebrow and title are unguarded too, but the
+        card image, lesson and chips are optional. This one always renders
+        because every story has a page.
 
-        aria-hidden because it is decorative here, and because the information
-        is already carried: the rows are an <ol>, so a screen reader announces
-        the position anyway. Without this it is read twice, once as list
-        position and once as a bare "01". The colour token says the same thing
-        -- --numeral is deliberately near-invisible and no content depends on
-        it being read.
+        THE ACCESSIBLE NAME IS THE BUTTON TEXT PLUS THE TITLE, in that order,
+        and it has to be. Three links reading only "Read the case" are
+        indistinguishable in a screen reader's link list, which is WCAG 2.4.4.
+        Referencing the visible span first keeps the spoken name starting with
+        the words on screen, which is what voice control matches on (2.5.3) --
+        an aria-label replacing the text would break that.
+
+        The arrow is aria-hidden and OUTSIDE the referenced span, so it is
+        neither announced nor part of the name. It is `&#8594;`, not the
+        `&#8599;` the Contact links use: the diagonal one means the link leaves
+        the site, and this one stays on it.
+
+        NO SPACE IS WRITTEN BETWEEN THE TWO SPANS. The anchor is a flex
+        container, which discards whitespace between its items, so one written
+        here would render as nothing and read as though it were doing the
+        spacing. The gap is a `gap` in the stylesheet.
         {%- endcomment -%}
-        <p class="work-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
-        {%- comment -%}
-        Category only. The number moved to the numeral above, so the index and
-        separator spans are gone from this row -- the story page keeps the full
-        `01 / supply` form.
-
-        A DIRECT child of the anchor rather than the first thing inside
-        .work-copy, which is where it reads like it belongs. It has to be a
-        grid item in its own right so that at 960px and below it can share a
-        baseline row with the numeral while the title drops beneath both. Kept
-        inside the wrapper it could not: a flex or baseline relationship cannot
-        reach across .work-copy's box.
-        {%- endcomment -%}
-        <p class="eyebrow">{{ story.category }}</p>
-        {%- comment -%}
-        Title, lesson and chips go in ONE wrapper so they move as a block.
-        `.work-row > a` is a two-column grid, and the bug this guards against
-        is real history: with automatic placement, separate direct children
-        alternated between the rail and the main column, so the summary and
-        chips landed in the 168px rail -- and which field went where depended
-        on how many optional fields a story happened to set.
-
-        The stylesheet now pins a column on every direct child, which is the
-        actual fix, and this wrapper is what keeps the group from needing three
-        more of them. A NEW DIRECT CHILD STILL NEEDS ITS OWN `grid-column`;
-        adding a bare one puts the bug back.
-
-        The wrapper is otherwise unstyled beyond its column. Every rule in the
-        design CSS is class-based, so the descendants keep their styling with no
-        change to the stylesheet.
-        {%- endcomment -%}
-        <div class="work-copy">
-          <h3 class="work-title" id="work-title-{{ story.slug | default: forloop.index | escape }}">{{ story.title }}</h3>
-          {%- comment -%}
-          `description` deliberately does NOT render here. The row is title,
-          lesson and chips; the lesson is the line that makes it specific.
-
-          This is a TEMPLATE change, not a front-matter one. `description` is
-          still required on every story and is still the page's meta
-          description -- deleting the key would send the story to search
-          results described by its own opening heading. The .work-summary rules
-          in the stylesheet are kept and marked inert for the same reason the
-          hero-image rules are: restoring this line is a one-line change here
-          and nothing in the CSS.
-          {%- endcomment -%}
-          {%- comment -%}
-          The lesson line is what makes the index specific rather than generic:
-          each row states what the case taught, not only what it achieved.
-          Guarded, so a story without `lesson` renders as before.
-          {%- endcomment -%}
-          {%- if story.lesson %}
-          <div class="work-lesson">
-            <p class="work-lesson-label">Lesson</p>
-            <p class="work-lesson-text">{{ story.lesson }}</p>
-          </div>
-          {%- endif %}
-          {%- if story.chips %}
-          <ul class="chips" role="list">
-            {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
-          </ul>
-          {%- endif %}
-        </div>
-      </a>
+        <p class="work-cta">
+          <a href="{{ story.url | relative_url }}" aria-labelledby="work-cta-{{ row_id }} work-title-{{ row_id }}"><span id="work-cta-{{ row_id }}">Read the case</span><span aria-hidden="true">&#8594;</span></a>
+        </p>
+      </div>
     </li>
     {%- endfor %}
   </ol>
