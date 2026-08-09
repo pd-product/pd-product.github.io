@@ -31,14 +31,22 @@
    the reveal never played at all on a desktop. Every card was simply un-hidden
    off-screen.
 
-   The fix relies on a guarantee in the IntersectionObserver spec: observe()
-   queues an initial notification carrying the element's current state, whether
-   or not it intersects. A live observer therefore always calls back within a
-   frame or two of mount. One callback of any kind proves it works, so the
-   timer is cancelled and the reveal is left to play whenever the reader
-   arrives. No callback by 1200ms means the observer is the broken kind, and
-   the cards go visible. Both the failure the handoff saw and the animation it
-   asked for are preserved; a flat deadline cannot do both.
+   The fix relies on a live observer always calling back once, even when
+   nothing intersects. That falls out of the spec's own bookkeeping rather than
+   from a sentence promising it: observe() records the target with
+   `previousThresholdIndex` set to -1, and the update steps queue an entry
+   whenever the computed thresholdIndex differs from it. -1 is not a value any
+   computation produces, so the first pass always differs and always queues.
+
+   So one callback of any kind proves the observer works: the timer is
+   cancelled and the reveal is left to play whenever the reader arrives. No
+   callback by 1200ms means the observer is the broken kind, and the cards go
+   visible. Confirmed on the built page -- three seconds after an unscrolled
+   desktop load the cards are still hidden, which is only possible if the floor
+   was cancelled by a callback for cards that were nowhere near the viewport.
+
+   Both the failure the handoff saw and the animation it asked for are
+   preserved; a flat deadline cannot do both.
 
    The reduced-motion check is in this file and not only in the stylesheet for
    the same reason: under `reduce` the script must not APPLY the hidden state,
@@ -127,12 +135,19 @@
   /* Floor 4. Printing renders the whole document, including everything below
      the reader's scroll position that has therefore never been revealed.
 
-     TWO LISTENERS, because no single one covers every browser. beforeprint is
-     the Chrome and Firefox route and runs early enough for the paint that
-     follows. Safari does not implement it at all -- on desktop or iOS -- and
-     instead flips a matchMedia('print') query, so Safari needs the second one
-     or it prints a page of blank cards. Both call the same function, and
-     showAll is idempotent, so a browser that fires both does no extra work. */
+     beforeprint carries this in every current browser -- Chrome, Firefox and
+     Safari, the last since Safari 13 and iOS 13, per MDN's compatibility data.
+     It runs early enough for the paint that follows.
+
+     The matchMedia('print') query below is NOT a Safari fallback. It is there
+     for the case beforeprint cannot express: a renderer that is ALREADY in
+     print media when the document loads never fires an event, because nothing
+     transitions. That is checked at registration; the change listener beside
+     it is cheap cover for a headless print pipeline that switches media
+     without dispatching beforeprint.
+
+     Both routes call the same function, and showAll is idempotent, so a
+     browser that takes both does no extra work. */
   addEventListener('beforeprint', showAll);
 
   var printQuery = window.matchMedia && window.matchMedia('print');
