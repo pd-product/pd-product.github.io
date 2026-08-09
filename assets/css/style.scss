@@ -1327,6 +1327,34 @@ a:hover { color: var(--text); }
   .site-header { padding: 16px var(--gutter); }
   .site-nav ul { gap: 16px; }
 
+  /* The header drops the nav onto its own row rather than breaking words.
+     Four nav items do not fit beside the wordmark below about 384px: measured
+     at 375, which is the iPhone SE and the 13 mini, the row overflowed and
+     flex shrank both items until "pat diggins" broke to two lines and "off
+     hours" broke to "off / hours". The header went 51px to 69px and read as
+     damaged. Three items fitted, so this arrived with the fourth.
+
+     nowrap is what makes it a WRAP rather than a squeeze: it stops each item
+     shrinking below its own text, so the header has no choice but to move the
+     nav down. flex-wrap then does it at exactly the width where it stops
+     fitting, which is why there is no new breakpoint here -- add one and it is
+     wrong for the next label the nav gains.
+
+     This is the header wrap CLAUDE.md already names as the remedy for header
+     crowding.
+
+     SCOPED TO THE WORDMARK HEADER, and that scope is load-bearing. Story pages
+     carry a breadcrumb instead, and the crumb is MEANT to absorb the squeeze
+     by truncating -- CLAUDE.md calls that the thing keeping a long crumb from
+     pushing the nav off the row. `flex-wrap: wrap` would defeat it: wrapping
+     is decided on each item's hypothetical size, so an over-long item moves to
+     the next line INSTEAD of shrinking, and flex-shrink never runs. Applied
+     unscoped, this grew the story header from 48px to 75px at every width
+     below 640 and stopped the ellipsis engaging at all. */
+  .site-header-wordmark { flex-wrap: wrap; row-gap: 12px; }
+  .site-title,
+  .site-nav a { white-space: nowrap; }
+
   /* Do NOT hide the first crumb here to save room. It is the only link inside
      <nav aria-label="Breadcrumb">, and hiding it leaves a navigation landmark
      with nothing to navigate to. The ellipsis on the current crumb is what
