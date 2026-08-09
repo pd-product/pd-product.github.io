@@ -64,9 +64,10 @@ Nothing guards `category`, `description` or `date`, and each fails silently rath
 - `category` leaves an empty eyebrow on the home row and a dangling `01 /` on the story page when
   it is missing. It also drops the story-header field tint, since that is keyed to the value.
 - `description` does not render on the home row, but it is still required: it is the line under the
-  story title AND the page's meta description. Omit it and `jekyll-seo-tag` falls back to the page
-  excerpt -- the first block of the body -- so the story goes to search results and link previews
-  described by its own opening heading. Nothing on the page shows you it is gone.
+  story title AND the page's meta description. Omitting it visibly removes that summary line from
+  the story page, and silently corrupts the metadata -- `jekyll-seo-tag` falls back to the page
+  excerpt, which is the first block of the body, so the story goes to search results and link
+  previews described by its own opening heading. Only the second half is quiet.
 - `date` has a silent WRONG default rather than an absent one. Without it Jekyll stamps build time,
   so `datePublished` and the sitemap's `lastmod` move on every deploy and re-announce the story as
   new. Use the date the story was published, not the date you are editing.

@@ -191,7 +191,7 @@ same note in the data file.
     {%- for stop in site.data['path-here'] %}
     <li class="path-stop">
       <p class="path-year">{{ stop.year }}</p>
-      <p>{{ stop.copy }}</p>
+      <p class="path-copy">{{ stop.copy }}</p>
     </li>
     {%- endfor %}
   </ol>
@@ -201,7 +201,8 @@ same note in the data file.
 Six cards from _data/off-hours.yml. The numeral is derived from position, not
 stored, so reordering the data renumbers the grid; see the note in that file.
 
-`label` prints unescaped because three labels carry HTML entities. The card
+`label` and `copy` both print unescaped because both carry HTML entities --
+two labels have `&amp;`, and one card's copy has `&gt;`. The card
 is a plain <li> and the reveal animation attaches nothing here -- the hidden
 state is applied by assets/js/off-hours.js at runtime, so a page loaded with
 no JavaScript shows every card. That is the point of doing it that way round.
@@ -213,7 +214,7 @@ no JavaScript shows every card. That is the point of doing it that way round.
     <li class="off-hours-card">
       <p class="off-hours-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
       <p class="off-hours-label">{{ entry.label }}</p>
-      <p>{{ entry.copy }}</p>
+      <p class="off-hours-copy">{{ entry.copy }}</p>
     </li>
     {%- endfor %}
   </ul>

@@ -87,9 +87,7 @@ h3, a blockquote, code or a Markdown table.
 
 ## Constraints I was handed    {#constraints}
 
-- Author this as a plain markdown unordered list; the CSS supplies the accent
-  square. An ordered list still renders, numbered `01`, `02`, but the
-  constraints chapter is not what that treatment is for any more.
+- Author ordered lists as plain markdown; the CSS supplies the `01`, `02`.
 - Keep them short -- they sit beside the prose measure, not inside it.
 - The `role="list"` line below is not decoration: the `list-style: none` reset
   drops the implicit list role in Safari with VoiceOver.

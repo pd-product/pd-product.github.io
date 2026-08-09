@@ -604,7 +604,18 @@ a:hover { color: var(--text); }
 
 .path-stop:last-child .path-year { color: var(--accent); }
 
-.path-stop p {
+/* A CLASS, not `.path-stop p`, and that is a correctness fix rather than a
+   style preference. The handoff specified the descendant form, which scores
+   (0,1,1) and therefore outranks the single-class `.path-year` above it: the
+   year rendered at 15px Helvetica in --meta instead of 12px mono in
+   --nav-muted, at every width, and the mobile overrides lost to it too.
+   Measured before this change, `.path-year` computed to 15px / Helvetica Neue
+   / rgb(200,205,210).
+
+   The same trap sits in `.off-hours-card`. Both are class-based now, which is
+   also what the file header asks for, and neither can be outranked by a
+   sibling in the same block. */
+.path-copy {
   font: 400 15px/1.5 var(--sans);
   color: var(--meta);
   text-wrap: pretty;
@@ -658,7 +669,14 @@ a:hover { color: var(--text); }
   color: var(--text);
 }
 
-.off-hours-card p {
+/* A class, for the reason spelled out on .path-copy above: the handoff's
+   `.off-hours-card p` outranked both `.off-hours-numeral` and
+   `.off-hours-label`, so the 34px display numeral rendered at 15px Helvetica
+   and the 11px mono label rendered at 15px Helvetica as well. Only `font` and
+   `color` were lost, which is why it did not look obviously broken --
+   text-transform and letter-spacing still applied, so the labels were
+   uppercase in the wrong face at the wrong size. */
+.off-hours-copy {
   font: 400 15px/1.6 var(--sans);
   color: var(--muted);
   text-wrap: pretty;
@@ -1003,11 +1021,18 @@ a:hover { color: var(--text); }
    numbers were: the source stays a plain heading and nothing has to be
    renumbered when a story adds or drops a chapter.
 
-   The rail carries the matching counter and the two CANNOT drift, which is
-   worth being explicit about because it is a property of the include rather
-   than of these rules: _includes/chapter-rail.html generates exactly one entry
-   per `.story-prose > h2`, in document order, so both counters walk the same
-   set in the same sequence from the same origin.
+   The rail carries the matching counter, and the two agree FOR A STORY THAT
+   HONOURS THE ANCHOR CONTRACT -- which is a property of the include, not of
+   these rules. _includes/chapter-rail.html emits one entry per heading whose
+   rendered opener starts `<h2 id="`, in document order, so on a conforming
+   story both counters walk the same set in the same sequence.
+
+   They CAN disagree, and it is worth knowing how: this rule counts every
+   direct h2, while the include matches only anchored ones. A heading written
+   without `{#id}`, or with the `{: .class #id}` form that renders the class
+   first, is numbered in the prose and absent from the rail, so every rail
+   number after it lags. README already calls a missing anchor a visible
+   failure; this is the second way it shows.
 
    decimal-leading-zero, not a literal "0" prefix -- the literal form renders
    "010" at ten chapters. Same reasoning as the constraint counter and the
@@ -1084,9 +1109,11 @@ a:hover { color: var(--text); }
    ever needs a second, differently marked list, that is the point to add the
    hook, not before.
 
-   The 9px top margin is what sits the square on the first line's optical
-   centre at the 16px/1.66 the list items use. It is tied to that type, so
-   re-measure it if the list type changes. */
+   The 9px top margin is tuned to the 16px/1.66 the list items use: measured,
+   it puts the square's centre at 11.5px against a 26.6px line box, so it sits
+   just above the line's geometric middle and level with the lowercase text
+   rather than the full line height. It is tied to that type -- re-measure if
+   the list type changes. */
 .story-prose ul > li::before {
   content: "";
   flex: none;

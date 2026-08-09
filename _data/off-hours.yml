@@ -9,11 +9,11 @@
 # disagree with where the card actually sits. The first card's numeral takes
 # the accent; that is a :first-child rule in the stylesheet, not a field here.
 #
-# `label` and `copy` are printed WITHOUT the `escape` filter, because two
-# labels carry HTML entities the source has to keep as entities to stay ASCII:
-# `&amp;` in two of them and `&gt;` in the third. Escaping them would render
-# the entity text itself, as "&amp;". Anything added here follows the same
-# rule -- write the entity, not the character.
+# `label` and `copy` are BOTH printed without the `escape` filter, because
+# both carry HTML entities the source has to keep as entities to stay ASCII:
+# `&amp;` in the labels of entries 3 and 4, and `&gt;` in the copy of entry 3.
+# Escaping them would render the entity text itself, as "&amp;". Anything added
+# here follows the same rule -- write the entity, not the character.
 #
 # Three cards per row above 960px, two below it, one below 640px, so six
 # entries fill the grid at every width. A seventh would leave a gap at the

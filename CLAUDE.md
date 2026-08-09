@@ -24,9 +24,11 @@ not raise them again unprompted.
   is deliberately not an open-source licence. Adopting a recognised one to make GitHub's label
   tidier would grant rights the owner withholds.
 - **No analytics, JS libraries, CDN dependencies, or dark/light toggle.** Dark and light are pure
-  `prefers-color-scheme`. There are exactly two scripts -- the chapter-rail reading state and the
-  Off hours reveal -- both vanilla, both progressive enhancement, and both of which must stay
-  optional. The bar for a third is that the page is complete and correct without it. For the
+  `prefers-color-scheme`. There are exactly two executable JavaScript assets -- the chapter-rail
+  reading state and the Off hours reveal -- both vanilla, both progressive enhancement, and both of
+  which must stay optional. (The `<script type="application/ld+json">` blocks in
+  `_layouts/default.html` and from `{% seo %}` are structured data, not behaviour, and are not
+  counted here.) The bar for a third is that the page is complete and correct without it. For the
   reveal that means the hidden state is applied FROM the script and never from the stylesheet, so
   no JavaScript means no animation rather than no content.
 

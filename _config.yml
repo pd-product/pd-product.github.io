@@ -70,8 +70,9 @@ linkedin: "https://www.linkedin.com/in/patrick-diggins/"
 # The home page carries a fifth anchored section, #path-here, which is
 # deliberately NOT in the nav: it is context for the sections around it rather
 # than a destination, and a five-item mono row starts wrapping at the phone
-# breakpoint. The id exists so the section is a labelled landmark and so it can
-# be linked directly.
+# breakpoint. Its id is the fragment target, so it can still be linked
+# directly. What makes it a landmark is separate -- the aria-labelledby on the
+# section in index.html, which is what gives it an accessible name.
 nav:
   - title: "work"
     url: "/#work"

@@ -39,11 +39,18 @@
    computation produces, so the first pass always differs and always queues.
 
    So one callback of any kind proves the observer works: the timer is
-   cancelled and the reveal is left to play whenever the reader arrives. No
-   callback by 1200ms means the observer is the broken kind, and the cards go
-   visible. Confirmed on the built page -- three seconds after an unscrolled
-   desktop load the cards are still hidden, which is only possible if the floor
-   was cancelled by a callback for cards that were nowhere near the viewport.
+   cancelled and the reveal is left to play whenever the reader arrives.
+   Confirmed on the built page -- three seconds after an unscrolled desktop
+   load the cards are still hidden, which is only possible if the floor was
+   cancelled by a callback for cards nowhere near the viewport.
+
+   1200ms IS A FAIL-OPEN DEADLINE, NOT A PROOF OF DEATH. The notification is
+   delivered on a rendering update, and nothing bounds how long a stalled main
+   thread can defer that. A live-but-late observer is therefore misread as dead
+   and the cards are shown without animating. That is the correct way to be
+   wrong here, and it is why showAll disconnects: a callback arriving after the
+   deadline cannot re-hide or re-animate anything. The cost is the animation;
+   the content is never at risk.
 
    Both the failure the handoff saw and the animation it asked for are
    preserved; a flat deadline cannot do both.
@@ -77,6 +84,7 @@
      disconnect it and the floors that call showAll are armed first. It stays
      null until there is something to disconnect. */
   var observer = null;
+  var rescued = false;
 
   /* Play a card in. The delay has to be set BEFORE the attribute comes off:
      the transition is computed at the moment the hidden state is removed. */
@@ -99,12 +107,25 @@
      them safe, and is why the flag goes on the SECTION: one attribute, one
      rule, no per-card inline styles to unpick. */
   function showAll() {
+    rescued = true;
     section.setAttribute('data-reveal-done', '');
+    /* May be null when a floor fires before the observer is built -- the
+       print-at-mount check does exactly that. `rescued` is what stops one
+       being constructed afterwards. */
     if (observer) observer.disconnect();
     for (var i = 0; i < cards.length; i++) {
       cards[i].style.transitionDelay = '';
       cards[i].removeAttribute('data-reveal');
     }
+  }
+
+  /* True once any card has begun revealing. A rescue is only warranted while
+     something is actually in flight; see the visibilitychange floor. */
+  function started() {
+    for (var i = 0; i < cards.length; i++) {
+      if (!cards[i].hasAttribute('data-reveal')) return true;
+    }
+    return false;
   }
 
   /* The stagger runs across a row, so it needs the column count -- which is a
@@ -126,10 +147,19 @@
      become a deadline the reader has to beat by scrolling. */
   var floor = setTimeout(showAll, 1200);
 
-  /* Floor 3. A backgrounded tab stops delivering both frames and observer
-     callbacks, so a card mid-transition would stay part-faded. */
+  /* Floor 3. A backgrounded tab stops delivering frames, so a card caught
+     mid-transition would stay part-faded when the tab is next shown.
+
+     ONLY WHEN SOMETHING IS ACTUALLY IN FLIGHT. An earlier version rescued on
+     every visibilitychange, which meant switching tabs once -- before ever
+     scrolling to this section -- set the rescue flag, disconnected the
+     observer and forfeited the animation for the rest of the page's life.
+     Nothing was in danger in that state: the cards were hidden, off-screen and
+     waiting, which is exactly where they should be. A rescue is for finishing
+     an animation that cannot finish itself, not for pre-empting one that has
+     not begun. */
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) showAll();
+    if (document.hidden && started()) showAll();
   });
 
   /* Floor 4. Printing renders the whole document, including everything below
@@ -172,9 +202,12 @@
     }
   }
 
-  /* No observer support: the cards are already visible content, so show them
-     and stop. Cancel the timer first so it has nothing left to do. */
-  if (typeof IntersectionObserver !== 'function') {
+  /* Nothing left to observe. Either a floor already fired -- the print-media
+     check above runs before this point and can rescue everything -- or there
+     is no IntersectionObserver to build, in which case the cards are visible
+     content and simply stay visible. Building an observer after a rescue would
+     leave a live callback writing transitionDelay onto finished cards. */
+  if (rescued || typeof IntersectionObserver !== 'function') {
     clearTimeout(floor);
     showAll();
     return;
@@ -185,23 +218,29 @@
      once the element reaches the remaining 94%.
 
      THE ENORMOUS TOP MARGIN IS NOT PADDING, IT IS WHAT MAKES THE TEST
-     MONOTONIC, and without it the section can be left permanently blank.
-     IntersectionObserver reports CHANGES to isIntersecting. With a plain root,
-     a card that is below the viewport and then above it -- one jump, no
-     intermediate frame -- is not intersecting at either end, so no change is
-     reported and the callback never runs. The card stays hidden for the rest
-     of the page's life, and scrolling back up does not help: it is above the
-     trigger line, not below it.
+     MONOTONIC. IntersectionObserver reports CHANGES to isIntersecting. With a
+     plain root, a card that is below the viewport and then above it -- one
+     jump, no intermediate frame -- is not intersecting at either end, so no
+     change is reported and the callback never runs. The card is left marked
+     hidden while sitting above the reader.
 
-     That is reachable in one click. `contact` is in the nav on every page and
+     That is reachable in one click: `contact` is in the nav on every page and
      `/#contact` lands well past this section. Measured at 320x568 before this
-     margin existed: after that jump all six cards sat above the viewport,
-     all six still hidden, and scrolling back up revealed only the three that
-     happened to re-cross the line.
+     margin existed, after that jump all six cards sat above the viewport and
+     all six were still marked hidden.
+
+     To be accurate about the consequence, because an earlier version of this
+     note overstated it: those cards are not lost for the life of the page. A
+     reader who scrolls back up re-enters them through the root's top edge,
+     which IS a change, and they reveal then. The real defects are that content
+     above the reader is in a hidden state at all -- print and screenshot both
+     render the whole document -- and that scrolling UPWARD triggers an
+     entrance animation on cards the reader has already passed, which is
+     backwards.
 
      Extending the root 100000px upward means anything at or above the line is
      always inside it. isIntersecting then only ever goes false -> true, the
-     jump is a change, and the callback fires. */
+     jump is a change, and a card that has been passed counts as seen. */
   observer = new IntersectionObserver(function (entries) {
     /* Proof of life. The spec guarantees an initial notification per observed
        element, so reaching this line at all means the observer works and the
