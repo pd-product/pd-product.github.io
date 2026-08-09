@@ -73,9 +73,22 @@ failure mode in every case is silent.
 
 ## Known and accepted
 
-Below roughly 305px the breadcrumb's fixed portion can overflow toward the nav. That is below the
-320px narrowest common device, so it is accepted rather than outstanding. The fix, if it is ever
-wanted, is a header wrap or stack -- not re-hiding the first crumb, for the reason above.
+A story page is clean down to 275px and scrolls horizontally at 270px and below: `.site-nav` runs
+past the right edge, giving `scrollWidth` 272 against `clientWidth` 270. That is well below the
+320px narrowest common device, so it is accepted rather than outstanding.
+
+THE BREADCRUMB IS NOT THE CAUSE, and this is worth stating because it is the thing that looks like
+it. The gap between the crumb and the nav holds at a constant 24px at every width down to 270 -- the
+crumb truncates as designed and never reaches the nav. It is the nav row itself that will not fit.
+
+The fix, if it is ever wanted, is the header wrap the home page and 404 already have: those two
+carry `.site-header-wordmark`, which below 640px is free to drop the nav onto its own row at
+whatever width it stops fitting, and they are therefore clean down to 250px. Story pages
+deliberately do not get that rule -- `flex-wrap: wrap` moves an over-long crumb to the next line
+INSTEAD of shrinking it, which defeats the truncation the crumb depends on; the scope is explained
+on the rule in `assets/css/style.scss` and in `_includes/nav.html`. So the fix is a wrap or stack
+that story pages can take without losing the ellipsis, not re-hiding the first crumb, for the
+reason above.
 
 ## Verifying
 

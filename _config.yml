@@ -182,7 +182,27 @@ plugins:
 
 # `jekyll-optional-front-matter` renders any .md file with no front matter as a
 # live page, so an un-excluded note at the root becomes a published, indexed URL.
+#
+# `temp/` is session scratch and is in .gitignore, so it does not reach Pages
+# today. It is excluded anyway, because .gitignore is the WRONG layer to be
+# relying on: a local build without this line copies the whole directory into
+# _site and puts every .html in it into sitemap.xml as a real pdiggins.com URL.
+# That makes the local build stop matching what Pages serves, which is the one
+# thing the verification routine depends on -- and it means the day anything in
+# temp/ is deliberately committed, it publishes. Keep the exclusion independent
+# of whether the directory is tracked.
 exclude:
   - README.md
   - CLAUDE.md
   - Gemfile
+  - temp/
+
+# Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded,
+# so without this line a local build produces /assets/css/style.css at 58KB with
+# all 90 source comments intact while the deployed file is 18KB with none. The
+# cascade is identical either way, so nothing RENDERS differently -- but any
+# size or content measurement taken from a local build is off by more than 3x,
+# and checking the built output is how this repo verifies. Keep local equal to
+# deployed.
+sass:
+  style: compressed
