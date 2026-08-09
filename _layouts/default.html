@@ -84,6 +84,34 @@
     <link rel="icon" href="{{ '/assets/favicon-32.png' | relative_url }}" sizes="32x32">
     <link rel="icon" href="{{ '/assets/favicon-512.png' | relative_url }}" sizes="512x512">
     <link rel="apple-touch-icon" href="{{ '/assets/favicon-180.png' | relative_url }}">
+    {%- comment -%}
+    ONE face is preloaded, and this is the one: Space Grotesk Regular is the
+    weight 400 that sets the largest type on EVERY page type -- the hero h1 at
+    47px, the story title at 41px, the section headings at 34px and the work
+    numerals at 132px. The other three faces stay unpreloaded on purpose. Plex
+    Medium and Space Grotesk Medium are conditional -- neither appears on all
+    pages -- so preloading them would compete for bandwidth with the one face
+    that always matters, and would be a wasted fetch wherever it is unused.
+
+    `crossorigin` IS REQUIRED even though the font is same-origin. Font requests
+    are made in CORS mode, and a preload without the attribute does not match
+    the request the stylesheet later makes, so the file is fetched TWICE. The
+    attribute is valueless here, which is the anonymous mode fonts need.
+
+    THIS MUST STAY ABOVE THE STYLESHEET, which is the whole point of it. An
+    @font-face src is only discovered once the stylesheet has been fetched and
+    parsed, so the font would otherwise wait out that round trip; declared here
+    it starts alongside the CSS instead.
+
+    WHAT IT BUYS IS A SHORTER SWAP, NOT A LAYOUT FIX. `font-display: swap` plus
+    the metric-matched "Display Fallback" face already stop the headline
+    REFLOWING when the real font lands -- see the metrics note in
+    assets/css/style.scss. What they do not stop is the swap being visible: the
+    fallback's x-height runs large, so first paint is a different weight and
+    size. This shortens the time that mismatched paint is on screen and changes
+    no geometry.
+    {%- endcomment -%}
+    <link rel="preload" href="{{ '/assets/fonts/SpaceGrotesk-Regular.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
   </head>
   <body>
