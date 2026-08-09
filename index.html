@@ -49,14 +49,26 @@ of the text onto the page as visible content.
   </ul>
 </section>
 
-<section id="work" class="work-list">
+<section id="work" class="work-list" aria-labelledby="work-heading">
   {%- comment -%}
-  The design has no visible "Work" heading, but the nav anchors here and a
-  labelled landmark needs one, so it is hidden rather than removed. Uses the
-  shared .sr-only utility; the stylesheet previously carried a second,
-  near-identical hiding rule for this one element.
+  The design has no visible "Work" heading, but the nav anchors here and the
+  section needs a name, so it is hidden rather than removed. Uses the shared
+  .sr-only utility; the stylesheet previously carried a second, near-identical
+  hiding rule for this one element.
+
+  THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and
+  every section on this page carries one for that reason. A <section> maps to
+  role="region" ONLY when it has an accessible name, and an accessible name
+  comes from aria-label or aria-labelledby, never from a descendant heading.
+  Verified in the rendered accessibility tree: before these attributes existed
+  the page exposed banner, main, contentinfo and one navigation, and not one
+  of the five sections appeared at all. The headings were reachable by heading
+  navigation the whole time; the landmarks the nav mirrors were not.
+
+  Removing an aria-labelledby, or an id it points at, silently demotes that
+  section back to a generic box. Nothing on screen changes.
   {%- endcomment -%}
-  <h2 class="sr-only">Work</h2>
+  <h2 class="sr-only" id="work-heading">Work</h2>
   {%- comment -%}
   role="list" is not redundant here. The stylesheet's `ul, ol { list-style:
   none }` reset removes the implicit list role in Safari with VoiceOver, so
@@ -173,8 +185,8 @@ anything here.
 `year` prints unescaped because it carries `&middot;` as an entity; see the
 same note in the data file.
 {%- endcomment -%}
-<section id="path-here" class="path-here">
-  <h2>The path here</h2>
+<section id="path-here" class="path-here" aria-labelledby="path-here-heading">
+  <h2 id="path-here-heading">The path here</h2>
   <ol class="path-grid" role="list">
     {%- for stop in site.data['path-here'] %}
     <li class="path-stop">
@@ -194,8 +206,8 @@ is a plain <li> and the reveal animation attaches nothing here -- the hidden
 state is applied by assets/js/off-hours.js at runtime, so a page loaded with
 no JavaScript shows every card. That is the point of doing it that way round.
 {%- endcomment -%}
-<section id="off-hours" class="off-hours">
-  <h2>Off hours</h2>
+<section id="off-hours" class="off-hours" aria-labelledby="off-hours-heading">
+  <h2 id="off-hours-heading">Off hours</h2>
   <ul class="off-hours-grid" role="list">
     {%- for entry in site.data['off-hours'] %}
     <li class="off-hours-card">
@@ -207,8 +219,8 @@ no JavaScript shows every card. That is the point of doing it that way round.
   </ul>
 </section>
 
-<section id="about" class="about">
-  <h2>About</h2>
+<section id="about" class="about" aria-labelledby="about-heading">
+  <h2 id="about-heading">About</h2>
   <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
   {%- comment -%}
   Same pattern and the same reason as .work-copy: without this wrapper the two
@@ -221,8 +233,8 @@ no JavaScript shows every card. That is the point of doing it that way round.
   </div>
 </section>
 
-<section id="contact" class="contact">
-  <h2>Contact</h2>
+<section id="contact" class="contact" aria-labelledby="contact-heading">
+  <h2 id="contact-heading">Contact</h2>
   <!-- Links only: GitHub Pages has no server, so there is no form to submit.
        Each link renders only once its value is set in _config.yml, so an
        unfinished site shows a short list rather than live broken links. The
