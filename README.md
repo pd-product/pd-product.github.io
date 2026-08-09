@@ -129,9 +129,11 @@ So: chapters are `h2`, and everything under them is paragraphs, lists and figure
 genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed
 first -- it is not an authoring decision to make mid-story.
 
-Ordered lists are numbered by CSS, so author them as plain markdown ordered lists and let the
-counter supply `01`, `02`. Add `{: role="list"}` after a list, as the existing stories do: the
-`list-style: none` reset drops the implicit list role in Safari with VoiceOver.
+Both list forms are styled and neither takes a marker in the source. An unordered list gets an
+accent square, which is what the constraints chapter uses. An ordered list is numbered by CSS, so
+author it as a plain markdown ordered list and let the counter supply `01`, `02`. Add
+`{: role="list"}` after a list, as the existing stories do: the `list-style: none` reset drops the
+implicit list role in Safari with VoiceOver.
 
 ## Assets
 

@@ -25,8 +25,28 @@ own `<!-- End Jekyll SEO tag -->` closed this comment early, leaking the rest
 of the text onto the page as visible content.
 {%- endcomment -%}
 <section class="intro">
-  <p class="eyebrow">senior pm &middot; solving problems with ai</p>
-  <h1>I own platform businesses and build on them. These are the calls I made, including the ones I would make differently.</h1>
+  <p class="eyebrow">solving problems with ai</p>
+  <h1>I turn problems people have learned to work around into products they can actually use.</h1>
+  {%- comment -%}
+  Four facts and three separators, each its own element. The separators are
+  marked up rather than generated for the same reason as .site-crumb-sep:
+  generated text may be announced depending on browser and assistive
+  technology, and a pseudo-element cannot carry aria-hidden. Decorative text
+  has to be marked up to be hideable.
+
+  role="list" for the reason every other list here carries it -- the
+  `list-style: none` reset drops the implicit list role in Safari with
+  VoiceOver.
+  {%- endcomment -%}
+  <ul class="facts" role="list">
+    <li>new york</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>senior pm at microsoft</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>pc gamer</li>
+    <li class="facts-sep" aria-hidden="true">&middot;</li>
+    <li>ice cream, all seasons</li>
+  </ul>
 </section>
 
 <section id="work" class="work-list">
@@ -118,8 +138,8 @@ of the text onto the page as visible content.
   rail-height below the photo. The wrapper is unstyled apart from its placement.
   {%- endcomment -%}
   <div class="about-copy">
-    <p>I work on the platforms that sit between publishers and the demand that pays for their content. My career has moved steadily toward the decisions behind technical products, and I got there by taking on that work before it was mine to do. Lately that includes writing code with AI agents.</p>
-    <p>In January 2026 I went from AI skeptic to AI native, now building work and personal tools daily.</p>
+    <p>I started in customer-facing roles and moved into product by taking on technical problems before they were mine to solve. Today I own publisher platforms and follow problems from customer workflow through data, architecture, implementation, and adoption.</p>
+    <p>I make the product call, stay close enough to test it, and use AI to investigate, build, and ship.</p>
   </div>
 </section>
 

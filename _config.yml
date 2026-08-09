@@ -64,11 +64,19 @@ linkedin: "https://www.linkedin.com/in/patrick-diggins/"
 # to crawlers again unless it is excluded.
 
 # Nav is data, not markup: edited here, rendered by _includes/nav.html.
-# Two of the three are anchors on the home page, so they are written as
-# absolute paths and work from story pages too.
+# All four are anchors on the home page, so they are written as absolute paths
+# and work from story pages too.
+#
+# The home page carries a fifth anchored section, #path-here, which is
+# deliberately NOT in the nav: it is context for the sections around it rather
+# than a destination, and a five-item mono row starts wrapping at the phone
+# breakpoint. The id exists so the section is a labelled landmark and so it can
+# be linked directly.
 nav:
   - title: "work"
     url: "/#work"
+  - title: "off hours"
+    url: "/#off-hours"
   - title: "about"
     url: "/#about"
   - title: "contact"
@@ -131,7 +139,7 @@ og_image:
   # Describes what the CARD LOOKS LIKE, not what it says. Someone who hears this
   # is about to meet the headline again as page text; repeating it here makes
   # them listen to it twice and tells them nothing about the image.
-  alt: "A dark share card: a small green monospace line reading senior pm, solving problems with ai, above a large four-line headline, with the name Pat Diggins and pdiggins.com along the bottom."
+  alt: "A dark share card: a small green monospace line reading solving problems with ai, above a large four-line headline, with the name pat diggins and pdiggins.com along the bottom."
 
 # The person this site is about. Rendered as a ProfilePage + Person JSON-LD
 # block on the HOME PAGE ONLY, by _layouts/default.html. Data, not markup, so

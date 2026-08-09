@@ -44,17 +44,17 @@ tradeoffs:
 published: true
 ---
 
-## The situation    {#situation}
+## How it started    {#situation}
 
 Early in 2026 I spent a while researching investment and tax strategy to revamp our portfolios, then hired a financial planner for a short engagement to pressure-test what I had come up with. That left me with several jobs that would recur indefinitely, the most tedious being portfolio rebalancing and estimated tax payments. Both are the kind of work that is straightforward in principle and miserable in practice, because doing them properly means holding a lot of interacting rules in your head at once.
 
 I started building the rebalancing model in a spreadsheet. Fairly early on it became clear that it would be too tedious and time consuming to maintain. This was the same period I was learning what agentic coding tools could actually do at work, so I decided to find out what I could build instead. The tension was mundane and familiar: the obvious solution was the one I would end up avoiding.
 
-## Constraints I was handed    {#constraints}
+## Constraints I set myself    {#constraints}
 
-1. The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
-2. Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
-3. The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
+- The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
+- Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
+- The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
 {: role="list"}
 
 ## The call I made    {#the-call}
@@ -65,7 +65,7 @@ The expected option was a spreadsheet, or paying for a product that does some of
 
 I kept Monarch for aggregating and exporting the data, which is the part it does better than anything I would write, and built tools that consume that export. That boundary meant I never had to rebuild aggregation. The tools now cover rebalancing, estimated tax payments, spend analysis, and budgeting.
 
-## What shipped    {#shipped}
+## What I built    {#shipped}
 
 A suite of Python tools covering rebalancing, estimated tax payments, spend analysis, and budgeting. The obvious benefit is that they save me the manual work. The one I did not anticipate is that they let me run each exercise as often as I want, more accurately and in more depth than I otherwise would. That turned out to be the actual value, and it matches what I found using the same tools at work. The real gain was reaching analysis I would otherwise have skipped.
 

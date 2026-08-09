@@ -52,9 +52,9 @@ Through late 2025 and early 2026 we tried several fixes. Each one closed part of
 
 ## Constraints I was handed    {#constraints}
 
-1. The proposal came from two engineering leaders who had thought about it carefully and were confident in it.
-2. My doubt was anecdotal, based on patterns I had noticed in customer setups, and there was no existing analysis that could confirm or refute it.
-3. Several partial fixes had already been spent on this, so proposing another delay needed to be worth it.
+- The proposal came from two engineering leaders who had thought about it carefully and were confident in it.
+- My doubt was anecdotal, based on patterns I had noticed in customer setups, and there was no existing analysis that could confirm or refute it.
+- Several partial fixes had already been spent on this, so proposing another delay needed to be worth it.
 {: role="list"}
 
 ## The call I made    {#the-call}

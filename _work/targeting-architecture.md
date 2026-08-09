@@ -1,6 +1,6 @@
 ---
 slug: "targeting-architecture"
-title: "Rebuilding how publishers target their inventory"
+title: "Rebuilding targeting around how publishers sell"
 # Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "targeting architecture"
@@ -10,9 +10,10 @@ crumb: "targeting architecture"
 # the body -- the opening `## ` heading. Search and link previews then read
 # "The situation".
 description: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
-# One line, shown on the home-page row under the description. A trim of this
-# story's own "What I would redo" chapter, approved as written.
-lesson: "Treat the customer experience of a transition as part of the design, not as something that follows it."
+# One line, shown on the home-page row. A trim of this story's own "What I
+# would redo" chapter, approved as written; the full sentence stays in that
+# chapter and this is deliberately the shorter form.
+lesson: "Treat the customer experience of a transition as part of the design."
 category: "supply"
 order: 1
 # Publication date of this page, not the date of the work it describes. Without
@@ -54,9 +55,9 @@ Customers were direct with me about how prohibitive this overhead was. They had 
 
 ## Constraints I was handed    {#constraints}
 
-1. The existing model was live and carrying real publisher revenue, so nothing could break for anyone already running on it.
-2. The only alternative on the table was making no investment at all and letting first-party and third-party publishers keep absorbing the friction.
-3. Ownership of the core targeting logic was genuinely unsettled between engineering teams, and engineering leadership had to settle it before the work could be assigned.
+- The existing model was live and carrying real publisher revenue, so nothing could break for anyone already running on it.
+- The only alternative on the table was making no investment at all and letting first-party and third-party publishers keep absorbing the friction.
+- Ownership of the core targeting logic was genuinely unsettled between engineering teams, and engineering leadership had to settle it before the work could be assigned.
 {: role="list"}
 
 ## The call I made    {#the-call}
