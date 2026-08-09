@@ -15,6 +15,17 @@
    Rules are class-based and named after the markup they style, in the order
    the page assembles: shell, nav, home, footer, story, responsive. Section
    headers name the file each block belongs to.
+
+   ID SELECTORS ARE AVOIDED even where an id is the obvious hook. One outranks
+   every single-class rule in this file, and several blocks below depend on
+   equal specificity with source order deciding the winner.
+
+   NO LIQUID IN THIS FILE, INCLUDING INSIDE COMMENTS. The front matter above
+   means Jekyll renders this through Liquid before Sass ever sees it, and a CSS
+   comment is not a Liquid comment. A tag written to illustrate a point in
+   prose is executed: an `if` tag failed the whole build, and an output tag
+   silently rendered as nothing and left a hole mid-sentence. Describe the
+   template in words, or name the file to read.
    ========================================================================== */
 
 /* --- Functional utility. Do not remove. -------------------------------- */
@@ -465,7 +476,7 @@ a:hover { color: var(--text); }
 
 /* Inert, like the image rules above: index.html no longer prints `description`
    on the home row. Kept rather than deleted because restoring that line is one
-   `{% if %}` in the template and should not also need a stylesheet change --
+   conditional in the template and should not also need a stylesheet change --
    the same reason the hero-figure rules are written and unused. The 62ch here
    is what .work-lesson and .about p are matched to, so it is also the record
    of what the row's measure is. */
@@ -815,8 +826,8 @@ a:hover { color: var(--text); }
    the right one: a category that is missing, misspelt, or newly invented
    matches neither selector and the header renders untinted -- which is exactly
    how every story page looked before this existed. A class emitted from the
-   same field would instead need a `.story-header-{{ category }}` rule for
-   every value and would silently render unstyled markup for the rest.
+   same field would instead need one `.story-header-<value>` rule per
+   category and would silently render unstyled markup for anything else.
 
    The home-page work rows do NOT take this. They sit on the .work-list panel,
    and three tinted bands inside one panel stops the tint meaning anything --
@@ -1019,8 +1030,8 @@ a:hover { color: var(--text); }
 }
 
 /* decimal-leading-zero, not a hardcoded "0" prefix: the literal form renders
-   "010" at ten items. The templates already derive their own numbers this way
-   (`{% if display_index < 10 %}0{% endif %}`); this matches them. */
+   "010" at ten items. The templates already derive their own numbers with a
+   conditional zero prefix; this matches them. */
 .story-prose ol > li::before {
   content: counter(constraint, decimal-leading-zero);
   flex: none;
