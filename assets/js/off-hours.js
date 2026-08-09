@@ -65,6 +65,11 @@
     window.matchMedia('(prefers-reduced-motion: reduce)');
   if (reduced && reduced.matches) return;
 
+  /* Declared here rather than at the observer below, because showAll needs to
+     disconnect it and the floors that call showAll are armed first. It stays
+     null until there is something to disconnect. */
+  var observer = null;
+
   /* Play a card in. The delay has to be set BEFORE the attribute comes off:
      the transition is computed at the moment the hidden state is removed. */
   function reveal(card, delay) {
@@ -72,16 +77,24 @@
     card.removeAttribute('data-reveal');
   }
 
-  /* Every floor calls this, so it clears the stagger rather than honouring it:
-     a floor is a rescue, not an animation.
+  /* Every floor calls this. A rescue is not an animation: it puts every card
+     in its final state NOW, kills the transition outright, and stops the
+     observer so nothing re-animates behind it.
 
-     It touches only cards that are STILL HIDDEN. Rewriting transition-delay on
-     a card already mid-transition restarts it, and the 1200ms timer would
-     otherwise do exactly that to anything revealed just before it fired. */
+     IT MUST TOUCH EVERY CARD, NOT ONLY THE STILL-HIDDEN ONES. `reveal` removes
+     data-reveal at the START of a card's animation, so between then and ~640ms
+     later (up to 140ms of stagger plus a 500ms transition) a card is
+     unmarked and still transparent. An earlier version skipped unmarked cards
+     to avoid restarting a transition; printing mid-reveal then captured
+     opacities of 0.22, 0.014 and 0 -- two cards fully invisible on the page
+     the floor exists to protect. Killing the transition is what makes touching
+     them safe, and is why the flag goes on the SECTION: one attribute, one
+     rule, no per-card inline styles to unpick. */
   function showAll() {
+    section.setAttribute('data-reveal-done', '');
+    if (observer) observer.disconnect();
     for (var i = 0; i < cards.length; i++) {
-      if (!cards[i].hasAttribute('data-reveal')) continue;
-      cards[i].style.transitionDelay = '0ms';
+      cards[i].style.transitionDelay = '';
       cards[i].removeAttribute('data-reveal');
     }
   }
@@ -118,13 +131,20 @@
      the Chrome and Firefox route and runs early enough for the paint that
      follows. Safari does not implement it at all -- on desktop or iOS -- and
      instead flips a matchMedia('print') query, so Safari needs the second one
-     or it prints a page of blank cards. Both call the same function and
-     showAll only touches cards that are still hidden, so firing both costs
-     nothing. */
+     or it prints a page of blank cards. Both call the same function, and
+     showAll is idempotent, so a browser that fires both does no extra work. */
   addEventListener('beforeprint', showAll);
 
   var printQuery = window.matchMedia && window.matchMedia('print');
   if (printQuery) {
+    /* ALREADY in print media at mount, which a `change` listener can never
+       see: a renderer that loads the document straight into print media never
+       transitions into it. Nothing else catches this either -- document.hidden
+       is false, and the observer's initial callback cancels the 1200ms floor
+       while reporting the cards as not intersecting. Measured before this
+       line existed: loading under print media left all six at opacity 0. */
+    if (printQuery.matches) showAll();
+
     if (printQuery.addEventListener) {
       printQuery.addEventListener('change', function (e) {
         if (e.matches) showAll();
@@ -167,7 +187,7 @@
      Extending the root 100000px upward means anything at or above the line is
      always inside it. isIntersecting then only ever goes false -> true, the
      jump is a change, and the callback fires. */
-  var observer = new IntersectionObserver(function (entries) {
+  observer = new IntersectionObserver(function (entries) {
     /* Proof of life. The spec guarantees an initial notification per observed
        element, so reaching this line at all means the observer works and the
        dead-observer floor must stand down. */

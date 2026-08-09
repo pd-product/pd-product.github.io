@@ -677,6 +677,21 @@ a:hover { color: var(--text); }
   transform: translateY(10px);
 }
 
+/* The rescue state. assets/js/off-hours.js sets this on the SECTION whenever a
+   floor fires, and it has to beat both the hidden rule above and any
+   in-flight transition -- printing during the reveal captured cards at
+   opacity 0.22 and 0.014 before this existed, because removing the hidden
+   attribute alone still leaves the transition running.
+
+   `transition: none` is the load-bearing declaration; opacity and transform
+   are what it lands on. One rule on an ancestor rather than inline styles per
+   card, so the script sets one attribute and there is nothing to unwind. */
+.off-hours[data-reveal-done] .off-hours-card {
+  transition: none;
+  opacity: 1;
+  transform: none;
+}
+
 /* --- Home: about + contact (index.html) --------------------------------
    Two sections in <main>, styled to read as one panel (mock option 13b).
    CONSTRAINT: both sit on the site's spine -- the 168px rail for the label, the
