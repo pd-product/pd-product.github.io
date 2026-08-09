@@ -697,7 +697,7 @@ a:hover { color: var(--text); }
 
    transition-delay is set inline by the script, because the stagger depends on
    how many columns the grid currently has and CSS cannot count them. */
-.off-hours-card { transition: opacity .5s ease, transform .5s ease; }
+.off-hours-card { transition: opacity 1s ease, transform 1s ease; }
 
 .off-hours-card[data-reveal="hidden"] {
   opacity: 0;
