@@ -59,8 +59,9 @@ omits one renders without it. Two carry a fallback rather than nothing: `crumb` 
 `title`, and `hero_alt` falls back to `title`, which is a weak image description rather than a
 visible failure, so set it whenever you set `hero_image`.
 
-Nothing guards `category`, `description` or `date`. Each fails in a way that is easy to miss --
-two of them entirely silently, and `description` half and half:
+Nothing guards `category`, `description` or `date`, and each fails differently. `category` and
+`description` leave something visibly wrong on the page; `date` is the only one that fails with no
+sign at all:
 
 - `category` leaves an empty eyebrow on the home row and a dangling `01 /` on the story page when
   it is missing. It also drops the story-header field tint, since that is keyed to the value.
