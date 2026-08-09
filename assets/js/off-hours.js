@@ -113,8 +113,29 @@
 
   /* Floor 4. Printing renders the whole document, including everything below
      the reader's scroll position that has therefore never been revealed.
-     beforeprint runs early enough for the paint that follows it. */
+
+     TWO LISTENERS, because no single one covers every browser. beforeprint is
+     the Chrome and Firefox route and runs early enough for the paint that
+     follows. Safari does not implement it at all -- on desktop or iOS -- and
+     instead flips a matchMedia('print') query, so Safari needs the second one
+     or it prints a page of blank cards. Both call the same function and
+     showAll only touches cards that are still hidden, so firing both costs
+     nothing. */
   addEventListener('beforeprint', showAll);
+
+  var printQuery = window.matchMedia && window.matchMedia('print');
+  if (printQuery) {
+    if (printQuery.addEventListener) {
+      printQuery.addEventListener('change', function (e) {
+        if (e.matches) showAll();
+      });
+    } else if (printQuery.addListener) {
+      /* Safari below 14 has only the deprecated form. */
+      printQuery.addListener(function (q) {
+        if (q.matches) showAll();
+      });
+    }
+  }
 
   /* No observer support: the cards are already visible content, so show them
      and stop. Cancel the timer first so it has nothing left to do. */
