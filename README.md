@@ -153,15 +153,26 @@ the site-wide default in `_config.yml`, so nothing is ever missing a card.
   not a real type, and `alt` is not a Schema.org property. The dimensions come from `og_image:` in
   `_config.yml` and are printed by `_layouts/default.html` instead. A story that sets its own
   `image:` gets no dimension tags, deliberately: they would describe the wrong file.
-- `assets/fonts/` -- IBM Plex Mono Regular and Medium, self-hosted as woff2 and **subset** to the
-  ~107 glyphs the site renders, which cut each file from about 46KB to about 11.6KB. They are
-  declared in CSS as `"Site Mono"`: the SIL OFL reserves the name "Plex" and forbids a modified
-  version from presenting a reserved name, and a subset is a modified version. The IBM copyright
-  notice is retained inside both files. Regenerate with `fonttools subset` if the character set
-  ever needs to grow -- adding a character the subset lacks makes that one glyph silently fall back
+- `assets/fonts/` -- two families, both self-hosted as woff2 and both **subset**, which is what
+  keeps each file near 11KB instead of 46KB. Regenerate with `fonttools subset` if a character set
+  ever needs to grow: adding a character the subset lacks makes that one glyph silently fall back
   to another font.
-  The SIL Open Font License requires its text to travel with the font, and this repo is public and
-  therefore redistributes it. `OFL.txt` is the one file exempt from the ASCII-only convention.
+
+  **IBM Plex Mono** Regular and Medium, subset to the ~107 glyphs the site renders, declared in CSS
+  as `"Site Mono"`. The rename is required: the SIL OFL reserves the name "Plex" and forbids a
+  modified version from presenting a reserved name, and a subset is a modified version.
+
+  **Space Grotesk** Regular and Medium, subset to printable ASCII plus five characters a display
+  string could reach for, declared under its own name. Its OFL reserves no name -- the notice is
+  "Copyright 2020 The Space Grotesk Project Authors" with nothing specified after it -- so the
+  clause that forced the Plex rename does not apply and the upstream name records are untouched.
+  Do not copy the Plex precedent onto a third family without reading that family's own licence.
+
+  The copyright notice is retained inside all four files. The SIL Open Font License requires its
+  text to travel with the font, and this repo is public and therefore redistributes it, so each
+  family ships its own: `OFL-IBMPlexMono.txt` and `OFL-SpaceGrotesk.txt`. The Plex one is the one
+  file exempt from the ASCII-only convention -- it carries a UTF-8 copyright sign. Space Grotesk's
+  is already pure ASCII, but both must travel unaltered either way.
 
 v1 ships without diagrams by design decision. No story sets `hero_image`, so the hero figure and
 home-page card do not render; the CSS for both is written and inert, so adding one later needs no
@@ -189,7 +200,7 @@ _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
 _work/           one file per story
 assets/css/      style.scss compiles to /assets/css/style.css
-assets/fonts/    self-hosted woff2 + its license
+assets/fonts/    self-hosted woff2, two families, each with its own license
 assets/img/      diagrams
 assets/og/       share cards
 ```

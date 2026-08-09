@@ -56,7 +56,9 @@ failure mode in every case is silent.
   oddly to you. These are the owner's own words about their own work. Front matter is editable;
   bodies are not, absent an explicit instruction to change one.
 - **ASCII only in source files.** HTML entities in markup, CSS escapes in stylesheets.
-  `assets/fonts/OFL.txt` is the single exempt file and must travel unaltered.
+  `assets/fonts/OFL-IBMPlexMono.txt` is the single exempt file -- it carries a UTF-8 copyright
+  sign -- and must travel unaltered. `assets/fonts/OFL-SpaceGrotesk.txt` is ASCII already and is
+  equally unalterable, for the licence's reasons rather than this convention's.
 - **No in-source change logs.** Comment the durable CONSTRAINT, never the change that introduced it.
   If a comment addresses a past session or a document outside this repo, it is handoff apparatus and
   should be removed rather than preserved.

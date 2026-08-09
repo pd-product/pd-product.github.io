@@ -55,8 +55,9 @@
 .content:focus { outline: none; }
 
 /* --- Fonts -------------------------------------------------------------
-   Self-hosted woff2, two weights, both used. Commit OFL.txt alongside.
-   Headings and body use the Helvetica Neue system stack -- no webfont.
+   Two self-hosted families, two weights each, all four used. Each family's
+   licence file travels with it: OFL-IBMPlexMono.txt and OFL-SpaceGrotesk.txt.
+   Body copy uses the Helvetica Neue system stack -- no webfont.
 
    "Site Mono" is IBM Plex Mono, subset to the ~107 glyphs this site renders
    (printable ASCII, plus the handful of characters that arrive as HTML
@@ -66,10 +67,19 @@
    ships with IBM Plex reserves the name "Plex", and clause 3 forbids a
    Modified Version from presenting a Reserved Font Name to users. A subset is
    a Modified Version. The internal name records were changed to match, the IBM
-   copyright notice is retained inside both files, and OFL.txt travels with
+   copyright notice is retained inside both files, and the licence travels with
    them. Do not rename this back to "IBM Plex Mono" while the files are
    subset -- and if the full fonts are ever restored, drop the alias with
-   them.                                                                     */
+   them.
+
+   SPACE GROTESK IS NOT RENAMED, and the difference is the licence, not a
+   change of policy. Its OFL carries no Reserved Font Name: the notice reads
+   "Copyright 2020 The Space Grotesk Project Authors" with no names specified
+   after it, and clause 3 only bites on names that are reserved. Checked
+   against the upstream OFL.txt, not assumed from the Plex precedent. So the
+   subset keeps the real family name and the upstream name records are
+   untouched. If a future release adds a reserved name, this has to be
+   revisited -- the clause applies per family and per version.               */
 
 @font-face {
   font-family: "Site Mono";
@@ -85,6 +95,64 @@
   font-weight: 500;
   font-display: swap;
   src: url("/assets/fonts/IBMPlexMono-Medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/assets/fonts/SpaceGrotesk-Regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/assets/fonts/SpaceGrotesk-Medium.woff2") format("woff2");
+}
+
+/* Metric-matched stand-in for the display face, and the reason `font-display:
+   swap` does not throw the headline around on first paint.
+
+   Space Grotesk sets about 13% WIDER per character than Arial. Unadjusted,
+   the hero headline reflows -- often by a whole line -- the moment the webfont
+   arrives, and the headline is the largest thing on the page. size-adjust
+   scales the fallback to match the real face's advance widths; the three
+   overrides then restore the line box, because size-adjust scales the metrics
+   with the glyphs.
+
+   MEASURED, not estimated. All four values come from the shipped subset's own
+   metrics against Arial: normalised average lowercase advance 0.54456 against
+   0.48170 gives 113.05%, and the ascent, descent and line gap are Space
+   Grotesk's own (984/-292/0 per 1000 upm) divided back through that scale.
+   Re-derive them if either font is ever replaced. Checked on the real hero
+   string at 47px: 2018.1px against 2061.6px, a 2.15% difference, so wrap
+   points hold.
+
+   WIDTH is matched, not x-height, and that is the deliberate half of the
+   trade. Matching x-height would leave the fallback 6% narrow and put the
+   reflow back. The swap is therefore slightly visible as weight, never as
+   layout.
+
+   Arial is the reference because it is the stack's realistic resolution on
+   Windows and Android. macOS resolves Helvetica Neue first and will be a
+   little off; that is accepted rather than solved, since one @font-face
+   cannot carry two sets of metrics.
+
+   The `local()` sources fail quietly. If none of the three resolve, this face
+   simply drops out and the stack falls through to the plain families listed
+   after it in --display.                                                    */
+@font-face {
+  font-family: "Display Fallback";
+  font-style: normal;
+  font-weight: 400 500;
+  src: local("Helvetica Neue"), local("Helvetica"), local("Arial");
+  size-adjust: 113.05%;
+  ascent-override: 87.04%;
+  descent-override: 25.83%;
+  line-gap-override: 0%;
 }
 
 /* --- Tokens ------------------------------------------------------------ */
@@ -114,6 +182,15 @@
 
   --sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: "Site Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Display only: headlines, titles, section headings, the pager, and the
+     large numerals. A SEPARATE token rather than a change to --sans, because
+     body copy, the meta rail, chips, eyebrows, the fact strip and the mono
+     labels all deliberately stay where they are.
+
+     "Display Fallback" is the metric-matched face declared above and has to
+     stay ahead of the plain families -- it is what makes the swap invisible.
+     The plain families behind it are the floor if `local()` finds nothing. */
+  --display: "Space Grotesk", "Display Fallback", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   --page: 1180px;   /* content cap */
   --gutter: 46px;
@@ -270,7 +347,7 @@ a:hover { color: var(--text); }
 }
 
 .intro h1 {
-  font: 400 47px/1.09 var(--sans);
+  font: 400 47px/1.09 var(--display);
   letter-spacing: -.03em;
   max-width: 27ch;
   text-wrap: pretty;
@@ -317,7 +394,7 @@ a:hover { color: var(--text); }
 .eyebrow-sep { margin: 0 .4em; }
 
 .work-title {
-  font: 500 23px/1.22 var(--sans);
+  font: 500 23px/1.22 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   margin-bottom: 11px;
@@ -466,7 +543,7 @@ a:hover { color: var(--text); }
 }
 
 .page-simple h1 {
-  font: 400 41px/1.1 var(--sans);
+  font: 400 41px/1.1 var(--display);
   letter-spacing: -.03em;
   max-width: 24ch;
   margin-bottom: 16px;
@@ -515,7 +592,7 @@ a:hover { color: var(--text); }
 }
 
 .story-title {
-  font: 400 41px/1.1 var(--sans);
+  font: 400 41px/1.1 var(--display);
   letter-spacing: -.03em;
   max-width: 24ch;
   margin-bottom: 16px;
@@ -627,7 +704,7 @@ a:hover { color: var(--text); }
 }
 
 .story-prose > h2 {
-  font: 500 21px/1.25 var(--sans);
+  font: 500 21px/1.25 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   margin: 36px 0 13px;
@@ -822,7 +899,7 @@ a:hover { color: var(--text); }
 }
 
 .story-pager a {
-  font: 500 19px/1.3 var(--sans);
+  font: 500 19px/1.3 var(--display);
   letter-spacing: -.02em;
   color: var(--text);
   max-width: 34ch;
