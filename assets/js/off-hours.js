@@ -17,19 +17,20 @@
 
      1. never hide anything if the document is already hidden at mount, which
         covers thumbnail capture and any renderer that never paints;
-     2. a timer that un-hides everything IF THE OBSERVER NEVER CALLED BACK;
+     2. a fail-open timer that un-hides everything unless the observer has
+        reported back by then;
      3. a visibilitychange listener, for a tab backgrounded mid-animation --
         transitions and observers both stall there;
      4. a beforeprint listener, because printing renders the whole document
         including the part nobody has scrolled to yet.
 
-   FLOOR 2 IS A DEAD-OBSERVER DETECTOR, NOT A DEADLINE, and the difference
-   matters. The handoff specified a flat ~1200ms timer that cleared anything
-   still hidden. Measured on the built page, this section starts at y=1665 and
-   the desktop viewport is 900 tall, so it is NEVER on screen at load: that
-   timer fired about a second before any reader could reach the section, and
-   the reveal never played at all on a desktop. Every card was simply un-hidden
-   off-screen.
+   FLOOR 2 IS A DEAD-OBSERVER DETECTOR FIRST AND A DEADLINE SECOND, and the
+   difference from the handoff matters. It specified a flat ~1200ms timer that
+   cleared anything still hidden. Measured on the built page, this section
+   starts at y=1665 and the desktop viewport is 900 tall, so it is NEVER on
+   screen at load: that timer fired about a second before any reader could
+   reach the section, and the reveal never played at all on a desktop. Every
+   card was simply un-hidden off-screen.
 
    The fix relies on a live observer always calling back once, even when
    nothing intersects. That falls out of the spec's own bookkeeping rather than
@@ -86,46 +87,65 @@
   var observer = null;
   var rescued = false;
 
+  /* Cards whose animation has begun and not yet finished. Only these are worth
+     rescuing when the tab goes away; see the visibilitychange floor. */
+  var flying = [];
+
+  function land(card) {
+    var i = flying.indexOf(card);
+    if (i !== -1) flying.splice(i, 1);
+  }
+
   /* Play a card in. The delay has to be set BEFORE the attribute comes off:
-     the transition is computed at the moment the hidden state is removed. */
+     the transition is computed at the moment the hidden state is removed.
+
+     The card counts as in flight until its stagger and transition have both
+     had time to run. transitionend would be tidier but does not fire in a
+     background tab, which is the case this bookkeeping exists for. */
   function reveal(card, delay) {
     card.style.transitionDelay = delay + 'ms';
     card.removeAttribute('data-reveal');
+    flying.push(card);
+    setTimeout(function () { land(card); }, delay + 600);
   }
 
-  /* Every floor calls this. A rescue is not an animation: it puts every card
-     in its final state NOW, kills the transition outright, and stops the
-     observer so nothing re-animates behind it.
+  /* Finish just the cards that are mid-animation, and leave everything else
+     armed. Used by the visibilitychange floor: a stalled transition is what
+     needs saving, an untriggered card is not. */
+  function settleFlying() {
+    while (flying.length) {
+      var card = flying.pop();
+      card.style.transitionDelay = '';
+      card.setAttribute('data-reveal-done', '');
+    }
+  }
+
+  /* The full rescue, used by the mount, timer and print floors: every card in
+     its final state NOW, transition killed, observer stopped so nothing
+     re-animates behind it.
 
      IT MUST TOUCH EVERY CARD, NOT ONLY THE STILL-HIDDEN ONES. `reveal` removes
-     data-reveal at the START of a card's animation, so between then and ~640ms
-     later (up to 140ms of stagger plus a 500ms transition) a card is
-     unmarked and still transparent. An earlier version skipped unmarked cards
-     to avoid restarting a transition; printing mid-reveal then captured
-     opacities of 0.22, 0.014 and 0 -- two cards fully invisible on the page
-     the floor exists to protect. Killing the transition is what makes touching
-     them safe, and is why the flag goes on the SECTION: one attribute, one
-     rule, no per-card inline styles to unpick. */
+     data-reveal at the START of a card's animation, so for up to ~640ms -- 140
+     of stagger plus a 500ms transition -- a card is unmarked and still
+     transparent. An earlier version skipped unmarked cards to avoid restarting
+     a transition; printing in that window captured opacities of 0.22, 0.014
+     and 0, two cards fully invisible, on the very output the floor exists to
+     protect. Killing the transition is what makes touching them safe.
+
+     The done flag is PER CARD, not on the section, so settleFlying can use the
+     same mechanism on a subset. */
   function showAll() {
     rescued = true;
-    section.setAttribute('data-reveal-done', '');
+    flying.length = 0;
     /* May be null when a floor fires before the observer is built -- the
        print-at-mount check does exactly that. `rescued` is what stops one
        being constructed afterwards. */
     if (observer) observer.disconnect();
     for (var i = 0; i < cards.length; i++) {
       cards[i].style.transitionDelay = '';
+      cards[i].setAttribute('data-reveal-done', '');
       cards[i].removeAttribute('data-reveal');
     }
-  }
-
-  /* True once any card has begun revealing. A rescue is only warranted while
-     something is actually in flight; see the visibilitychange floor. */
-  function started() {
-    for (var i = 0; i < cards.length; i++) {
-      if (!cards[i].hasAttribute('data-reveal')) return true;
-    }
-    return false;
   }
 
   /* The stagger runs across a row, so it needs the column count -- which is a
@@ -144,22 +164,23 @@
 
   /* Floor 2. Cancelled by the first observer callback of any kind -- see the
      note at the top: this detects an observer that never runs, and must not
-     become a deadline the reader has to beat by scrolling. */
+     become a deadline the reader has to beat by SCROLLING. It is still a
+     deadline for the observer itself -- see the header. */
   var floor = setTimeout(showAll, 1200);
 
   /* Floor 3. A backgrounded tab stops delivering frames, so a card caught
      mid-transition would stay part-faded when the tab is next shown.
 
-     ONLY WHEN SOMETHING IS ACTUALLY IN FLIGHT. An earlier version rescued on
-     every visibilitychange, which meant switching tabs once -- before ever
-     scrolling to this section -- set the rescue flag, disconnected the
-     observer and forfeited the animation for the rest of the page's life.
-     Nothing was in danger in that state: the cards were hidden, off-screen and
-     waiting, which is exactly where they should be. A rescue is for finishing
-     an animation that cannot finish itself, not for pre-empting one that has
-     not begun. */
+     THIS FLOOR SETTLES ONLY WHAT IS IN FLIGHT. It does not call showAll, and
+     the distinction has been wrong twice. First version: rescued on every
+     hide, so switching tabs once before ever reaching the section forfeited
+     the whole animation. Second version: rescued if any card had EVER
+     started, so hiding the tab after the first card landed still forfeited the
+     other five. A rescue finishes an animation that cannot finish itself; it
+     has no business touching a card that has not been triggered. Those stay
+     hidden, off-screen and armed, with the observer still live. */
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden && started()) showAll();
+    if (document.hidden) settleFlying();
   });
 
   /* Floor 4. Printing renders the whole document, including everything below
@@ -233,8 +254,8 @@
      note overstated it: those cards are not lost for the life of the page. A
      reader who scrolls back up re-enters them through the root's top edge,
      which IS a change, and they reveal then. The real defects are that content
-     above the reader is in a hidden state at all -- print and screenshot both
-     render the whole document -- and that scrolling UPWARD triggers an
+     above the reader is in a hidden state at all -- printing renders the whole
+     document, as does a full-page capture -- and that scrolling UPWARD triggers an
      entrance animation on cards the reader has already passed, which is
      backwards.
 

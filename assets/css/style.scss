@@ -143,9 +143,12 @@
    points hold.
 
    WIDTH is matched, not x-height, and the trade is real in both directions.
-   Matching x-height instead would put size-adjust at 94.30% and leave the
-   fallback 16.6% narrow -- 1719.7px against 2018.1px on the hero string, a
-   14.79% miss and a reflow of whole lines. The price of matching width is that
+   Matching x-height instead would put size-adjust at 94.30%, which sets 16.6%
+   narrow per character. On the hero string that comes out as 1719.7px against
+   2018.1px -- a 14.79% shortfall rather than 16.6%, because the two numbers
+   measure different things: the first is the average advance ratio, the second
+   is this particular string. Either way it is a reflow of whole lines, against
+   the 2.15% the shipped values give. The price of matching width is that
    the fallback's x-height runs 19.9% large, so the swap is visible as a change
    of weight and size. That is the right way round: a heavier first paint is a
    flicker, a reflow moves the text the reader is already reading.
@@ -608,9 +611,10 @@ a:hover { color: var(--text); }
    style preference. The handoff specified the descendant form, which scores
    (0,1,1) and therefore outranks the single-class `.path-year` above it: the
    year rendered at 15px Helvetica in --meta instead of 12px mono in
-   --nav-muted, at every width, and the mobile overrides lost to it too.
-   Measured before this change, `.path-year` computed to 15px / Helvetica Neue
-   / rgb(200,205,210).
+   --nav-muted, at every width. Measured before this change, `.path-year`
+   computed to 15px / Helvetica Neue / rgb(200,205,210). (`.path-year` has no
+   responsive override of its own; the Off hours pair below did, and those lost
+   too, being single-class themselves.)
 
    The same trap sits in `.off-hours-card`. Both are class-based now, which is
    also what the file header asks for, and neither can be outranked by a
@@ -672,8 +676,9 @@ a:hover { color: var(--text); }
 /* A class, for the reason spelled out on .path-copy above: the handoff's
    `.off-hours-card p` outranked both `.off-hours-numeral` and
    `.off-hours-label`, so the 34px display numeral rendered at 15px Helvetica
-   and the 11px mono label rendered at 15px Helvetica as well. Only `font` and
-   `color` were lost, which is why it did not look obviously broken --
+   and the 11px mono label rendered at 15px Helvetica as well. The 640px
+   overrides on both lost to it too, being single-class themselves. Only `font`
+   and `color` were affected, which is why it did not look obviously broken --
    text-transform and letter-spacing still applied, so the labels were
    uppercase in the wrong face at the wrong size. */
 .off-hours-copy {
@@ -698,16 +703,17 @@ a:hover { color: var(--text); }
   transform: translateY(10px);
 }
 
-/* The rescue state. assets/js/off-hours.js sets this on the SECTION whenever a
-   floor fires, and it has to beat both the hidden rule above and any
-   in-flight transition -- printing during the reveal captured cards at
-   opacity 0.22 and 0.014 before this existed, because removing the hidden
-   attribute alone still leaves the transition running.
+/* The rescue state. assets/js/off-hours.js sets this PER CARD, so a floor can
+   settle the two cards mid-animation without touching the four that have not
+   been triggered. It has to beat both the hidden rule above and any in-flight
+   transition -- printing during the reveal captured cards at opacity 0.22 and
+   0.014 before this existed, because removing the hidden attribute alone
+   leaves the transition running.
 
-   `transition: none` is the load-bearing declaration; opacity and transform
-   are what it lands on. One rule on an ancestor rather than inline styles per
-   card, so the script sets one attribute and there is nothing to unwind. */
-.off-hours[data-reveal-done] .off-hours-card {
+   Same specificity as the hidden rule (0,2,0), so SOURCE ORDER is what makes
+   this win. It must stay below it. `transition: none` is the load-bearing
+   declaration; opacity and transform are what it lands on. */
+.off-hours-card[data-reveal-done] {
   transition: none;
   opacity: 1;
   transform: none;
