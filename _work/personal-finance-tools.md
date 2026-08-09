@@ -12,9 +12,9 @@ crumb: "personal finance tools"
 # link previews then read that heading instead.
 description: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
 # One line, and the only prose on the home-page row now that the description
-# does not render there. A trim of this story's own "What I would redo"
-# chapter, approved as written.
-lesson: "When building feels cheap, the discipline that protects you is the one you stop noticing you dropped."
+# does not render there. Owner-supplied, and deliberately shorter than this
+# story's "What I would redo" chapter, which makes the same point at length.
+lesson: "When building feels cheap, skipped planning becomes expensive."
 category: "personal"
 order: 3
 # Publication date of this page, not the date of the work it describes. Without
@@ -73,4 +73,4 @@ A suite of Python tools covering rebalancing, estimated tax payments, spend anal
 
 ## What I would redo    {#redo}
 
-I would have gone back to planning when the scope changed, and I did not. The project started as a rebalancing tool with a clear requirements document. Then the tax work needed richer income data, which made me want to consolidate how all the tools ingested data, which led to building document processing with personal information stripped out. Each step followed sensibly from the last and none of them were in the original plan. I would never have let that happen on a work project, because a conversation with an engineer would have forced a re-plan. Building alone with tools that make the next feature feel almost free, I skipped that step, and I paid for it in refactoring that cost more than the planning would have. The lesson generalizes past this project: when building feels cheap, the discipline that usually protects you is the one you stop noticing you have dropped.
+I would have gone back to planning when the scope changed, and I did not. The project started as a rebalancing tool with a clear requirements document. Then the tax work needed richer income data, which made me want to consolidate how all the tools ingested data, which led to building document processing with personal information stripped out. Each step followed sensibly from the last and none of them were in the original plan. I would never have let that happen on a work project, because a conversation with an engineer would have forced a re-plan. Building alone with tools that make the next feature feel almost free, I skipped that step, and I paid for it in refactoring that cost more than the planning would have. The lesson generalizes past this project: when building feels cheap, skipped planning becomes expensive.

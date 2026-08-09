@@ -10,11 +10,11 @@ crumb: "testing the fix"
 # be `description`: with any other name seo-tag falls back to page.excerpt,
 # which is the first block of the body -- the opening `## ` heading. Search and
 # link previews then read that heading instead.
-description: "Two engineering leaders proposed a solution to a targeting gap and were confident it would hold. I doubted it on a hunch, spent a weekend building the analysis to find out, and it turned out the design would have left 14% of revenue exposed."
+description: "Two engineering leaders proposed a fix they believed would hold. I had doubts, so I spent a weekend testing it. The design would have left 14% of revenue exposed."
 # One line, and the only prose on the home-page row now that the description
-# does not render there. A trim of this story's own "What I would redo"
-# chapter, approved as written.
-lesson: "When repeated fixes keep leaving edge cases behind, the problem is not understood yet."
+# does not render there. Owner-supplied, and deliberately shorter than this
+# story's "What I would redo" chapter, which makes the same point at length.
+lesson: "Repeated partial fixes are a sign the problem is not understood yet."
 category: "platform"
 order: 2
 # Publication date of this page, not the date of the work it describes. Without
