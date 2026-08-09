@@ -81,22 +81,37 @@
      cannot be changed alone:
 
        TRIGGER is the reveal threshold, as a fraction of viewport height, and
-       it lives in exactly one place. The observer's root margin is derived
-       from it in pixels rather than restating it as a percentage -- see the
-       note on rootMargin() for why that matters. It is NOT the same number as
-       the arming test, which uses the fold; a card partly on screen counts as
-       seen.
+       it lives in exactly one place. A card fades in once its top has come up
+       past this line, so a SMALLER number means the card travels further into
+       view before it moves.
 
-       TRANSITION mirrors the .5s on .off-hours-card. It sizes the backstop
+       It was 0.94, which fired while only a sliver of the card was showing at
+       the very bottom edge: by the time a reader's eye reached it, the fade had
+       finished in their peripheral vision. At 0.80 a card crosses 20% of the
+       viewport's height between entering and firing -- 180px at 900 tall, 114px
+       at 568 -- which is what buys the animation somewhere visible to happen.
+       Whether that is most of the CARD depends on the card's own height against
+       the viewport's, so it is not a promise about how much of the card shows.
+
+       The cost is the other side of the same coin: for that same 20% of travel
+       the card is on screen and still blank. Pushing the number lower trades an
+       unseen animation for a visible empty box.
+
+       The observer's root margin is derived from this in pixels rather than
+       restating it as a percentage -- see the note on rootMargin(). It is NOT
+       the same number as the arming test, which uses the fold: a card already
+       partly on screen counts as seen and is never hidden.
+
+       TRANSITION mirrors the 1s on .off-hours-card. It sizes the backstop
        that closes the in-flight window when transitionend cannot fire.
        SETTLE_SLACK is a whole extra TRANSITION on purpose: overshooting that
        window is free, and the backstop fails open in any case.
 
-       STAGGER is per column index, so a 3-up row runs 0 / 70 / 140ms. */
-  var TRIGGER = 0.94;
-  var TRANSITION = 500;
-  var SETTLE_SLACK = 500;
-  var STAGGER = 70;
+       STAGGER is per column index, so a 3-up row runs 0 / 140 / 280ms. */
+  var TRIGGER = 0.80;
+  var TRANSITION = 1000;
+  var SETTLE_SLACK = 1000;
+  var STAGGER = 140;
 
   /* Declared here rather than at the observer below, because showAll needs to
      disconnect it and the floors that call showAll are armed first. It stays
@@ -111,7 +126,7 @@
 
   /* Out of the in-flight set, and back to a clean element. Clearing the inline
      delay here matters because the rescue paths were the only ones doing it:
-     a card that revealed normally kept `transition-delay: 140ms` for the life
+     a card that revealed normally kept `transition-delay: 280ms` for the life
      of the page, so anything that transitioned it later -- a resize rebuild
      re-revealing it, or any future transition on this class -- would inherit a
      stagger meant for one moment in one layout. */
@@ -175,8 +190,8 @@
      re-animates behind it.
 
      IT MUST TOUCH EVERY CARD, NOT ONLY THE STILL-HIDDEN ONES. `reveal` removes
-     data-reveal at the START of a card's animation, so for up to ~640ms -- 140
-     of stagger plus a 500ms transition -- a card is unmarked and still
+     data-reveal at the START of a card's animation, so for up to ~1280ms -- 280
+     of stagger plus a 1000ms transition -- a card is unmarked and still
      transparent. An earlier version skipped unmarked cards to avoid restarting
      a transition; printing in that window captured opacities of 0.22, 0.014
      and 0, two cards fully invisible, on the very output the floor exists to
@@ -230,7 +245,7 @@
      takes over. A reader gets the full reveal; a machine gets the content.
 
      BELOW THE FOLD, NOT BELOW THE TRIGGER LINE, and the difference is a visible
-     bug. The trigger line sits at 94% of the viewport, so a card at 95% is on
+     bug. The trigger line sits at 80% of the viewport, so a card at 85% is on
      screen -- a sliver of it is being looked at right now -- and hiding it
      would blink it out from under the reader. Anything with any part of itself
      in the viewport counts as already seen and is left alone. Only what is
@@ -420,9 +435,10 @@
      COALESCED PER FRAME, NOT DEBOUNCED ON A TRAILING EDGE. A trailing debounce
      was the obvious choice and it is wrong here: through a sustained window
      drag it leaves the OLD margin in force, computed from the viewport the
-     drag started in. Growing 500px to 1000px keeps a -30px bottom margin, so
-     the trigger sits at 97% instead of 94% and a card in that band stays
-     visibly blank until the drag stops; shrinking reveals early. One rebuild
+     drag started in. Growing 500px tall to 1000px keeps the -100px bottom
+     margin computed from the old height, so the trigger sits at 90% of the new
+     viewport instead of 80% and a card in that 10% band stays visibly blank
+     until the drag stops; shrinking reveals early. One rebuild
      per animation frame keeps the margin honest for every frame the reader
      actually sees, and still collapses the several resize events a drag emits
      within a single frame. */
