@@ -24,6 +24,15 @@ HTML comments: naming the seo tag in a `<!-- -->` block expanded it, and its
 own `<!-- End Jekyll SEO tag -->` closed this comment early, leaking the rest
 of the text onto the page as visible content.
 {%- endcomment -%}
+{%- comment -%}
+The ONE section on this page with no aria-labelledby, deliberately. The only
+heading inside it is the page h1, which names the WHOLE PAGE rather than a
+region within it, and the nav does not anchor here. Left unnamed this stays a
+generic box inside <main>, which is correct: pointing at the h1 would put a
+landmark named "I turn problems people have learned to work around..." in the
+landmark list, and that heading is already reachable by heading navigation.
+The five anchored sections below are the named regions; see the note on #work.
+{%- endcomment -%}
 <section class="intro">
   <p class="eyebrow">solving problems with ai</p>
   <h1>I turn problems people have learned to work around into products they can actually use.</h1>
@@ -56,8 +65,8 @@ of the text onto the page as visible content.
   .sr-only utility; the stylesheet previously carried a second, near-identical
   hiding rule for this one element.
 
-  THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and
-  every section on this page carries one for that reason. A <section> maps to
+  THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and all
+  five anchored sections carry one for that reason. A <section> maps to
   role="region" ONLY when it has an accessible name, and an accessible name
   comes from aria-label or aria-labelledby, never from a descendant heading.
   Verified in the rendered accessibility tree: before these attributes existed

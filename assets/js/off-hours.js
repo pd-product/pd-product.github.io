@@ -31,9 +31,10 @@
    FLOOR 2 IS A DEAD-OBSERVER DETECTOR FIRST AND A DEADLINE SECOND, and the
    difference from the handoff matters. It specified a flat ~1200ms timer from
    page load that cleared anything still hidden. Measured on the built page,
-   this section starts at y=1665 against a 900px desktop viewport, so it is
-   never on screen at load: that timer fired about a second before any reader
-   could reach the section, and the reveal never played at all on a desktop.
+   this section starts at y=1657 against a 900px desktop viewport -- the same
+   at 1024, 1180, 1280 and 1440 wide -- so it is never on screen at load: that
+   timer fired about a second before any reader could reach the section, and
+   the reveal never played at all on a desktop.
    Arming on scroll fixes the same problem from the other end, and the timer
    now starts from the arming moment rather than from load.
 

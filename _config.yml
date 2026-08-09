@@ -182,7 +182,33 @@ plugins:
 
 # `jekyll-optional-front-matter` renders any .md file with no front matter as a
 # live page, so an un-excluded note at the root becomes a published, indexed URL.
+#
+# `temp/` is session scratch and is in .gitignore, so it does not reach Pages
+# today. It is excluded anyway, because .gitignore is the WRONG layer to be
+# relying on: a local build without this line copies temp/'s publishable files
+# into _site -- Jekyll skips entries starting with `_` or `.`, so the built
+# sites under temp/_site* are passed over, but the scripts, notes and loose
+# .html are not -- and every .html among them lands in sitemap.xml as a real
+# pdiggins.com URL. A local build then stops matching what Pages serves, and a
+# publishable file committed under temp/ would deploy. Keep the exclusion
+# independent of whether the directory is tracked.
 exclude:
   - README.md
   - CLAUDE.md
   - Gemfile
+  - temp/
+
+# Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded,
+# which retains every comment, so without this line a local build produces
+# /assets/css/style.css at about 61KB with all 92 comment blocks intact while
+# the deployed file is 18KB with none. Expect that KB figure to drift -- editing
+# any comment in style.scss moves it, and only the compressed side is pinned to
+# what Pages serves.
+#
+# The cascade is identical either way, so nothing RENDERS differently and no
+# selector, value or specificity reading changes. What differs is the serialized
+# file, whose byte size is off by more than 3x. Nothing here requires building
+# locally, but a local build is the only way to inspect the built output, so
+# keep it equal to what is deployed.
+sass:
+  style: compressed

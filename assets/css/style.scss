@@ -20,6 +20,14 @@
    every single-class rule in this file, and several blocks below depend on
    equal specificity with source order deciding the winner.
 
+   THE ONE EXCEPTION IS `h2#redo`, in the redo-chapter accent, its continuity
+   rules and their 640px override, all under Signature elements. The id is not
+   a styling hook chosen for convenience there -- it is the authored chapter
+   anchor, and the accent has to attach to that one chapter with no per-story
+   markup. Nothing in the file depends on outranking it, and the constraint it
+   carries is that #redo must stay the last chapter, which is stated on the
+   rule itself. Do not read it as licence for a second one.
+
    NO LIQUID IN THIS FILE, INCLUDING INSIDE COMMENTS. The front matter above
    means Jekyll renders this through Liquid before Sass ever sees it, and a CSS
    comment is not a Liquid comment. A tag written to illustrate a point in
