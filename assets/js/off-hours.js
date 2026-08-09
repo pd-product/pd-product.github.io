@@ -224,6 +224,17 @@
         pending.push(cards[i]);
       }
     }
+
+    /* Nothing below the line, so there is nothing to reveal and the section
+       stays exactly as it rendered. This ARMS PERMANENTLY WITH NOTHING TO DO,
+       which is intended rather than a leak: it is what happens when the page
+       loads at a fragment past this section -- /#contact, a restored scroll
+       position, a back navigation -- and the browser's own scroll to that
+       fragment is the scroll that arms us. Every card is above the line, so
+       every card counts as already seen. Measured: loading /#contact leaves
+       all six visible, and they stay visible whichever way the reader scrolls
+       afterwards. The animation is skipped for that visit, which is the right
+       call for a reader who arrived past it, and no content is ever at risk. */
     if (!pending.length) return;
 
     /* Floor 2. Cancelled by the first observer callback of any kind -- see the
