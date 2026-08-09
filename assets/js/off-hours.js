@@ -13,15 +13,32 @@
    IntersectionObserver delivered no entries at all in one environment, and a
    requestAnimationFrame loop produced no frames in a hidden document. In each
    case the cards stayed at opacity 0 and the section rendered empty. So there
-   are three floors, none of which depends on a frame or a callback:
+   are four floors:
 
      1. never hide anything if the document is already hidden at mount, which
-        also covers print, PDF export and thumbnail capture;
-     2. a timer that clears the hidden state on anything still hidden, whatever
-        the reason;
+        covers thumbnail capture and any renderer that never paints;
+     2. a timer that un-hides everything IF THE OBSERVER NEVER CALLED BACK;
      3. a visibilitychange listener, for a tab backgrounded mid-animation --
-        transitions and observers both stall there and the timer above may
-        already have fired.
+        transitions and observers both stall there;
+     4. a beforeprint listener, because printing renders the whole document
+        including the part nobody has scrolled to yet.
+
+   FLOOR 2 IS A DEAD-OBSERVER DETECTOR, NOT A DEADLINE, and the difference
+   matters. The handoff specified a flat ~1200ms timer that cleared anything
+   still hidden. Measured on the built page, this section starts at y=1665 and
+   the desktop viewport is 900 tall, so it is NEVER on screen at load: that
+   timer fired about a second before any reader could reach the section, and
+   the reveal never played at all on a desktop. Every card was simply un-hidden
+   off-screen.
+
+   The fix relies on a guarantee in the IntersectionObserver spec: observe()
+   queues an initial notification carrying the element's current state, whether
+   or not it intersects. A live observer therefore always calls back within a
+   frame or two of mount. One callback of any kind proves it works, so the
+   timer is cancelled and the reveal is left to play whenever the reader
+   arrives. No callback by 1200ms means the observer is the broken kind, and
+   the cards go visible. Both the failure the handoff saw and the animation it
+   asked for are preserved; a flat deadline cannot do both.
 
    The reduced-motion check is in this file and not only in the stylesheet for
    the same reason: under `reduce` the script must not APPLY the hidden state,
@@ -83,14 +100,21 @@
     cards[i].setAttribute('data-reveal', 'hidden');
   }
 
-  /* Floor 2. Whatever happens above, nothing stays hidden past this. */
+  /* Floor 2. Cancelled by the first observer callback of any kind -- see the
+     note at the top: this detects an observer that never runs, and must not
+     become a deadline the reader has to beat by scrolling. */
   var floor = setTimeout(showAll, 1200);
 
   /* Floor 3. A backgrounded tab stops delivering both frames and observer
-     callbacks, and may do so after the timer has already run. */
+     callbacks, so a card mid-transition would stay part-faded. */
   document.addEventListener('visibilitychange', function () {
     if (document.hidden) showAll();
   });
+
+  /* Floor 4. Printing renders the whole document, including everything below
+     the reader's scroll position that has therefore never been revealed.
+     beforeprint runs early enough for the paint that follows it. */
+  addEventListener('beforeprint', showAll);
 
   /* No observer support: the cards are already visible content, so show them
      and stop. Cancel the timer first so it has nothing left to do. */
@@ -104,6 +128,11 @@
      off the root's bottom edge is what expresses that: intersection begins
      once the element reaches the remaining 94%. */
   var observer = new IntersectionObserver(function (entries) {
+    /* Proof of life. The spec guarantees an initial notification per observed
+       element, so reaching this line at all means the observer works and the
+       dead-observer floor must stand down. */
+    clearTimeout(floor);
+
     for (var j = 0; j < entries.length; j++) {
       if (!entries[j].isIntersecting) continue;
       var card = entries[j].target;
