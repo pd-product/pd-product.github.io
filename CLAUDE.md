@@ -24,8 +24,11 @@ not raise them again unprompted.
   is deliberately not an open-source licence. Adopting a recognised one to make GitHub's label
   tidier would grant rights the owner withholds.
 - **No analytics, JS libraries, CDN dependencies, or dark/light toggle.** Dark and light are pure
-  `prefers-color-scheme`. The only JavaScript is the chapter-rail reading state, which is
-  progressive enhancement and must stay optional.
+  `prefers-color-scheme`. There are exactly two scripts -- the chapter-rail reading state and the
+  Off hours reveal -- both vanilla, both progressive enhancement, and both of which must stay
+  optional. The bar for a third is that the page is complete and correct without it. For the
+  reveal that means the hidden state is applied FROM the script and never from the stylesheet, so
+  no JavaScript means no animation rather than no content.
 
 ## Do not "clean these up"
 

@@ -20,8 +20,30 @@ allow a few minutes.
 
 ## Page set
 
-`/` is the whole site apart from the stories. About and contact are anchored blocks on the home
-page (`/#about`, `/#contact`), not separate pages. Stories live at `/work/<slug>/`.
+`/` is the whole site apart from the stories. Everything else is an anchored block on the home page
+rather than a separate page: `/#work`, `/#path-here`, `/#off-hours`, `/#about`, `/#contact`. Four of
+those five are in the nav; `#path-here` deliberately is not, and `_config.yml` says why. Stories
+live at `/work/<slug>/`.
+
+## The two data-driven home sections
+
+Off hours and The path here are edited in `_data/`, not in `index.html`, for the same reason the
+nav is: adding, dropping or reordering an entry is a data edit and the template does not change.
+Each file carries its own constraints at the top -- read them, because both have one that is not
+obvious from the markup:
+
+- `off-hours.yml` has no `numeral` key. The displayed `01`, `02` comes from position in the list,
+  as everything numbered on this site does, so reordering renumbers itself.
+- `path-here.yml` describes a career whose **third stop is current**. The fourth is a change in how
+  the work is done, not a job.
+
+Both files carry HTML entities in some strings -- `&amp;`, `&gt;`, `&middot;` -- to keep the source
+ASCII, and both are printed without the `escape` filter for that reason. Adding an entry means
+writing the entity, not the character. Escaping them renders the entity text on the page.
+
+Grid shape is why the counts are what they are: six Off hours entries fill a 3-up and a 2-up grid
+exactly, and four path stops fill a 4-up and a 2-up. A seventh or a fifth leaves a gap at a
+breakpoint, which is a design question rather than only a data one.
 
 ## Adding a story
 
@@ -205,8 +227,10 @@ it can reach, defaults or no defaults.)
 _config.yml      site metadata, contact links, nav list, collection config, share-card default
 _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
+_data/           off-hours.yml, path-here.yml -- the two data-driven home sections
 _work/           one file per story
 assets/css/      style.scss compiles to /assets/css/style.css
+assets/js/       chapter-rail.js, off-hours.js -- both optional, both vanilla
 assets/fonts/    self-hosted woff2, two families, each with its own license
 assets/img/      diagrams
 assets/og/       share cards

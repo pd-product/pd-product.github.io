@@ -1,0 +1,28 @@
+# The four stops rendered by index.html into #path-here.
+#
+# LOAD-BEARING, AND NOT A CV: the 2021 role is current. The 2026 stop is a
+# shift in how the work is done, not a job change, and nothing in the markup
+# may imply the 2021 stop ended -- no "present" marker on the last stop, no
+# past-tense framing of the third. The last stop's year label takes the accent
+# because it is the current chapter of the story, not because it names a
+# current employer. The job title itself is carried by the fact strip and the
+# About panel, which is where a reader looks for it.
+#
+# `year` carries `&middot;` as an entity so the source stays ASCII, and is
+# printed without the `escape` filter for that reason. Write the entity, not
+# the character.
+#
+# Four stops fill the row at desktop and pair cleanly at 960px. A fifth would
+# leave a gap at both widths.
+
+- year: "2013 &middot; AOL"
+  copy: "Learned the platform through customers."
+
+- year: "2019 &middot; Neustar"
+  copy: "Moved into product."
+
+- year: "2021 &middot; Xandr / Microsoft"
+  copy: "Took ownership of a publisher business."
+
+- year: "2026 &middot; AI"
+  copy: "Started building directly."

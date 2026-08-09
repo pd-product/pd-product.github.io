@@ -1,0 +1,40 @@
+# Off hours entries, rendered by index.html into the #off-hours grid.
+#
+# Data, not markup, for the same reason `nav` is: adding, dropping or
+# reordering an entry is an edit here and nothing in the template changes.
+#
+# THERE IS NO `numeral` KEY, deliberately. The displayed 01, 02 is derived from
+# position in this list, exactly as the work rows and the story pages derive
+# theirs -- so reordering renumbers itself and a hand-written number can never
+# disagree with where the card actually sits. The first card's numeral takes
+# the accent; that is a :first-child rule in the stylesheet, not a field here.
+#
+# `label` and `copy` are printed WITHOUT the `escape` filter, because two
+# labels carry HTML entities the source has to keep as entities to stay ASCII:
+# `&amp;` in two of them and `&gt;` in the third. Escaping them would render
+# the entity text itself, as "&amp;". Anything added here follows the same
+# rule -- write the entity, not the character.
+#
+# Three cards per row above 960px, two below it, one below 640px, so six
+# entries fill the grid at every width. A seventh would leave a gap at the
+# desktop width; that is a design question, not just a data one.
+
+- label: "ice cream"
+  copy: "Aficionado. A multi-pint tasting or January scoops are never out of the question. Jeni's Brooklyn Blackout."
+
+- label: "food crawls"
+  copy: "My wife is the foodie and I'm happily along for the ride, locally and internationally."
+
+- label: "pc gaming &amp; hardware"
+  copy: "From TIE Fighter on MS-DOS to Cyberpunk 2077 and Valheim. Build your own &gt; pre-built."
+
+# The one entry with no concrete detail. Parked deliberately by the owner
+# rather than left unfinished, and final for this build.
+- label: "sci fi &amp; soundtracks"
+  copy: "My favorite escapes."
+
+- label: "history"
+  copy: "Top Ken Burns viewer."
+
+- label: "running"
+  copy: "Started on the DC National Mall. Now running in NYC parks."

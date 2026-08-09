@@ -382,6 +382,13 @@ a:hover { color: var(--text); }
 
 /* --- Home: work list (index.html) -------------------------------------- */
 
+/* The three cases read as one band rather than three rules on the page
+   ground. No border-top here on purpose: the first .work-row already carries
+   one, and that hairline IS the boundary under the hero -- a border on this
+   element too would draw it twice, 1px apart. The tone change does the rest of
+   the separating. */
+.work-list { background: var(--panel); }
+
 /* The whole row is the click target, so the whole row responds: its top
    hairline goes accent on hover and focus. The title colour change below
    stays. Transition is on border-color only, so nothing else animates.
@@ -495,6 +502,170 @@ a:hover { color: var(--text); }
   margin-bottom: 18px;
 }
 
+/* --- Home: fact strip (index.html .facts) ------------------------------
+   Sits inside .intro under the headline. Not a section and not a landmark --
+   it is four facts, and the last one takes the accent so the row ends on the
+   least corporate of them rather than trailing off.
+
+   The separators are their own list items, which is why they are marked up in
+   index.html rather than generated: a pseudo-element cannot carry aria-hidden.
+   --dim rather than --faint on them: they are punctuation between items, and
+   at full text contrast they read as a fifth thing in the row.             */
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 22px;
+  margin-top: 30px;
+  font: 400 11.5px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--nav-muted);
+}
+
+.facts-sep { color: var(--dim); }
+
+/* The last ITEM, which is always a fact and never a separator -- the row is
+   four facts and three separators, so it cannot end on one. */
+.facts li:last-child { color: var(--accent); }
+
+/* --- Home: section headings (index.html) -------------------------------
+   One rule for all four home-page section headings. This REPLACES the 11.5px
+   mono accent label that About and Contact used to carry; their grid
+   placement in the 168px rail is untouched, only the type changed. Both words
+   measure under 140px at 34px, so neither wraps in the rail.
+
+   The mono accent label is still the treatment everywhere else it appears --
+   .story-meta dt, .chapter-rail > h2, .work-lesson-label, the eyebrows and the
+   pager labels. It is simply no longer what a home-page section heading looks
+   like.
+
+   Selected by CLASS, not by id, even though these are the only four elements
+   that match. An id selector would outrank every single-class rule in this
+   file and break the equal-specificity, source-order discipline the About and
+   Contact placement rules below depend on.                                 */
+
+.about > h2,
+.contact > h2,
+.path-here > h2,
+.off-hours > h2 {
+  font: 400 34px/1.1 var(--display);
+  letter-spacing: -.025em;
+  text-transform: none;
+  color: var(--text);
+}
+
+/* --- Home: the path here (index.html) ----------------------------------
+   Four stops, hairline-separated, reading left to right. The last stop's year
+   takes the accent because it is the current chapter -- see the constraint in
+   _data/path-here.yml before touching that: it must not read as "current
+   employer", because the stop before it is.                                */
+
+.path-here {
+  border-top: 1px solid var(--hairline);
+  padding: 56px var(--gutter);
+}
+
+.path-here > h2 { margin-bottom: 34px; }
+
+.path-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--border);
+}
+
+.path-stop {
+  padding: 20px 20px 0 0;
+  border-right: 1px solid var(--hairline);
+}
+
+.path-stop:last-child { border-right: 0; }
+.path-stop + .path-stop { padding-left: 20px; }
+
+.path-year {
+  margin-bottom: 8px;
+  font: 400 12px var(--mono);
+  color: var(--nav-muted);
+}
+
+.path-stop:last-child .path-year { color: var(--accent); }
+
+.path-stop p {
+  font: 400 15px/1.5 var(--sans);
+  color: var(--meta);
+  text-wrap: pretty;
+}
+
+/* --- Home: off hours (index.html) --------------------------------------
+   The warm half of the field pair: green marks work, this marks personal.
+
+   The hairlines between cards are the 1px grid gap showing the --border
+   underneath, which is why no card carries a border of its own. Cards sit on
+   --bg rather than on the tint, deliberately -- the tint marks the section in
+   the padding around the grid, and the copy keeps exactly the contrast it has
+   everywhere else on the page.                                             */
+
+.off-hours {
+  border-top: 1px solid var(--hairline);
+  background: var(--field-personal);
+  padding: 56px var(--gutter);
+}
+
+.off-hours > h2 { margin-bottom: 34px; }
+
+.off-hours-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+
+.off-hours-card {
+  background: var(--bg);
+  padding: 26px 24px;
+}
+
+.off-hours-numeral {
+  margin-bottom: 14px;
+  font: 400 34px/.9 var(--display);
+  color: var(--dim);
+}
+
+/* Only the first is accent. A :first-child rule rather than a field in the
+   data, so reordering the entries cannot leave the accent behind. */
+.off-hours-card:first-child .off-hours-numeral { color: var(--accent); }
+
+.off-hours-label {
+  margin-bottom: 8px;
+  font: 500 11px var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.off-hours-card p {
+  font: 400 15px/1.6 var(--sans);
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* The reveal. THE HIDDEN STATE IS APPLIED BY JAVASCRIPT, never by this file:
+   assets/js/off-hours.js sets data-reveal="hidden" at mount and removes it to
+   play the card in. Written the other way round -- hidden in CSS, revealed by
+   script -- a page with no JavaScript, a script that 404s, or any of the
+   several ways an observer can deliver nothing would leave the whole section
+   blank. See the floors in that file.
+
+   transition-delay is set inline by the script, because the stagger depends on
+   how many columns the grid currently has and CSS cannot count them. */
+.off-hours-card { transition: opacity .5s ease, transform .5s ease; }
+
+.off-hours-card[data-reveal="hidden"] {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
 /* --- Home: about + contact (index.html) --------------------------------
    Two sections in <main>, styled to read as one panel (mock option 13b).
    CONSTRAINT: both sit on the site's spine -- the 168px rail for the label, the
@@ -520,21 +691,15 @@ a:hover { color: var(--text); }
   padding-top: 0;
 }
 
-.about > h2,
-.contact > h2 {
-  font: 400 11.5px var(--mono);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 14px;
-}
+/* Heading TYPE for these two comes from the shared home-page section-heading
+   rule above; only their placement and margins are set here. */
 
 /* Label in the 168px rail where every work-row eyebrow sits, content in the
-   main column at 262px where every summary starts. Rows are explicit so the
+   main column at 262px where every summary started. Rows are explicit so the
    photo and the copy share row 2 and their top edges line up; auto-placement
    would drop the copy to row 1 and the second paragraph past the photo.
-   These rules must stay AFTER the shared h2 rule above: same specificity, so
-   source order is what lets the margins below win. */
+   These rules must stay AFTER the shared heading rule above: same
+   specificity, so source order is what lets the margins below win. */
 .about,
 .contact {
   display: grid;
@@ -1099,6 +1264,25 @@ a:hover { color: var(--text); }
   .work-row .eyebrow { margin-bottom: 0; }
   .work-row .work-copy { grid-column: 1 / -1; }
 
+  /* Two up. Three consequences of halving the columns, all of which have to be
+     handled or the second row reads as a mistake:
+
+     - the right-hand hairline has to come off the SECOND cell of each pair,
+       not just the last one, or a rule runs down the middle of nothing;
+     - the first cell of each ROW has to lose the left padding that
+       `.path-stop + .path-stop` gives every stop after the first, or stop 3
+       sits indented 20px further than stop 1 directly above it;
+     - the rows need a rule and space between them. At four-across there is
+       only one row, so the grid's single top border was the whole treatment.  */
+  .path-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  .path-stop { padding-bottom: 20px; }
+  .path-stop:nth-child(2n) { border-right: 0; }
+  .path-stop:nth-child(2n + 1) { padding-left: 0; }
+  .path-stop:nth-child(n + 3) { border-top: 1px solid var(--hairline); }
+
+  .off-hours-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
   .story-body { grid-template-columns: 1fr; gap: 28px; }
 
   /* One column. Every child sets `grid-column: 1 / -1`, so a two-column track
@@ -1151,9 +1335,46 @@ a:hover { color: var(--text); }
      solve. Re-measure before extending this to any other heading. */
   .intro h1 { font-size: 29px; line-height: 1.18; letter-spacing: -.025em; }
 
+  .facts { margin-top: 22px; gap: 8px 14px; font-size: 10.5px; }
+
   .work-row > a { padding: 22px var(--gutter); }
   .work-title { font-size: 19px; }
   .work-summary { max-width: none; }
+
+  .about > h2,
+  .contact > h2,
+  .path-here > h2,
+  .off-hours > h2 { font-size: 27px; }
+
+  /* One column, and the grid's rules turn into a single left rule down the
+     list. Every 960px addition above has to be undone as well as the desktop
+     one -- the row border and the row padding both stop applying once there
+     are no rows to separate. */
+  .path-here { padding: 38px var(--gutter); }
+
+  .path-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+    border-top: 0;
+    border-left: 1px solid var(--border);
+    padding-left: 18px;
+  }
+
+  .path-stop { padding: 0; border-right: 0; }
+  .path-stop + .path-stop { padding-left: 0; }
+  .path-stop:nth-child(n + 3) { border-top: 0; }
+
+  .off-hours { padding: 38px var(--gutter); }
+
+  /* Both, not just Off hours. The two sections mirror each other exactly at
+     every other width, and the delta tightened only one of them at this
+     breakpoint. */
+  .path-here > h2,
+  .off-hours > h2 { margin-bottom: 22px; }
+  .off-hours-grid { grid-template-columns: minmax(0, 1fr); }
+  .off-hours-card { padding: 20px; }
+  .off-hours-numeral { font-size: 28px; margin-bottom: 10px; }
+  .off-hours-label { font-size: 10.5px; }
 
   .story-header { padding: 30px var(--gutter) 24px; }
   .story-title { font-size: 27px; letter-spacing: -.025em; }
@@ -1294,6 +1515,13 @@ a:hover { color: var(--text); }
   /* The work-row hairline transition. Colour-only and 150ms, so it is mild,
      but the preference is a preference. */
   .work-row { transition: none; }
+
+  /* Belt to the script's braces. assets/js/off-hours.js checks the same
+     preference and returns before it hides anything, so under reduce there is
+     normally no transition to suppress. This is here for the window between
+     the stylesheet applying and the deferred script running, and for the case
+     where the preference changes after mount. */
+  .off-hours-card { transition: none; }
 }
 
 /* --- Signature elements ------------------------------------------------

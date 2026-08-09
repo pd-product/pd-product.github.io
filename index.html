@@ -164,6 +164,49 @@ of the text onto the page as visible content.
   </ol>
 </section>
 
+{%- comment -%}
+Four stops, hairline-separated. Content comes from _data/path-here.yml, which
+also carries the constraint this section is easy to get wrong: the third stop
+is the CURRENT role and the fourth is not a job. Read that file before editing
+anything here.
+
+`year` prints unescaped because it carries `&middot;` as an entity; see the
+same note in the data file.
+{%- endcomment -%}
+<section id="path-here" class="path-here">
+  <h2>The path here</h2>
+  <ol class="path-grid" role="list">
+    {%- for stop in site.data['path-here'] %}
+    <li class="path-stop">
+      <p class="path-year">{{ stop.year }}</p>
+      <p>{{ stop.copy }}</p>
+    </li>
+    {%- endfor %}
+  </ol>
+</section>
+
+{%- comment -%}
+Six cards from _data/off-hours.yml. The numeral is derived from position, not
+stored, so reordering the data renumbers the grid; see the note in that file.
+
+`label` prints unescaped because three labels carry HTML entities. The card
+is a plain <li> and the reveal animation attaches nothing here -- the hidden
+state is applied by assets/js/off-hours.js at runtime, so a page loaded with
+no JavaScript shows every card. That is the point of doing it that way round.
+{%- endcomment -%}
+<section id="off-hours" class="off-hours">
+  <h2>Off hours</h2>
+  <ul class="off-hours-grid" role="list">
+    {%- for entry in site.data['off-hours'] %}
+    <li class="off-hours-card">
+      <p class="off-hours-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
+      <p class="off-hours-label">{{ entry.label }}</p>
+      <p>{{ entry.copy }}</p>
+    </li>
+    {%- endfor %}
+  </ul>
+</section>
+
 <section id="about" class="about">
   <h2>About</h2>
   <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
