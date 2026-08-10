@@ -94,8 +94,8 @@ comparison sees.
 
 BOTH faces are predicted KERNED, because the browser kerns. Predicting from
 unshaped outlines runs a display line up to 4.5px wide of what Chrome draws, and
-the error cannot be allowed in one direction either: this face carries 26 POSITIVE
-kern pairs among its 508. Ligatures are a different matter -- substitution changes
+the error cannot be allowed in one direction either: this face flattens to 1258
+pairs, 59 of them POSITIVE. Ligatures are a different matter -- substitution changes
 which glyphs exist, so rather than reimplement a shaper, copy that would form one
 (`ff`, `fi`, `fl`, `tt`) is refused by `fit()`. No current copy forms one.
 
@@ -271,8 +271,12 @@ def _kern_pairs(f):
     Applied when predicting geometry because the browser applies it. Predicting
     from unshaped outlines instead runs a display line up to 4.5px wide of what
     Chrome actually draws, which is far too loose to catch anything -- and the
-    slack cannot simply be allowed in one direction, because this face carries 26
-    POSITIVE pairs among its 508.
+    slack cannot simply be allowed in one direction, because this face flattens to
+    1258 pairs of which 59 are POSITIVE.
+
+    `kern` is the only positioning feature to apply here. The other default-on
+    candidate, `locl`, is registered on this face only under the CAT and TRK
+    language systems, and the card sets no language, so it cannot fire.
     """
     pairs = {}
     if "GPOS" not in f:
@@ -291,10 +295,17 @@ def _kern_pairs(f):
                             pairs[(first, rec.SecondGlyph)] = adj
             elif st.Format == 2:
                 covered = set(st.Coverage.glyphs)
-                left, right = {}, {}
-                for g, k in st.ClassDef1.classDefs.items():
+                # CLASS 0 IS EVERY GLYPH THE ClassDef DOES NOT MENTION, and it is
+                # not listed there. Building the classes from `classDefs` alone
+                # drops it -- 8 non-zero adjustments in this face involve class 0,
+                # so the prediction silently disagreed with the browser for any
+                # string containing one.
+                d1, d2 = st.ClassDef1.classDefs, st.ClassDef2.classDefs
+                left = {0: [g for g in covered if g not in d1]}
+                right = {0: [g for g in f.getGlyphOrder() if g not in d2]}
+                for g, k in d1.items():
                     left.setdefault(k, []).append(g)
-                for g, k in st.ClassDef2.classDefs.items():
+                for g, k in d2.items():
                     right.setdefault(k, []).append(g)
                 for k1, rec1 in enumerate(st.Class1Record):
                     for k2, rec2 in enumerate(rec1.Class2Record):
