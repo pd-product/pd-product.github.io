@@ -40,6 +40,7 @@ USING IT
 
     python _tools/make_og_card.py            # draws and gates; installs nothing
     python _tools/make_og_card.py --write    # also installs assets/og/default.png
+    python _tools/make_og_card.py --replace  # installs a card that DIFFERS from HEAD
 
 To reword, edit HEADLINE and break it by hand. Breaks are editorial -- they fall
 on sense units and no algorithm finds them -- so the tool validates them and
@@ -60,35 +61,48 @@ needs more than this tool: _layouts/default.html emits og:image:width, height an
 both alt tags only when a page uses the default card, so a story with its own
 card would ship with none of them. Fix that block first or do not ship them.
 
-WHAT THE GATE PROVES
+WHAT THE GATE PROVES, AND THE ONE THING IT CANNOT
 
-Per element, against the font outlines rather than against the previous card: the
-ink box on every edge, the dominant ink colour, the weight, and -- on the mono
-elements -- where every interior glyph sits.
+There are two checks here doing different jobs, and confusing them is how a
+generator ends up trusted for something it does not do.
 
-That last one is why this does not simply compare ink boxes. On a monospace
-string, size and tracking trade off EXACTLY, so a wrong pair keeps the box while
-walking every glyph inside it. Fitting to the box alone picks 21.3px/.12em for the
-eyebrow with a PERFECT box match and interior glyphs wrong by up to 3px. It is
-the same blindness that let an earlier whole-card version set the wordmark 9px
-narrow. It is checked as OCCUPANCY -- predicted gaps stay empty, predicted glyphs
-have ink -- rather than run for run, because the rasteriser merges glyphs that
-sit closer than about a pixel and a run count would measure that instead.
+The per-element checks prove THE RENDER MATCHES THE VALUES. Against the font
+outlines, per element: the ink box on every edge, the dominant ink colour, the
+weight, and -- on the mono elements -- where every interior glyph sits. They
+catch a font that did not load, a browser that drew something else, a right-
+aligned element that drifted, subpixel fringing.
+
+They CANNOT catch a wrong value, and no amount of them ever will. They predict
+from the same constants they drew from, so editing one moves both sides and they
+still agree. Set the wordmark to 24px and every one of them passes, because 24px
+is then what the card is supposed to be. That is exactly how a whole-card version
+once shipped a 9px-narrow wordmark: its checks were self-consistent too.
+
+What catches that is the comparison against the committed card, which is why a
+redraw that changes anything needs --replace. The resting state is a run that
+reproduces the committed card byte for byte.
+
+The interior check is still worth having, for a narrower reason. On a monospace
+string size and tracking trade off EXACTLY, so a wrong pair keeps the outer box
+while walking every glyph inside it -- fitting to the box alone picks 21.3px/.12em
+for the eyebrow with a PERFECT box match and interior glyphs out by up to 3px. It
+is checked as OCCUPANCY -- predicted gaps stay empty, predicted glyphs have ink --
+rather than run for run, because the rasteriser merges glyphs that sit closer than
+about a pixel and a run count would measure that instead.
 
 The headline does not get that check and does not need it. Space Grotesk carries
 a `kern` feature and these outlines are unshaped, so a rendered line runs
 NARROWER than predicted; the gate allows that as one-sided slack rather than
-pretending to shape the text. And the ambiguity the interior check exists for is
-specific to monospace: in a proportional face tracking is uniform while glyph
-widths scale, so a wrong size cannot be hidden by a compensating tracking, and
-the box constrains it.
+pretending to shape the text. And the ambiguity it exists for is specific to
+monospace: in a proportional face tracking is uniform while glyph widths scale,
+so a wrong size cannot be hidden by a compensating tracking.
 
-Weight is checked by comparison rather than against a tolerance: the drawn area
-has to sit closer to this weight's filled outlines than to the other weight's.
-Chrome's gamma-corrected edges inflate coverage by an amount that depends on how
-much luminance contrast the ink has against the background -- measured at +8.8%
-for the near-white headline against +24.8% for the accent eyebrow -- so any
-absolute band would have to be per element AND per colour. A comparison does not.
+Weight is checked against THE SAME STRING RENDERED BOTH WAYS, not against filled
+outlines. Chrome's edges inflate coverage by about a quarter, which is wider than
+the gap between Regular and Medium, so an outline comparison structurally prefers
+the heavier face -- on the url it separates by 80.0 against 76.5, which is a coin
+toss, not a check. Rendering both references makes the inflation common to each
+side and cancels it.
 
 REQUIREMENTS
 
@@ -104,13 +118,13 @@ import json
 import pathlib
 import re
 import shutil
+import subprocess
 import sys
 import time
 import urllib.request
 
 import numpy as np
 import websocket
-from fontTools.pens.areaPen import AreaPen
 from fontTools.pens.boundsPen import BoundsPen
 from fontTools.ttLib import TTFont
 from PIL import Image
@@ -249,10 +263,9 @@ def font(family, weight):
         gs, hm, upm = f.getGlyphSet(), f["hmtx"], f["head"].unitsPerEm
         glyphs = {}
         for cp, name in f.getBestCmap().items():
-            bounds, area = BoundsPen(gs), AreaPen(gs)
+            bounds = BoundsPen(gs)
             gs[name].draw(bounds)
-            gs[name].draw(area)
-            glyphs[chr(cp)] = (hm[name][0], bounds.bounds, abs(area.value))
+            glyphs[chr(cp)] = (hm[name][0], bounds.bounds)
         _fonts[key] = (glyphs, upm, f["OS/2"].sCapHeight)
     return _fonts[key]
 
@@ -273,7 +286,7 @@ def glyph_spans(text, type_, origin):
     k = size / upm
     pen, spans = float(origin), []
     for ch in text:
-        advance, bounds, _area = glyphs[ch]
+        advance, bounds = glyphs[ch]
         if bounds:
             spans.append([pen + bounds[0] * k, pen + bounds[2] * k])
         pen += advance * k + track * size
@@ -291,15 +304,9 @@ def vertical_span(text, type_, baseline):
     family, weight, size, _track, _ = type_
     glyphs, upm, _cap = font(family, weight)
     k = size / upm
-    tops = [bounds[3] for ch in text for _a, bounds, _r in [glyphs[ch]] if bounds]
-    bottoms = [bounds[1] for ch in text for _a, bounds, _r in [glyphs[ch]] if bounds]
+    tops = [bounds[3] for ch in text for _a, bounds in [glyphs[ch]] if bounds]
+    bottoms = [bounds[1] for ch in text for _a, bounds in [glyphs[ch]] if bounds]
     return baseline - max(tops) * k, baseline - min(bottoms) * k
-
-
-def outline_area(text, type_):
-    family, weight, size, _track, _ = type_
-    glyphs, upm, _cap = font(family, weight)
-    return sum(glyphs[ch][2] for ch in text) * (size / upm) ** 2
 
 
 def advance_width(text, type_):
@@ -490,8 +497,9 @@ def draw(eyebrow, lines):
     """
     els = elements(eyebrow, lines)
     probe_top = 200
-    placed = []
+    placed, weights = [], {}
     for name, text, type_, baseline, align in els:
+        family, weight, size, track, ink = type_
         want_top, _bottom = vertical_span(text, type_, baseline)
         probe = render(page([(name, text, type_, probe_top, align)], rule=False),
                        f"probe-{name}.png")
@@ -499,10 +507,31 @@ def draw(eyebrow, lines):
         if not got:
             sys.exit(f"probe for {name} drew nothing")
         placed.append((name, text, type_, probe_top + int(want_top) - got[0], align))
-    return els, placed, render(page(placed), "card.png")
+
+        # A second probe at the OTHER weight, through the same rasteriser, so the
+        # gate can tell them apart. Comparing the drawn area to filled outlines
+        # instead cannot: Chrome's edges inflate coverage by about a quarter,
+        # which is wider than the gap between Regular and Medium, so an outline
+        # comparison structurally prefers the heavier face. Measured on the url
+        # it separates by 80.0 against 76.5 -- a coin toss. Rendering both makes
+        # the inflation common to each side and cancels it.
+        alt = (family, 500 if weight == 400 else 400, size, track, ink)
+        other = render(page([(name, text, alt, probe_top, align)], rule=False),
+                       f"probe-{name}-alt.png")
+        weights[name] = (area_of(np.asarray(probe), ink),
+                         area_of(np.asarray(other), ink), alt[1])
+    return els, placed, weights, render(page(placed), "card.png")
 
 
 # --- Measuring --------------------------------------------------------------
+
+def area_of(arr, ink, y0=0, y1=HEIGHT - 1, x0=0, x1=WIDTH - 1):
+    """Total ink coverage in square pixels, projected onto this element's colour."""
+    px = arr[y0:y1 + 1, x0:x1 + 1]
+    d = np.array(ink, float) - np.array(BG, float)
+    cover = ((px.astype(float) - np.array(BG, float)) * d).sum(axis=2) / (d * d).sum()
+    return float(np.clip(cover, 0, 1)[ink_mask(arr)[y0:y1 + 1, x0:x1 + 1]].sum())
+
 
 def ink_mask(arr):
     return np.abs(arr.astype(np.int16) - np.array(BG, dtype=np.int16)).max(axis=2) > 24
@@ -607,7 +636,7 @@ def interior_drift(cols, spans):
     return misplaced
 
 
-def check(arr, els, placed):
+def check(arr, els, placed, weights):
     """Every element, against its outlines. Returns the failures."""
     fails = []
     windows = x_windows(arr, els)
@@ -658,18 +687,14 @@ def check(arr, els, placed):
             fails.append(f"{name} ink is {css_colour(got['colour'])}, "
                          f"should be {css_colour(ink)}")
 
-        # Weight, without a hand-tuned band: the drawn area has to sit closer to
-        # this weight's filled outlines than to the other weight's. Chrome's
-        # gamma-corrected edges inflate coverage by an amount that depends on how
-        # much luminance contrast the ink has against the background, so an
-        # absolute tolerance would have to be per-element and per-colour. A
-        # comparison does not.
-        other = 500 if weight == 400 else 400
-        mine = abs(got["area"] - outline_area(text, type_))
-        theirs = abs(got["area"] - outline_area(text, (family, other, size, 0, ink)))
-        if mine >= theirs:
-            fails.append(f"{name}: ink area {got['area']:.0f} is closer to {family} "
-                         f"{other} than to the {weight} it is drawn as")
+        # Weight, against the SAME string drawn both ways through this rasteriser
+        # rather than against a tolerance. Both references carry Chrome's edge
+        # inflation equally, so it cancels instead of deciding the answer.
+        mine, theirs, other = weights[name]
+        if abs(got["area"] - mine) >= abs(got["area"] - theirs):
+            fails.append(f"{name}: drawn area {got['area']:.0f} is nearer {family} "
+                         f"{other} ({theirs:.0f}) than the {weight} it declares "
+                         f"({mine:.0f})")
     return fails
 
 
@@ -745,6 +770,45 @@ def check_alt(n, eyebrow):
     return []
 
 
+def committed_card():
+    """The card as committed, or None if it is not in HEAD yet."""
+    r = subprocess.run(["git", "show", f"HEAD:{SHIPPED.relative_to(ROOT).as_posix()}"],
+                       cwd=ROOT, capture_output=True)
+    if r.returncode != 0:
+        return None
+    path = OUT / "committed.png"
+    path.write_bytes(r.stdout)
+    return Image.open(path).convert("RGB")
+
+
+def check_against_committed(before, after):
+    """Refuse to change the card unless the change was asked for.
+
+    THE REST OF THE GATE CANNOT DO THIS, and the difference is worth being exact
+    about. Everything else here proves the render matches the VALUES: it predicts
+    from the same constants it drew from, so editing one moves both sides and the
+    gate still agrees. Set the wordmark to 24px and every geometry check passes,
+    because 24px is then what the card is supposed to be. That is precisely the
+    class of mistake that shipped a 9px-narrow wordmark, and only a comparison
+    against the card already committed can see it.
+
+    So a redraw that changes the card needs --replace, and the resting state is a
+    run that reproduces it byte for byte.
+    """
+    a, b = np.asarray(before).astype(np.int16), np.asarray(after).astype(np.int16)
+    if a.shape != b.shape:
+        return [f"the committed card is {a.shape[1]}x{a.shape[0]} and this is "
+                f"{b.shape[1]}x{b.shape[0]}"]
+    d = np.abs(a - b).max(axis=2)
+    if not d.any():
+        return []
+    rows = np.where(d.any(axis=1))[0]
+    return [f"this differs from the committed card: {int((d > 0).sum())} pixels, "
+            f"y{rows[0]}-{rows[-1]}, largest change {int(d.max())} of 255.\n"
+            f"     If the copy or a design value changed on purpose, pass --replace.\n"
+            f"     If it did not, something moved that nobody asked to move."]
+
+
 def report(before, after, els):
     """What moved against the committed card, so a redraw is legible as a diff.
 
@@ -793,10 +857,10 @@ def main():
     print(f"headline: {n} lines, cap-top y{head_cap_top(n)}, "
           f"{head_cap_top(n) - EYEBROW_BASELINE}px under the eyebrow")
 
-    els, placed, card = draw(EYEBROW, HEADLINE)
+    els, placed, weights, card = draw(EYEBROW, HEADLINE)
     arr = np.asarray(card)
 
-    fails = check(arr, els, placed) + check_rule(arr) + check_fringing(arr)
+    fails = check(arr, els, placed, weights) + check_rule(arr) + check_fringing(arr)
     if fails:
         print("GATE FAILED -- the card does not match its own values:")
         for f in fails:
@@ -804,15 +868,24 @@ def main():
         sys.exit("Not writing.")
     print("gate: every element matches its outlines, box and interior")
 
-    if SHIPPED.exists():
-        report(Image.open(SHIPPED).convert("RGB"), card, els)
+    committed = committed_card()
+    if committed is not None:
+        report(committed, card, els)
+        drift = check_against_committed(committed, card)
+        if drift and "--replace" not in sys.argv:
+            print("\nTHIS REDRAW CHANGES THE CARD:")
+            for d in drift:
+                print("   " + d)
+            sys.exit("Not writing.")
+        if not drift:
+            print("   the committed card is reproduced exactly")
 
     # The committed card is RGBA with a uniformly opaque alpha channel. Preserving
     # that keeps the written file different from the previous one only in its
     # pixels, not in its channel layout as well -- and the preview is written the
     # same way, so what is previewed is what gets installed.
     card = card.convert("RGBA")
-    if "--write" in sys.argv:
+    if "--write" in sys.argv or "--replace" in sys.argv:
         card.save(SHIPPED)
         print(f"\nwritten to {SHIPPED}")
     else:
