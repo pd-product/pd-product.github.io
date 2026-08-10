@@ -123,6 +123,7 @@ build -- the fixture it renders through holds the four woff2 files and nothing
 else. This tool is not needed to build or serve the site.
 """
 import base64
+import html
 import json
 import pathlib
 import re
@@ -272,7 +273,7 @@ def _feature_lookups(table, tag):
     return out
 
 
-def _kern_subtables(f):
+def _kern_subtables(f, key):
     """The `kern` feature's pair-positioning subtables, IN LOOKUP ORDER.
 
     Kept as subtables rather than flattened into one pair dictionary, because
@@ -302,18 +303,28 @@ def _kern_subtables(f):
     for li in sorted(_feature_lookups(f["GPOS"], "kern")):
         lookup = gp.LookupList.Lookup[li]
         if lookup.LookupType == 9:
-            raise SystemExit(f"{f.reader.file.name}: kern lookup {li} is an extension "
+            raise SystemExit(f"{FONT_FILE[key]}: kern lookup {li} is an extension "
                              f"lookup, which this does not resolve. Predict geometry "
                              f"with a real shaper or drop the feature.")
         if lookup.LookupType != 2:
-            raise SystemExit(f"{f.reader.file.name}: kern lookup {li} is type "
+            raise SystemExit(f"{FONT_FILE[key]}: kern lookup {li} is type "
                              f"{lookup.LookupType}, not pair positioning. This models "
                              f"pair positioning only.")
         group = []
         for st in lookup.SubTable:
-            if getattr(st, "ValueFormat2", 0) & 0x0004:
-                raise SystemExit(f"{f.reader.file.name}: a kern subtable adjusts the "
-                                 f"SECOND glyph's advance, which this does not model.")
+            # Only "advance the first glyph in x" is modelled. Every other field
+            # OpenType allows in a ValueRecord -- placement, y advance, device and
+            # variation tables -- would change the geometry, and a non-empty
+            # ValueFormat2 also changes how the pair is traversed. Silently
+            # ignoring one would defeat the reason for reading the shipped font.
+            vf1 = getattr(st, "ValueFormat1", 0)
+            vf2 = getattr(st, "ValueFormat2", 0)
+            if vf1 & ~0x0004 or vf2:
+                raise SystemExit(
+                    f"{FONT_FILE[key]}: a kern subtable carries ValueFormat1="
+                    f"0x{vf1:04X} ValueFormat2=0x{vf2:04X}. Only x-advance on the "
+                    f"first glyph (0x0004) is modelled; predict geometry with a real "
+                    f"shaper before re-subsetting with anything else.")
             if st.Format == 1:
                 pairs = {}
                 for gi, first in enumerate(st.Coverage.glyphs):
@@ -331,7 +342,7 @@ def _kern_subtables(f):
                                           st.ClassDef2.classDefs,
                                           st.Class1Record)))
             else:
-                raise SystemExit(f"{f.reader.file.name}: kern subtable format "
+                raise SystemExit(f"{FONT_FILE[key]}: kern subtable format "
                                  f"{st.Format} is not modelled.")
         subtables.append(group)
     return subtables
@@ -396,7 +407,7 @@ def font(family, weight):
             gs[name].draw(bounds)
             glyphs[chr(cp)] = (name, hm[name][0], bounds.bounds)
         _fonts[key] = (glyphs, upm, f["OS/2"].sCapHeight,
-                       _kern_subtables(f), _ligature_sequences(f))
+                       _kern_subtables(f, key), _ligature_sequences(f))
     return _fonts[key]
 
 
@@ -410,10 +421,10 @@ def unsupported(text, type_):
     """
     family, weight, _size, _track, _ink = type_
     glyphs, _upm, _cap, _kern, ligs = font(family, weight)
-    # Reported as code points, never as the characters themselves. The character
-    # that triggers this is by definition one the console may not encode either --
-    # printing it raised UnicodeEncodeError on a cp1252 terminal -- and a curly
-    # quote is indistinguishable from a straight one in an error message anyway.
+    # Reported as code points, never as the characters themselves: unambiguous
+    # (a curly quote and a straight one are the same shape in an error message)
+    # and safe to print on any console. Echoing the character raised
+    # UnicodeEncodeError on this machine's cp1252 terminal.
     missing = sorted(f"U+{ord(ch):04X}" for ch in set(text) if ch not in glyphs)
     names = [glyphs[ch][0] for ch in text if ch in glyphs]
     formed = sorted({"".join(seq) for seq in ligs
@@ -430,9 +441,10 @@ def cap_height(family, weight, size):
 def glyph_spans(text, type_, origin):
     """Every glyph's ink interval and the pen position after the last one.
 
-    Kerned, because the browser kerns. Intervals closer than a pixel are merged,
-    because the rasteriser draws them as one run of ink and the gate compares
-    runs against runs.
+    Kerned, because the browser kerns. Intervals closer than a pixel are merged
+    so that a span is one contiguous region to test containment against; the gate
+    no longer pairs runs to spans, so the merge is about keeping the predicted
+    region honest rather than about matching counts.
     """
     family, weight, size, track, _ = type_
     glyphs, upm, _cap, kern, _ligs = font(family, weight)
@@ -505,6 +517,13 @@ def fit(eyebrow, lines):
     for label, text, type_ in [("the eyebrow", eyebrow.upper(), EYEBROW_TYPE),
                                ("the wordmark", WORDMARK, WORDMARK_TYPE),
                                ("the url", URL, URL_TYPE)]:
+        # Draws no ink -- empty, or nothing but spaces. Tested on the spans rather
+        # than on the string, so a space-only value is caught for the same reason
+        # an empty one is instead of reaching vertical_span() and raising there.
+        if not glyph_spans(text, type_, 0)[0]:
+            problems.append(f"{label} draws no ink; every element on this card is "
+                            f"required content")
+            continue
         missing, formed = unsupported(text, type_)
         if missing:
             problems.append(f"{label} uses {', '.join(missing)}, which the subset "
@@ -651,7 +670,10 @@ def page(placed, rule=True):
         rules.append(
             f"  #e{i} {{ {edge}; top: {top}px; font: {weight} {size}px/normal "
             f'"{family}"; letter-spacing: {track}em; color: {css_colour(ink)}; }}')
-        body.append(f'<div class="el" id="e{i}">{text}</div>')
+        # ESCAPED. The copy is validated against the FONT, so `&` and `<` pass
+        # that check and then vanish into the markup -- an ampersand in a
+        # headline would silently start an entity.
+        body.append(f'<div class="el" id="e{i}">{html.escape(text)}</div>')
     if rule:
         rules.append(f"  #rule {{ left: {COL_LEFT}px; top: {RULE_Y}px; "
                      f"width: {COL_RIGHT - COL_LEFT}px; height: 1px; "
@@ -819,6 +841,13 @@ def interior_drift(cols, spans, tol=2.0):
     draw something. Ink in a gap is outside every span. A glyph that walked is
     outside its own. A glyph drawn in pieces is still inside.
 
+    The tolerance is the antialiasing floor, which does NOT scale with type size --
+    it is the width of the rasteriser's edge, not a fraction of the glyph. Measured
+    on this card, the widest overhang past an outline is 1.00px on the 21px
+    eyebrow, 1.10px on the 25px wordmark and 1.31px on the 64px headline, so 2.0px
+    sits at roughly twice the observed need at both ends of the scale. A tolerance
+    proportional to size would be far too slack on the headline.
+
     WHAT THIS DOES NOT CATCH, so it is not mistaken for more: a compensating size
     and tracking pair on a monospace string. Eyebrow 20px/.18em against 21px/.14em
     moves the last glyph 1.3px and narrows each by 0.6px, both under the floor.
@@ -868,14 +897,24 @@ def check(arr, els, placed, weights):
             fails.append(f"{name} ink is {css_colour(got['colour'])}, "
                          f"should be {css_colour(ink)}")
 
-        # Weight, against the SAME string drawn both ways through this rasteriser
-        # rather than against a tolerance. Both references carry Chrome's edge
-        # inflation equally, so it cancels instead of deciding the answer.
+        # How much ink, against the SAME string drawn through this rasteriser at
+        # this weight. Placement is a whole-pixel translation of that probe, so the
+        # two rasterise identically and the measured difference is 0.00% on every
+        # element -- which makes this an ABSOLUTE bound rather than a comparison.
+        # A relative "nearer this weight than the other" test cannot see a sparse
+        # or partly missing render that stays on the correct side.
         mine, theirs, other = weights[name]
-        if abs(got["area"] - mine) >= abs(got["area"] - theirs):
-            fails.append(f"{name}: drawn area {got['area']:.0f} is nearer {family} "
-                         f"{other} ({theirs:.0f}) than the {weight} it declares "
-                         f"({mine:.0f})")
+        if mine <= 0:
+            fails.append(f"{name}: its probe drew nothing to compare against")
+        elif abs(got["area"] - mine) / mine > 0.02:
+            fails.append(f"{name}: drew {got['area']:.0f} of ink against {mine:.0f} "
+                         f"for the same string at {family} {weight} "
+                         f"({100 * (got['area'] - mine) / mine:+.1f}%)")
+        elif abs(theirs - mine) / mine <= 0.02:
+            # The bound only pins the weight while the weights are separable by it.
+            fails.append(f"{name}: {family} {weight} and {other} differ by "
+                         f"{100 * abs(theirs - mine) / mine:.1f}%, inside the 2% "
+                         f"bound, so this cannot tell them apart")
     return fails
 
 
