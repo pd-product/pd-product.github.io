@@ -67,10 +67,10 @@ There are two checks here doing different jobs, and confusing them is how a
 generator ends up trusted for something it does not do.
 
 The per-element checks prove THE RENDER MATCHES THE VALUES. Against the font
-outlines, per element: the ink box on every edge, the dominant ink colour, the
-weight, and -- on the mono elements -- where every interior glyph sits. They
-catch a font that did not load, a browser that drew something else, a right-
-aligned element that drifted, subpixel fringing.
+outlines, per element: the canvas size, the ink box on every edge, every interior
+glyph edge, the dominant ink colour, and the weight. They catch a font that did
+not load, a browser that drew something else, a right-aligned element that
+drifted, subpixel fringing, a card of the wrong size.
 
 They CANNOT catch a wrong value, and no amount of them ever will. They predict
 from the same constants they drew from, so editing one moves both sides and they
@@ -82,20 +82,22 @@ What catches that is the comparison against the committed card, which is why a
 redraw that changes anything needs --replace. The resting state is a run that
 reproduces the committed card byte for byte.
 
-The interior check is still worth having, for a narrower reason. On a monospace
-string size and tracking trade off EXACTLY, so a wrong pair keeps the outer box
-while walking every glyph inside it -- fitting to the box alone picks 21.3px/.12em
-for the eyebrow with a PERFECT box match and interior glyphs out by up to 3px. It
-is checked as OCCUPANCY -- predicted gaps stay empty, predicted glyphs have ink --
-rather than run for run, because the rasteriser merges glyphs that sit closer than
-about a pixel and a run count would measure that instead.
+The interior check earns its place on gross drift, not on close calls. It
+compares glyph EDGES, aligning runs of ink to the spans they cover rather than
+counting them -- whether two glyphs merge into one run depends on antialiasing
+between those particular shapes, and a count would measure that. It does NOT
+separate a compensating size and tracking pair: eyebrow 20px/.18em against
+21px/.14em moves the last glyph 1.3px and narrows each one by 0.6px, both under
+the antialiasing floor. That is why the original card's size and tracking were
+not separately recoverable, and it is another thing only the committed-card
+comparison sees.
 
-The headline does not get that check and does not need it. Space Grotesk carries
-a `kern` feature and these outlines are unshaped, so a rendered line runs
-NARROWER than predicted; the gate allows that as one-sided slack rather than
-pretending to shape the text. And the ambiguity it exists for is specific to
-monospace: in a proportional face tracking is uniform while glyph widths scale,
-so a wrong size cannot be hidden by a compensating tracking.
+BOTH faces are predicted KERNED, because the browser kerns. Predicting from
+unshaped outlines runs a display line up to 4.5px wide of what Chrome draws, and
+the error cannot be allowed in one direction either: this face carries 26 POSITIVE
+kern pairs among its 508. Ligatures are a different matter -- substitution changes
+which glyphs exist, so rather than reimplement a shaper, copy that would form one
+(`ff`, `fi`, `fl`, `tt`) is refused by `fit()`. No current copy forms one.
 
 Weight is checked against THE SAME STRING RENDERED BOTH WAYS, not against filled
 outlines. Chrome's edges inflate coverage by about a quarter, which is wider than
@@ -224,8 +226,8 @@ def _check_constants():
 # and tells them nothing about the image. The rule was already being followed --
 # it just was not written down anywhere a tool could check it.
 ALT = ("A dark share card: a small green monospace line reading {eyebrow}, "
-       "above a large {n}-line headline, with the name pat diggins and "
-       "pdiggins.com along the bottom.")
+       "above a large {n}-line headline, with the name {wordmark} and "
+       "{url} along the bottom.")
 
 FONT_FILE = {(MONO, 400): "IBMPlexMono-Regular", (MONO, 500): "IBMPlexMono-Medium",
              (DISPLAY, 400): "SpaceGrotesk-Regular",
@@ -251,8 +253,85 @@ _ws = None
 
 # --- Font outlines ----------------------------------------------------------
 
+def _feature_lookups(table, tag):
+    """Lookup indices reached by one feature tag."""
+    out = set()
+    if table is None:
+        return out
+    fl = table.table.FeatureList
+    for i in range(fl.FeatureCount):
+        if fl.FeatureRecord[i].FeatureTag == tag:
+            out.update(fl.FeatureRecord[i].Feature.LookupListIndex)
+    return out
+
+
+def _kern_pairs(f):
+    """Flatten the `kern` feature to (left glyph, right glyph) -> x adjustment.
+
+    Applied when predicting geometry because the browser applies it. Predicting
+    from unshaped outlines instead runs a display line up to 4.5px wide of what
+    Chrome actually draws, which is far too loose to catch anything -- and the
+    slack cannot simply be allowed in one direction, because this face carries 26
+    POSITIVE pairs among its 508.
+    """
+    pairs = {}
+    if "GPOS" not in f:
+        return pairs
+    gp = f["GPOS"].table
+    for li in sorted(_feature_lookups(f["GPOS"], "kern")):
+        lookup = gp.LookupList.Lookup[li]
+        if lookup.LookupType != 2:
+            continue
+        for st in lookup.SubTable:
+            if st.Format == 1:
+                for gi, first in enumerate(st.Coverage.glyphs):
+                    for rec in st.PairSet[gi].PairValueRecord:
+                        adj = getattr(rec.Value1, "XAdvance", 0) or 0
+                        if adj:
+                            pairs[(first, rec.SecondGlyph)] = adj
+            elif st.Format == 2:
+                covered = set(st.Coverage.glyphs)
+                left, right = {}, {}
+                for g, k in st.ClassDef1.classDefs.items():
+                    left.setdefault(k, []).append(g)
+                for g, k in st.ClassDef2.classDefs.items():
+                    right.setdefault(k, []).append(g)
+                for k1, rec1 in enumerate(st.Class1Record):
+                    for k2, rec2 in enumerate(rec1.Class2Record):
+                        adj = getattr(getattr(rec2, "Value1", None), "XAdvance", 0) or 0
+                        if not adj:
+                            continue
+                        for g1 in left.get(k1, []):
+                            if g1 in covered:
+                                for g2 in right.get(k2, []):
+                                    pairs[(g1, g2)] = adj
+    return pairs
+
+
+def _ligature_sequences(f):
+    """Glyph-name sequences the `liga` feature would substitute.
+
+    Not applied -- substitution changes which glyphs exist, so predicting it means
+    reimplementing a shaper. Copy that would trigger one is refused instead. No
+    current copy does; `ff`, `fi`, `fl` and `tt` are the ones to watch.
+    """
+    out = set()
+    if "GSUB" not in f:
+        return out
+    gs = f["GSUB"].table
+    for li in sorted(_feature_lookups(f["GSUB"], "liga")):
+        lookup = gs.LookupList.Lookup[li]
+        if lookup.LookupType != 4:
+            continue
+        for st in lookup.SubTable:
+            for first, ligs in (getattr(st, "ligatures", {}) or {}).items():
+                for lig in ligs:
+                    out.add((first, *lig.Component))
+    return out
+
+
 def font(family, weight):
-    """Glyph advance, bounds and filled area, straight from the shipped woff2.
+    """Glyph metrics, kern pairs and ligature sequences from the shipped woff2.
 
     Read rather than tabulated, so re-subsetting a face cannot leave a stale copy
     of its metrics in here disagreeing with what the browser loads.
@@ -265,34 +344,57 @@ def font(family, weight):
         for cp, name in f.getBestCmap().items():
             bounds = BoundsPen(gs)
             gs[name].draw(bounds)
-            glyphs[chr(cp)] = (hm[name][0], bounds.bounds)
-        _fonts[key] = (glyphs, upm, f["OS/2"].sCapHeight)
+            glyphs[chr(cp)] = (name, hm[name][0], bounds.bounds)
+        _fonts[key] = (glyphs, upm, f["OS/2"].sCapHeight,
+                       _kern_pairs(f), _ligature_sequences(f))
     return _fonts[key]
 
 
+def unsupported(text, type_):
+    """Characters this face cannot set, and sequences it would reshape.
+
+    The faces are SUBSET to the glyphs the site renders, so a curly quote or an
+    accented letter pasted into a headline is genuinely absent rather than merely
+    unusual. Without this the tool raises a bare KeyError deep inside a geometry
+    helper instead of naming the line, which is what it promises to do.
+    """
+    family, weight, _size, _track, _ink = type_
+    glyphs, _upm, _cap, _kern, ligs = font(family, weight)
+    missing = sorted({ch for ch in text if ch not in glyphs})
+    names = [glyphs[ch][0] for ch in text if ch in glyphs]
+    formed = sorted({"".join(seq) for seq in ligs
+                     for i in range(len(names) - len(seq) + 1)
+                     if tuple(names[i:i + len(seq)]) == seq})
+    return missing, formed
+
+
 def cap_height(family, weight, size):
-    glyphs, upm, cap = font(family, weight)
+    _glyphs, upm, cap, _kern, _ligs = font(family, weight)
     return cap * size / upm
 
 
 def glyph_spans(text, type_, origin):
     """Every glyph's ink interval and the pen position after the last one.
 
-    Intervals that touch or overlap are merged, because the renderer draws them
-    as one run of ink and the gate compares runs.
+    Kerned, because the browser kerns. Intervals closer than a pixel are merged,
+    because the rasteriser draws them as one run of ink and the gate compares
+    runs against runs.
     """
     family, weight, size, track, _ = type_
-    glyphs, upm, _cap = font(family, weight)
+    glyphs, upm, _cap, kern, _ligs = font(family, weight)
     k = size / upm
-    pen, spans = float(origin), []
+    pen, spans, prev = float(origin), [], None
     for ch in text:
-        advance, bounds = glyphs[ch]
+        name, advance, bounds = glyphs[ch]
+        if prev is not None:
+            pen += kern.get((prev, name), 0) * k
         if bounds:
             spans.append([pen + bounds[0] * k, pen + bounds[2] * k])
         pen += advance * k + track * size
+        prev = name
     merged = []
     for span in spans:
-        if merged and span[0] <= merged[-1][1]:
+        if merged and span[0] - merged[-1][1] < 1.0:
             merged[-1][1] = max(merged[-1][1], span[1])
         else:
             merged.append(list(span))
@@ -302,10 +404,10 @@ def glyph_spans(text, type_, origin):
 def vertical_span(text, type_, baseline):
     """Ink top and bottom edges, from the tallest and deepest glyph in the string."""
     family, weight, size, _track, _ = type_
-    glyphs, upm, _cap = font(family, weight)
+    glyphs, upm, _cap, _kern, _ligs = font(family, weight)
     k = size / upm
-    tops = [bounds[3] for ch in text for _a, bounds in [glyphs[ch]] if bounds]
-    bottoms = [bounds[1] for ch in text for _a, bounds in [glyphs[ch]] if bounds]
+    tops = [b[3] for ch in text for _n, _a, b in [glyphs[ch]] if b]
+    bottoms = [b[1] for ch in text for _n, _a, b in [glyphs[ch]] if b]
     return baseline - max(tops) * k, baseline - min(bottoms) * k
 
 
@@ -346,6 +448,17 @@ def fit(lines):
             f"leave {head_cap_top(len(lines)) - EYEBROW_BASELINE}px under the "
             f"eyebrow, against a floor of {MIN_CLEARANCE}px")
     for i, line in enumerate(lines, 1):
+        missing, formed = unsupported(line, HEAD_TYPE)
+        if missing:
+            problems.append(f"L{i} uses {', '.join(repr(c) for c in missing)}, which "
+                            f"the subset face does not carry: {line!r}")
+            continue
+        if formed:
+            problems.append(f"L{i} contains {', '.join(formed)}, which the face "
+                            f"substitutes as a ligature. This tool predicts geometry "
+                            f"from outlines and does not reshape, so it will not set "
+                            f"a line it cannot measure: {line!r}")
+            continue
         spans, _pen = glyph_spans(line, HEAD_TYPE, COL_LEFT)
         if not spans:
             problems.append(f"L{i} has no ink")
@@ -596,6 +709,13 @@ def x_windows(arr, els):
         gaps = sorted(((int(cols[i + 1] - cols[i]), int(cols[i]), int(cols[i + 1]))
                        for i in range(len(cols) - 1)), reverse=True)
         cuts = sorted((g[1] + g[2]) // 2 for g in gaps[:len(c) - 1])
+        if len(cuts) < len(c) - 1:
+            # Not enough separated ink to tell the row's elements apart. Give them
+            # all the full row: check() then reports what is actually missing,
+            # instead of this raising an IndexError on a partial `edges`.
+            for name in c:
+                out[name] = (0, WIDTH - 1)
+            continue
         edges = [0] + cuts + [WIDTH - 1]
         # Sorted by where the values put each element, NOT by the order they were
         # declared in. Those agree today -- the footer declares the wordmark
@@ -609,31 +729,49 @@ def x_windows(arr, els):
 # --- The gate ---------------------------------------------------------------
 
 def interior_drift(cols, spans):
-    """How far the drawn glyphs sit from where the outlines put them.
+    """Every run of drawn ink against the predicted spans it covers, edge to edge.
 
-    Compared as OCCUPANCY rather than as a run-for-run match: at -.03em a display
-    face merges adjacent glyphs into one run of ink, and at these sizes so do `a`
-    and `t` in the wordmark, so counting runs measures the rasteriser rather than
-    the placement. Instead every gap the outlines predict WIDE ENOUGH to survive
-    antialiasing must be empty, and every glyph must have ink where it belongs.
+    Compared as EDGES, not as occupancy. Occupancy -- "each predicted glyph has
+    some ink, each predicted gap has none" -- lets glyphs move freely inside their
+    own footprints, which is most of the room a placement error needs.
 
-    This is the check an ink box cannot do. A wrong advance keeps the box while
-    walking every interior glyph -- which is how a whole-card version once set
-    the wordmark 9px narrow -- and it puts ink in the predicted gaps.
+    Runs are ALIGNED rather than counted. Whether two glyphs render as one run of
+    ink depends on sub-pixel antialiasing between that particular pair of shapes:
+    the wordmark's `a` and `t` sit 2.03px apart and merge, while the url's
+    narrowest pair sits 2.23px apart and does not. A run-for-run count would be
+    measuring that, so predicted spans are instead absorbed into the run that
+    covers them and the group's outer edges are what must agree.
+
+    WHAT THIS DOES NOT CATCH, so it is not mistaken for more than it is: a
+    compensating size and tracking pair on a monospace string. Eyebrow 20px/.18em
+    against 21px/.14em walks the last glyph 1.3px and narrows each one by 0.6px,
+    both under the antialiasing floor. That is a property of the raster, not a
+    gap in this check -- it is why the size and tracking of the original card were
+    not separately recoverable in the first place. Only the comparison against the
+    committed card sees it.
     """
-    have = set(int(c) for c in cols)
-    misplaced = 0
-    for i, (left, right) in enumerate(spans):
-        if not any(x in have for x in range(int(left), int(right) + 1)):
-            misplaced += 1
-        if i + 1 < len(spans):
-            gap0, gap1 = right, spans[i + 1][0]
-            if gap1 - gap0 < 2.5:
-                continue
-            intruders = [x for x in range(int(gap0) + 2, int(gap1) - 1) if x in have]
-            if intruders:
-                misplaced += 1
-    return misplaced
+    tol = 2.0
+    runs, run = [], None
+    for x in sorted(int(c) for c in cols):
+        if run and x == run[1] + 1:
+            run[1] = x
+        else:
+            run = [x, x]
+            runs.append(run)
+    j, worst = 0, 0.0
+    for left, right in runs:
+        if j >= len(spans):
+            return f"{len(runs)} runs of ink over {len(spans)} predicted glyphs"
+        first = j
+        j += 1
+        while j < len(spans) and spans[j][0] <= right + tol:
+            j += 1
+        worst = max(worst, abs(left - spans[first][0]), abs(right - spans[j - 1][1]))
+    if j != len(spans):
+        return f"{len(spans) - j} predicted glyphs drew no ink"
+    if worst > tol:
+        return f"glyph edges out by up to {worst:.1f}px"
+    return None
 
 
 def check(arr, els, placed, weights):
@@ -653,35 +791,13 @@ def check(arr, els, placed, weights):
             continue
         want = {"x0": int(spans[0][0]), "x1": int(spans[-1][1]),
                 "y0": int(top), "y1": int(bottom)}
-        # Space Grotesk carries a `kern` feature and these outlines are unshaped,
-        # so a rendered display line is NARROWER than predicted. The subset mono
-        # has an empty GPOS feature list, so it is held exactly. Allowing the
-        # slack on both is how a real defect would hide.
-        kerns = family == DISPLAY
-        for edge in ("x0", "y0", "y1"):
+        for edge in ("x0", "x1", "y0", "y1"):
             if abs(got[edge] - want[edge]) > 1.5:
                 fails.append(f"{name} {edge} is {got[edge]}, outlines say {want[edge]}")
-        slack = got["x1"] - want["x1"]
-        if kerns:
-            floor = -0.012 * (want["x1"] - want["x0"])
-            if not floor <= slack <= 1.5:
-                fails.append(f"{name} right edge {got['x1']}, unkerned outlines say "
-                             f"{want['x1']} ({slack:+.0f}px; kerning allows "
-                             f"{floor:.0f} to +1.5)")
-        elif abs(slack) > 1.5:
-            fails.append(f"{name} x1 is {got['x1']}, outlines say {want['x1']}")
 
-        # Only where the outlines are the whole story. Shaping a kerned line
-        # against unshaped outlines measures the kerning, not the placement -- and
-        # the ambiguity this check exists for is specific to monospace, where size
-        # and tracking trade off EXACTLY and the box cannot separate them. In a
-        # proportional face they do not: tracking is uniform while glyph widths
-        # scale, so a wrong size cannot be hidden by a compensating tracking.
-        if not kerns:
-            drift = interior_drift(got["cols"], spans)
-            if drift:
-                fails.append(f"{name}: {drift} of {len(spans)} glyphs are not where "
-                             f"the outlines put them, while the ink box matches")
+        drift = interior_drift(got["cols"], spans)
+        if drift:
+            fails.append(f"{name}: {drift}, while the ink box matches")
 
         if got["colour"] != ink:
             fails.append(f"{name} ink is {css_colour(got['colour'])}, "
@@ -731,6 +847,20 @@ def check_fringing(arr):
     return []
 
 
+def check_size(arr):
+    """The canvas itself, before anything is measured on it.
+
+    Every other check windows into the array, so a card one pixel short passes
+    all of them and only fails later, as a numpy shape error inside the report.
+    Open Graph consumers reserve a box from og:image:width and height, and
+    _config.yml states 1200x630 as fact.
+    """
+    if arr.shape != (HEIGHT, WIDTH, 3):
+        return [f"the card is {arr.shape[1]}x{arr.shape[0]}, and _config.yml's "
+                f"og_image says {WIDTH}x{HEIGHT}"]
+    return []
+
+
 def check_rule(arr):
     fails = []
     row = arr[RULE_Y]
@@ -762,7 +892,8 @@ def check_alt(n, eyebrow):
     match = re.search(r'^\s+alt:\s*"(.*)"\s*$', block.group(1), re.M)
     if not match:
         return [f"no alt in the og_image block of {CONFIG.name}"]
-    want = ALT.format(eyebrow=eyebrow, n=NUMBER_WORD[n])
+    want = ALT.format(eyebrow=eyebrow, n=NUMBER_WORD[n],
+                      wordmark=WORDMARK, url=URL)
     if match.group(1) != want:
         return [f"og_image.alt does not describe this card.\n"
                 f"     in {CONFIG.name}: {match.group(1)}\n"
@@ -860,7 +991,9 @@ def main():
     els, placed, weights, card = draw(EYEBROW, HEADLINE)
     arr = np.asarray(card)
 
-    fails = check(arr, els, placed, weights) + check_rule(arr) + check_fringing(arr)
+    fails = (check_size(arr) or
+         check(arr, els, placed, weights) + check_rule(arr)
+         + check_fringing(arr))
     if fails:
         print("GATE FAILED -- the card does not match its own values:")
         for f in fails:
