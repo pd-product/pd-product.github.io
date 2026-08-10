@@ -149,9 +149,8 @@ OUT = ROOT / "temp/og-render"              # scratch; gitignored
 
 # --- The card ---------------------------------------------------------------
 
-EYEBROW = "solving problems with ai"       # index.html's .intro .eyebrow, verbatim
-HEADLINE = ["I build products", "that solve problems",
-            "people have learned", "to work around."]
+EYEBROW = "building with ai"               # index.html's .intro .eyebrow, verbatim
+HEADLINE = ["Always learning.", "Often solving problems."]
 
 # --- Canvas and column ------------------------------------------------------
 
@@ -200,11 +199,15 @@ LINE_PITCH = 69
 
 MAX_LINES = 5
 MIN_CLEARANCE = 40
-# The widest line on the card as designed is 580px. This is about one 64px em of
-# headroom over that, and it keeps at least 400px of air to the right of the
-# longest line, which is what makes the card read as display type rather than as
-# a paragraph.
-MAX_LINE_WIDTH = 640
+# How far right a headline line may reach, measured from COL_LEFT to its last
+# ink. A line may not fill the column: what makes the card read as display type
+# rather than as a paragraph is the air left to the right of the longest line,
+# and this keeps that above a third of the 1044px column.
+#
+# The floor is the durable half. Copy that reaches past it is re-broken or
+# rewritten -- never shrunk, and never admitted by moving this number to suit one
+# sentence, which would leave a measure that refuses nothing.
+MAX_LINE_REACH = 690
 
 NUMBER_WORD = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five"}
 
@@ -514,6 +517,18 @@ def fit(eyebrow, lines):
     of naming the problem.
     """
     problems = []
+    # WHITESPACE AT AN EDGE MOVES THE ELEMENT, and only the headline is measured
+    # for where it ends up. The eyebrow, the wordmark and the url have no reach
+    # constraint at all, so a leading space silently indents one of them and
+    # every check still agrees -- they predict from the same shift. Caught here
+    # for all four rather than left to the one measure that would notice.
+    # Refused rather than stripped: the breaks are editorial, and silently
+    # rewriting one is the thing this tool does not do.
+    for label, text in [("the eyebrow", eyebrow), ("the wordmark", WORDMARK),
+                        ("the url", URL)] + \
+                       [(f"L{i}", line) for i, line in enumerate(lines, 1)]:
+        if text != text.strip():
+            problems.append(f"{label} has whitespace at an edge: {text!r}")
     for label, text, type_ in [("the eyebrow", eyebrow.upper(), EYEBROW_TYPE),
                                ("the wordmark", WORDMARK, WORDMARK_TYPE),
                                ("the url", URL, URL_TYPE)]:
@@ -560,10 +575,16 @@ def fit(eyebrow, lines):
         if not spans:
             problems.append(f"L{i} has no ink")
             continue
-        width = spans[-1][1] - spans[0][0]
-        if width > MAX_LINE_WIDTH:
-            problems.append(f"L{i} sets {width:.0f}px wide, over the {MAX_LINE_WIDTH}px "
-                            f"measure by {width - MAX_LINE_WIDTH:.0f}px: {line!r}")
+        # Measured to where the ink ENDS, from the column's left edge, not as the
+        # span between first and last ink. The two differ by the first glyph's
+        # left side bearing, and only the first one is the air the measure exists
+        # to protect -- a line is refused for reaching too far right, which is
+        # where it is seen, not for being wide somewhere else on the canvas.
+        reach = spans[-1][1] - COL_LEFT
+        if reach > MAX_LINE_REACH:
+            problems.append(f"L{i} reaches {reach:.0f}px from the column's left edge, "
+                            f"over the {MAX_LINE_REACH}px measure by "
+                            f"{reach - MAX_LINE_REACH:.0f}px: {line!r}")
     clearance = head_cap_top(len(lines)) - EYEBROW_BASELINE
     if clearance < MIN_CLEARANCE:
         problems.append(f"{clearance}px of clearance under the eyebrow, against a floor "

@@ -132,8 +132,10 @@
   src: url("/assets/fonts/SpaceGrotesk-Medium.woff2") format("woff2");
 }
 
-/* Metric-matched stand-in for the display face, and the reason `font-display:
-   swap` does not throw the headline around on first paint.
+/* Metric-matched stand-in for the display face, and what keeps `font-display:
+   swap` from throwing the headline around on first paint. It narrows the
+   movement to a couple of widths rather than removing it; the measured
+   intervals are below.
 
    Space Grotesk sets about 13% WIDER per character than Arial. Unadjusted,
    the hero headline reflows -- often by a whole line -- the moment the webfont
@@ -147,26 +149,40 @@
    0.48170 gives 113.05%, and the ascent, descent and line gap are Space
    Grotesk's own (984/-292/0 per 1000 upm) divided back through that scale.
    Re-derive them if either font is ever replaced. Checked on the current hero
-   string at 47px: 1556.3px real against 1611.5px adjusted, a 3.55% difference.
-   Close, but NOT close enough to hold the wrap at every width. At the 1280 cap
-   of 813px the real face takes two lines and the fallback takes three, so this
-   headline DOES reflow by one line if the fallback paints first; at the 960 cap
-   both take three. The preload in _layouts/default.html is what keeps that
-   window short. Re-measure whenever the hero copy changes: the margin is a
-   property of the particular string, not of the two fonts, and the previous
-   copy held at both widths where this one does not.
+   string at 47px: 856.8px real against 903.3px adjusted, a 5.43% difference.
+   Swept every integer width from 320 to 1440 and spot-checked to 3840, on both
+   faces. They agree everywhere but two intervals: at 336-352 the fallback takes
+   THREE lines against the real face's two, a whole line, and at 719-960 both
+   take two but the fallback breaks a word earlier, so "solving" moves between
+   the lines when the real face lands. The preload in _layouts/default.html is
+   what keeps both windows short.
+
+   THE LINE COUNT IS THE CHECK, and the break word with it. That percentage is
+   NOT: a wider gap can hold a wrap that a narrower one loses, because what
+   decides it is where a string's break candidates fall against the cap, and
+   that belongs to the particular string rather than to the two fonts. NOR IS A
+   SAMPLE -- 336-352 sits between the 320 and the 360 that round numbers reach
+   for, and both of those agree. So re-measure on the built page whenever the
+   hero copy changes, over the domain measured here: every integer width from
+   320 to 1440, plus sampled widths above it, on both faces, counting the breaks
+   and not only the lines. Below 320 is not measured and not claimed; the note
+   in CLAUDE.md owns what happens down there.
 
    WIDTH is matched, not x-height, and the trade is real in both directions.
    Matching x-height instead would put size-adjust at 94.30%, which sets 16.6%
-   narrow per character. On the current hero string that comes out as 1327.4px
-   against 1556.3px -- a 14.70% shortfall rather than 16.6%, because the two
+   narrow per character. On the current hero string that comes out as 744.2px
+   against 856.8px -- a 13.14% shortfall rather than 16.6%, because the two
    numbers measure different things: the first is the average advance ratio, the
-   second is this particular string. That is a reflow of whole lines at every
-   width, against the one width where the shipped values lose a line. The price
-   of matching width is that
-   the fallback's x-height runs 19.9% large, so the swap is visible as a change
-   of weight and size. That is the right way round: a heavier first paint is a
-   flicker, a reflow moves the text the reader is already reading.
+   second is this particular string. Swept the same way it is a WASH on this
+   copy: the x-height variant matches the real face at 336-352 where the shipped
+   values lose a line, and loses one itself at 320-335 where they hold, and both
+   break a word early at 719-960. Width is still what is matched, because the
+   margin belongs to the string and the next copy may not split the difference
+   this evenly -- NOT because this copy makes the case. The price of
+   matching width is that the fallback's x-height runs 19.9% large, so the swap
+   is visible as a change of weight and size. That is the right way round: a
+   heavier first paint is a flicker, a reflow moves the text the reader is
+   already reading.
 
    Arial is the reference because it is the stack's realistic resolution on
    Windows and Android. macOS resolves Helvetica Neue first and will be a
@@ -241,7 +257,9 @@
      labels all deliberately stay where they are.
 
      "Display Fallback" is the metric-matched face declared above and has to
-     stay ahead of the plain families -- it is what makes the swap invisible.
+     stay ahead of the plain families -- it is what keeps the swap from moving
+     the headline at most widths. It does not make the swap invisible: the
+     fallback's x-height runs large, so the weight and size change is seen.
      The plain families behind it are the floor if `local()` finds nothing. */
   --display: "Space Grotesk", "Display Fallback", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -1511,11 +1529,11 @@ a:hover { color: var(--text); }
   .intro { padding: 34px var(--gutter) 28px; }
   .page-simple { padding: 34px var(--gutter) 28px; }
   /* Leading is raised HERE and nowhere else. The global 1.09 is display
-     leading, tuned for the one or two lines this headline occupies at 47px,
-     where each line is long relative to its height. At 29px in a ~350px column
-     the same copy wraps to THREE lines, and to four at 320 -- measured, not
-     estimated -- which reads as a block of text rather than a display line, and
-     text at display leading reads dense.
+     leading, tuned for lines that are long relative to their own height, which
+     is what this headline sets at 47px. At 29px it sets in a ~350px column
+     instead -- two lines there, three below 336, measured, not estimated --
+     where the lines are short enough to stack close and read dense at display
+     leading.
 
      Deliberately NOT applied to .story-title. Every story title measures one or
      two lines at both 390 and 1280, which is the case 1.10 is already tuned

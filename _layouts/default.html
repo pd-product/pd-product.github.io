@@ -104,12 +104,15 @@
     it starts alongside the CSS instead.
 
     WHAT IT BUYS IS A SHORTER SWAP, NOT A LAYOUT FIX. `font-display: swap` plus
-    the metric-matched "Display Fallback" face already stop the headline
-    REFLOWING when the real font lands -- see the metrics note in
-    assets/css/style.scss. What they do not stop is the swap being visible: the
-    fallback's x-height runs large, so first paint is a different weight and
-    size. This shortens the time that mismatched paint is on screen and changes
-    no geometry.
+    the metric-matched "Display Fallback" face hold the headline's line count at
+    almost every width, but not all: there are widths where the fallback loses a
+    line and widths where it keeps the count and breaks a word earlier, so the
+    headline CAN move when the real font lands. The metrics note in
+    assets/css/style.scss owns the measured intervals; do not restate them here.
+    Nor do they stop the swap being visible: the fallback's x-height runs large,
+    so first paint is a different weight and size. This shortens the time that
+    mismatched paint is on screen. It is the only lever here that does -- the
+    preload changes no geometry itself.
     {%- endcomment -%}
     <link rel="preload" href="{{ '/assets/fonts/SpaceGrotesk-Regular.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
