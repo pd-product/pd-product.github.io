@@ -19,3 +19,6 @@ Gemfile.lock
 
 # Session scratch (review prompts, working notes). Never published, never committed.
 temp/
+
+# Python bytecode from importing _tools/ helpers.
+__pycache__/
