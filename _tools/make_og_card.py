@@ -622,9 +622,11 @@ def connect():
 
 
 def preflight():
-    if not (SERVED / "assets/fonts").is_dir():
-        sys.exit(f"{SERVED}/assets/fonts does not exist.\n"
-                 f"  Copy the four woff2 files there, or run with the fixture rebuilt.")
+    # BUILD the fixture before demanding it. temp/ is gitignored, so on a fresh
+    # clone this directory does not exist -- and it is made entirely of files the
+    # repo already has, so telling the author to copy them by hand asks for the
+    # one thing that can put a stale face in front of the browser.
+    sync_fixture()
     try:
         urllib.request.urlopen(f"{FIXTURE}/assets/fonts/SpaceGrotesk-Regular.woff2",
                                timeout=5)
@@ -1074,7 +1076,6 @@ def report(before, after, els):
 def main():
     _check_constants()
     preflight()
-    sync_fixture()
 
     problems = fit(EYEBROW, HEADLINE)
     if problems:
