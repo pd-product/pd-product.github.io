@@ -517,20 +517,25 @@ def fit(eyebrow, lines):
     for label, text, type_ in [("the eyebrow", eyebrow.upper(), EYEBROW_TYPE),
                                ("the wordmark", WORDMARK, WORDMARK_TYPE),
                                ("the url", URL, URL_TYPE)]:
+        # ORDER MATTERS. unsupported() first, because glyph_spans() indexes the
+        # cmap and raises KeyError on a character the subset lacks -- checking for
+        # ink first sends an unsettable eyebrow through that path and loses the
+        # named refusal this exists to give.
+        missing, formed = unsupported(text, type_)
+        if missing:
+            problems.append(f"{label} uses {', '.join(missing)}, which the subset "
+                            f"face does not carry")
+            continue
+        if formed:
+            problems.append(f"{label} contains {', '.join(formed)}, which the face "
+                            f"substitutes as a ligature and this does not reshape")
+            continue
         # Draws no ink -- empty, or nothing but spaces. Tested on the spans rather
         # than on the string, so a space-only value is caught for the same reason
         # an empty one is instead of reaching vertical_span() and raising there.
         if not glyph_spans(text, type_, 0)[0]:
             problems.append(f"{label} draws no ink; every element on this card is "
                             f"required content")
-            continue
-        missing, formed = unsupported(text, type_)
-        if missing:
-            problems.append(f"{label} uses {', '.join(missing)}, which the subset "
-                            f"face does not carry")
-        if formed:
-            problems.append(f"{label} contains {', '.join(formed)}, which the face "
-                            f"substitutes as a ligature and this does not reshape")
     if not lines:
         problems.append("the headline is empty")
         return problems
@@ -670,9 +675,10 @@ def page(placed, rule=True):
         rules.append(
             f"  #e{i} {{ {edge}; top: {top}px; font: {weight} {size}px/normal "
             f'"{family}"; letter-spacing: {track}em; color: {css_colour(ink)}; }}')
-        # ESCAPED. The copy is validated against the FONT, so `&` and `<` pass
-        # that check and then vanish into the markup -- an ampersand in a
-        # headline would silently start an entity.
+        # ESCAPED. The copy is validated against the FONT, so markup characters
+        # pass that check and are then parsed rather than drawn. A bare `&` before
+        # a space survives, but `research &copy design` loses four characters to a
+        # copyright sign and `<em>` disappears entirely.
         body.append(f'<div class="el" id="e{i}">{html.escape(text)}</div>')
     if rule:
         rules.append(f"  #rule {{ left: {COL_LEFT}px; top: {RULE_Y}px; "
