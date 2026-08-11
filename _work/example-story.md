@@ -62,6 +62,8 @@ chips:
 tradeoffs:
   - rejected: "The expected option"
     chosen: "What you actually did"
+    # Optional caption above the table. Omitted, the table has none.
+    # title: "What the decision was between"
     rows:
       - dimension: "Time to ship"
         rejected: "What the expected option cost in time"

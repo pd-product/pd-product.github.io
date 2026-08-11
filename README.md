@@ -131,6 +131,12 @@ its marker can never land on the wrong column. Place it in the body where it bel
 `tradeoffs` is a list even with one table. Target 3 rows, 5 is the ceiling -- a story needing more
 dimensions should add a second table for a second decision rather than a taller one.
 
+Per table: `rejected` and `chosen` name the two options and head the two columns, and `rows`
+carries one entry per dimension, each with its own `dimension`, `rejected` and `chosen`. A fourth
+key, `title`, is optional and draws a caption above the table; omit it and the table has none.
+Nothing else is read. The other three are required in the sense that matters here -- omitting one
+renders an empty column head or an empty table body rather than an error.
+
 **The include line is required and fails silently without it.** Declaring `tradeoffs:` in front
 matter renders nothing on its own: the include is placed by hand, and `{% for table in nil %}`
 iterates zero times without complaining. A story with a fully authored table and no include line
