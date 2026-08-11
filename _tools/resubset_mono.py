@@ -308,6 +308,28 @@ def compare(a, b, label):
     return problems
 
 
+def closure(source, codepoints):
+    """Every glyph name those codepoints reach, components included.
+
+    A composite glyph is drawn from parts that are themselves glyphs, and the
+    subsetter has to carry them whether or not they have codepoints of their own.
+    This is what the added-glyph count has to be measured against.
+    """
+    f = TTFont(source)
+    glyf = f["glyf"]
+    cmap = f.getBestCmap()
+    out, stack = set(), [cmap[c] for c in codepoints if c in cmap]
+    while stack:
+        name = stack.pop()
+        if name in out:
+            continue
+        out.add(name)
+        g = glyf[name]
+        if g.isComposite():
+            stack.extend(c.glyphName for c in g.components)
+    return out
+
+
 def parse_add(argv):
     """The codepoints named by --add, as ints. `U+2713`, `2713` and `0x2713`."""
     out = []
@@ -377,39 +399,46 @@ def grow(weight, shipped, source, have, codepoints, raw_shipped, sig_before,
     if shrank:
         kept.append(f"{sum(shrank.values())} glyph(s) present before are gone: "
                     f"{list(shrank)[:3]}")
-    if sum(grew.values()) != len(add):
-        kept.append(f"expected exactly {len(add)} new glyph(s), got "
-                    f"{sum(grew.values())}: {list(grew)[:3]}")
-    # The FILE's shape, which the byte allowlist below cannot police. Adding a
-    # codepoint must not change the table list, drop a layout feature or strip
-    # the hinting programs, and must move the glyph count by exactly what was
-    # asked for.
+    # NOT len(add). A composite glyph brings its parts: U+00E9 is `eacute`, which
+    # references `e` and `acute`, and `acute` is not in the shipped subset -- so
+    # one requested codepoint legitimately adds two glyphs. Counting requested
+    # codepoints instead of the closure rejects every accented character there is.
+    want_new = closure(source, add) - set(TTFont(shipped).getGlyphOrder())
+    if sum(grew.values()) != len(want_new):
+        kept.append(f"expected {len(want_new)} new glyph(s) "
+                    f"({', '.join(sorted(want_new))}), got {sum(grew.values())}: "
+                    f"{list(grew)[:3]}")
     shape_after = profile(grown)
     for key in ("tables", "GSUB", "GPOS", "hinting"):
         if shape_before[key] != shape_after[key]:
             kept.append(f"{key}: shipped {shape_before[key]} vs grown "
                         f"{shape_after[key]}")
-    if shape_after["glyphs"] != shape_before["glyphs"] + len(add):
+    if shape_after["glyphs"] != shape_before["glyphs"] + len(want_new):
         kept.append(f"glyph count {shape_before['glyphs']} -> "
-                    f"{shape_after['glyphs']}, expected +{len(add)}")
+                    f"{shape_after['glyphs']}, expected "
+                    f"+{len(want_new)}")
 
-    # THIS LIST WAS MEASURED, NOT REASONED OUT, and the difference matters: an
-    # earlier list of six was derived from a single added arrow and silently did
-    # not generalise. Building the same subset with and without one added
-    # codepoint, for three characters in three different blocks:
+    # THE ROUND TRIP, and it is what makes an allowlist unnecessary.
     #
-    #     U+20AC  GSUB OS/2 cmap glyf head hmtx loca maxp
-    #     U+2022  GSUB      cmap glyf head hmtx loca maxp
-    #     U+00E9  GSUB GDEF cmap glyf head hmtx loca maxp
+    # Comparing the grown face with the shipped one directly cannot use a strict
+    # comparison, because a codepoint legitimately moves tables -- measured on
+    # three characters in three blocks, U+20AC moves GSUB and OS/2, U+2022 moves
+    # GSUB, U+00E9 moves GSUB and GDEF, all on top of cmap glyf head hmtx loca
+    # maxp. Waving those through by name is the curated-subset mistake this file
+    # exists to stop making: nothing would then check what is INSIDE them, and a
+    # GSUB lookup redirected to the wrong alternate, a rewritten GDEF class or a
+    # changed OS/2 weight would all pass.
     #
-    # so GSUB always moves, and OS/2 or GDEF move depending on which block the
-    # character sits in and whether it carries mark data. Widening the list this
-    # far would cost the gate its teeth on its own -- which is what the shape
-    # comparison above is for. It checks the feature TAGS, the table list and
-    # the hinting inside the three tables this list now waves through.
-    kept += table_diff(raw_shipped, raw_tables(grown),
-                       allowed={"head", "maxp", "hmtx", "cmap", "loca", "glyf",
-                                "GSUB", "GDEF", "OS/2"})
+    # So instead of deciding which tables may differ, take the difference back
+    # out: subset the grown face down to exactly the shipped codepoints and
+    # compare THAT with the shipped file, every table, no allowlist. Anything the
+    # grow step did to the retained 108 codepoints survives that trip and shows
+    # up here. Verified to reproduce the shipped file byte for byte on all 17
+    # tables, both weights.
+    back = OUT / f"roundtrip-{weight}.woff2"
+    subset(grown, back, codepoints)
+    copy_names(shipped, back)
+    kept += table_diff(raw_shipped, raw_tables(back), allowed=set())
     return kept
 
 
@@ -470,6 +499,7 @@ def main():
                   f"{', '.join(f'U+{c:04X}' for c in already)} is in the shipped "
                   f"face; there is nothing to add")
             continue
+        new_glyphs = closure(source, add) - set(TTFont(shipped).getGlyphOrder())
         kept = grow(weight, shipped, source, have, codepoints, raw_shipped,
                     sig_before, shape_before, add)
         if kept:
@@ -479,8 +509,11 @@ def main():
                 print(f"   REGRESSION  {p}")
         else:
             print("   every previously shipped codepoint is unchanged, and "
-                  "every glyph fingerprint survives with exactly "
-                  f"{len(add)} added")
+                  "every glyph fingerprint survives, with "
+                  f"{len(new_glyphs)} added "
+                  f"({', '.join(sorted(new_glyphs))}) and the round trip back "
+                  f"to {len(codepoints)} codepoints reproducing the shipped "
+                  f"file exactly")
 
     if not ok:
         raise SystemExit("\nrefusing to install: " + "; ".join(sorted(reasons)) + ".")
