@@ -117,7 +117,7 @@ REQUIREMENTS
 
 Pillow, numpy, fontTools with brotli, and websocket-client. Headless Chrome on
 9351 -- launched with --disable-lcd-text, which is not optional and which the
-gate checks -- and the font fixture on 8731; see temp/README.md. The card uses no
+gate checks -- and the font fixture on 8731; see README.md's Tools section. The card uses no
 stylesheet and no markup from the site, so regenerating it does NOT need a Jekyll
 build -- the fixture it renders through holds the four woff2 files and nothing
 else. This tool is not needed to build or serve the site.
@@ -631,7 +631,7 @@ def connect():
         # is a live endpoint with nothing to drive. Worth naming: the bare
         # IndexError it used to raise reads like a protocol fault.
         sys.exit(f"Chrome on {PORT} has no page target open.\n"
-                 f"  Relaunch it; see temp/README.md for the command.")
+                 f"  Relaunch it; see README.md's Tools section for the command.")
     _ws = websocket.create_connection(pages[0]["webSocketDebuggerUrl"], timeout=60)
     cmd("Page.enable")
     cmd("Network.enable")
@@ -658,7 +658,7 @@ def preflight():
         urllib.request.urlopen(f"http://127.0.0.1:{PORT}/json", timeout=5)
     except Exception as exc:
         sys.exit(f"No headless Chrome on {PORT} ({exc}).\n"
-                 f"  See temp/README.md for the launch command.")
+                 f"  See README.md's Tools section for the launch command.")
     OUT.mkdir(parents=True, exist_ok=True)
 
 

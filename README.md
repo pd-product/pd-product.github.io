@@ -169,29 +169,37 @@ implicit list role in Safari with VoiceOver.
 
 ## Assets
 
-Diagrams and cards are committed at final size; there is no build-time image processing. Story
-share cards are an authoring step, not a build step: `image:` in a story's front matter overrides
-the site-wide default in `_config.yml`, so nothing is ever missing a card.
+Diagrams and cards are committed at final size; there is no build-time image processing. Every page
+shares one card, `default.png`, drawn by `_tools/make_og_card.py` -- see CLAUDE.md for why there are
+no per-story cards. Nothing is ever missing a card because the site-wide default in `_config.yml`
+covers every page.
 
 - `assets/img/` -- the about photo, plus diagrams when they arrive, exported at the dimensions the
   design calls for. Full-resolution originals are kept in `_originals/`, which Jekyll does not
   publish; re-derive from there rather than upscaling a shipped file when a display size grows.
-- `assets/og/` -- share cards at 1200x630. `default.png` is the site-wide fallback; per-story cards
-  override it via `image:` in the story front matter.
+- `assets/og/` -- the share card at 1200x630. `default.png` serves every page. A story CAN override
+  it with `image:` in its front matter, and none does.
 
-  Keep `image:` a **bare path**, never a hash. seo-tag will emit `og:image:width/height/alt` from a
+  If one ever should, keep `image:` a **bare path**, never a hash. seo-tag will emit
+  `og:image:width/height/alt` from a
   hash, but its JSON-LD drop then forwards every key into the structured data and hardcodes
   `"@type": "imageObject"` in lowercase -- and Schema.org type names are case-sensitive, so that is
   not a real type, and `alt` is not a Schema.org property. The dimensions come from `og_image:` in
   `_config.yml` and are printed by `_layouts/default.html` instead. A story that sets its own
   `image:` gets no dimension tags, deliberately: they would describe the wrong file.
 - `assets/fonts/` -- two families, both self-hosted as woff2 and both **subset**, which is what
-  keeps each file near 11KB instead of 46KB. Regenerate with `fonttools subset` if a character set
+  keeps each file at 11-12KB instead of the 46KB the complete face weighs. Regenerate with
+  `fonttools subset` if a character set
   ever needs to grow: adding a character the subset lacks makes that one glyph silently fall back
-  to another font.
+  to another font. `_tools/check_subset_coverage.py` is what finds that.
 
-  **IBM Plex Mono** Regular and Medium, subset to the ~107 glyphs the site renders, declared in CSS
-  as `"Site Mono"`. The rename is required: the SIL OFL reserves the name "Plex" and forbids a
+  Re-subsetting means reproducing the CURRENT subset from the same upstream release first, and
+  proving it by comparing every decompressed table byte for byte rather than a chosen list of
+  fields. A same-codepoint rebuild matches all 17 tables exactly, bar `head`'s checksum and build
+  timestamp; anything less is a changed face.
+
+  **IBM Plex Mono** Regular and Medium, subset to the 108 codepoints the site renders, declared in
+  CSS as `"Site Mono"`. The rename is required: the SIL OFL reserves the name "Plex" and forbids a
   modified version from presenting a reserved name, and a subset is a modified version.
 
   **Space Grotesk** Regular and Medium, subset to printable ASCII plus five characters a display
@@ -224,6 +232,78 @@ which Jekyll ignores because it starts with a dot.
 which is the fix for exactly this problem. The advice stands on its own: Jekyll publishes markdown
 it can reach, defaults or no defaults.)
 
+## Tools
+
+`_tools/` holds two committed scripts. Neither runs at build or deploy time -- Pages runs Jekyll and
+nothing else -- and the site builds and serves without them. They exist because the two things they
+check cannot be checked by reading the source.
+
+**The leading underscore is load-bearing.** Jekyll skips entries starting with `_`, which is why
+`_tools/` needs no entry in `exclude:` the way `temp/` does. Renamed to `tools/`, both scripts would
+deploy as live URLs on pdiggins.com.
+
+Both drive a headless Chrome, for the same reason in both cases: the question is about the rendered
+page, not the file. Each script's own docstring is its living record; this is the map.
+
+Both expect it on port 9351, and neither starts it:
+
+```
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new \
+  --remote-debugging-port=9351 --remote-allow-origins='*' --no-first-run \
+  --user-data-dir='C:/Users/pbd/AppData/Local/Temp/cdp' about:blank
+```
+
+`--remote-allow-origins` is not optional; without it every connection hangs. Nor are the forward
+slashes in that path cosmetic -- bash eats the backslashes in an unquoted `C:\Users\...` and Chrome
+silently receives `C:UserspbdAppData...`. Add `--disable-lcd-text` for the card generator, which
+gates on it; the checker reads the DOM and never a pixel, so it is indifferent and one browser
+carrying the flag serves both.
+
+Python needs `fonttools`, `websocket-client`, and, for the card, `pillow` and `numpy`.
+
+### `make_og_card.py` -- draws `assets/og/default.png`
+
+The share card is a picture of text, so rewording the h1 leaves every shared link previewing the old
+claim. This draws the whole card from values rather than editing the previous PNG, and refuses copy
+that does not fit instead of shrinking it.
+
+It renders through a fixture of the four font files and no site markup, so it needs no Jekyll build.
+It writes that fixture itself; serve it, then draw:
+
+```
+python -m http.server 8731 --directory temp/og-fixture
+python _tools/make_og_card.py            # draws and gates; installs nothing
+python _tools/make_og_card.py --replace  # installs a card that DIFFERS from the committed one
+```
+
+Two things about it are easy to get wrong. It needs Chrome launched with `--disable-lcd-text`, or
+the small type comes back with colour fringes that no geometry check can see and that ship in the
+PNG. And a redraw that changes the card needs `--replace`: that comparison against the committed
+card is the only check that catches a wrong design VALUE, because every per-element check predicts
+from the same constants it drew from.
+
+### `check_subset_coverage.py` -- finds characters the faces do not carry
+
+Both self-hosted families are subset. A character outside the subset does not fail; the browser
+drops to the next family in the stack, so one glyph arrives mid-word in a different typeface at a
+different width. This walks the built site and names any character that reaches a face lacking it.
+
+```
+python -m http.server 8731 --directory <a built site>
+python _tools/check_subset_coverage.py
+```
+
+Only one of the two can hold 8731 at a time: this wants a built site there, the card generator wants
+its font fixture.
+
+Run it after adding a story, and after any copy that reaches past plain ASCII -- an arrow, a dash, a
+quote mark, anything pasted. It exits non-zero on a finding, names the code point and the face, and
+reports what Chrome painted instead.
+
+The check is per face, not per site: the two subsets are different sets, so a character can be in
+the mono face and absent from the display one. Body copy is exempt -- `--sans` is a system stack
+with no subset, so nothing there can fall back this way.
+
 ## Layout
 
 ```
@@ -232,6 +312,7 @@ _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
 _data/           off-hours.yml, path-here.yml -- the two data-driven home sections
 _work/           one file per story
+_tools/          committed authoring scripts; not part of the build, not published
 assets/css/      style.scss compiles to /assets/css/style.css
 assets/js/       chapter-rail.js, off-hours.js -- both optional, both vanilla
 assets/fonts/    self-hosted woff2, two families, each with its own license
