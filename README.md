@@ -134,8 +134,10 @@ dimensions should add a second table for a second decision rather than a taller 
 Per table: `rejected` and `chosen` name the two options and head the two columns, and `rows`
 carries one entry per dimension, each with its own `dimension`, `rejected` and `chosen`. A fourth
 key, `title`, is optional and draws a caption above the table; omit it and the table has none.
-Nothing else is read. The other three are required in the sense that matters here -- omitting one
-renders an empty column head or an empty table body rather than an error.
+Nothing else is read, and nothing errors. Omit `rejected` and its column head is blank; omit
+`chosen` and the head keeps the check mark with no option name beside it; omit `rows` and the table
+body is empty. In the first two the sub-640px stacked view loses that column's label as well, since
+it is drawn from the same value.
 
 **The include line is required and fails silently without it.** Declaring `tradeoffs:` in front
 matter renders nothing on its own: the include is placed by hand, and `{% for table in nil %}`
