@@ -5,7 +5,7 @@ title: "The spreadsheet that became a toolkit"
 # copy, not a trim of `title` -- the full title is too long for that slot.
 crumb: "personal finance tools"
 # Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
-# meta description. It no longer renders on the home-page row -- that is a
+# meta description. It does not render on the home-page row -- that is a
 # template decision in index.html, not a reason to drop the key. The key must
 # be `description`: with any other name seo-tag falls back to page.excerpt,
 # which is the first block of the body -- the opening `## ` heading. Search and

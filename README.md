@@ -150,12 +150,12 @@ source, only on the page:
   at that breakpoint while the unstyled `h3` stays at 18.72px, so a subheading renders LARGER than
   the chapter heading above it.
 - A **Markdown table** is unstyled next to the designed tradeoff table it will be compared with.
-  It also used to break the page: at 390 a five-column table pushed the document to `scrollWidth`
-  461 against `clientWidth` 390, giving the whole page a horizontal scrollbar and clipping every
-  line of body prose at the right edge -- a WCAG 1.4.10 reflow failure, from one authoring slip.
-  `.story-prose > table` now carries a containment guard so that cannot happen. **The guard is not
-  support.** It keeps the page conformant and makes the table look cramped and wrong, which is the
-  intended signal.
+  It is also the one authoring slip that can take the page out of conformance: measured at 390, a
+  bare five-column table pushes the document to `scrollWidth` 461 against `clientWidth` 390, giving
+  the whole page a horizontal scrollbar and clipping every line of body prose at the right edge --
+  a WCAG 1.4.10 reflow failure. `.story-prose > table` carries a containment guard so that cannot
+  happen. **The guard is not support.** It keeps the page conformant and makes the table look
+  cramped and wrong, which is the intended signal.
 
 So: chapters are `h2`, and everything under them is paragraphs, lists and figures. A story that
 genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed
@@ -228,9 +228,9 @@ Do not put a `README.md` inside these folders. Any `.md` in a publishable locati
 so a stray note turns into a published, indexed URL. Placeholder folders are held by `.gitkeep`,
 which Jekyll ignores because it starts with a dot.
 
-(The `defaults` blocks in `_config.yml` are no longer the mechanism -- both are scoped to a `type`,
-which is the fix for exactly this problem. The advice stands on its own: Jekyll publishes markdown
-it can reach, defaults or no defaults.)
+(The `defaults` blocks in `_config.yml` are both scoped to a `type`, which is what keeps them from
+reaching a stray file. The advice stands on its own either way: Jekyll publishes markdown it can
+reach, defaults or no defaults.)
 
 ## Tools
 

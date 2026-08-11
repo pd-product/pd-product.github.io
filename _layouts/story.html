@@ -66,8 +66,8 @@ which have silent wrong defaults rather than absent ones.
   the caption. Falling back to the title keeps a diagram from being unlabelled
   if a story sets hero_image and forgets hero_alt.
 
-  Both go through `escape`: one field, one treatment. The figcaption is escaped
-  too, which the attribute already was -- the pair used to differ.
+  Both go through `escape`: one field, one treatment. The figcaption carries it
+  as surely as the attribute does -- both are free-text front matter.
   {%- endcomment -%}
   {%- if page.hero_image %}
   <figure class="story-hero">

@@ -74,18 +74,18 @@ The five anchored sections below are the named regions; see the note on #work.
 <section id="work" class="work-list" aria-labelledby="work-heading">
   {%- comment -%}
   The design has no visible "Work" heading, but the nav anchors here and the
-  section needs a name, so it is hidden rather than removed. Uses the shared
-  .sr-only utility; the stylesheet previously carried a second, near-identical
-  hiding rule for this one element.
+  section needs a name, so it is hidden rather than removed. Hiding goes through
+  the shared .sr-only utility; this element does not get a near-identical rule
+  of its own.
 
   THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and all
   five anchored sections carry one for that reason. A <section> maps to
   role="region" ONLY when it has an accessible name, and an accessible name
   comes from aria-label or aria-labelledby, never from a descendant heading.
-  Verified in the rendered accessibility tree: before these attributes existed
-  the page exposed banner, main, contentinfo and one navigation, and not one
-  of the five sections appeared at all. The headings were reachable by heading
-  navigation the whole time; the landmarks the nav mirrors were not.
+  Verified in the rendered accessibility tree: without these attributes the page
+  exposes banner, main, contentinfo and one navigation, and not one of the five
+  sections appears at all. The headings stay reachable by heading navigation
+  either way; the landmarks the nav mirrors do not.
 
   Removing an aria-labelledby, or an id it points at, silently demotes that
   section back to a generic box. Nothing on screen changes.
@@ -126,9 +126,9 @@ The five anchored sections below are the named regions; see the note on #work.
       {%- comment -%}
       Position in the sorted list, not the raw `order` value. See the same
       note in _layouts/story.html; both derive it this way so they agree --
-      the home row now prints it as a display numeral and the story page
-      still prints it inside its eyebrow, but the number itself is the same
-      derivation in both places.
+      the home row prints it as a display numeral and the story page prints
+      it inside its eyebrow, but the number itself is the same derivation in
+      both places.
 
       aria-hidden because it is decorative here, and because the information
       is already carried: the rows are an <ol>, so a screen reader announces
@@ -153,15 +153,14 @@ The five anchored sections below are the named regions; see the note on #work.
       <p class="eyebrow">{{ story.category }}</p>
       {%- comment -%}
       Title, lesson, chips and the button go in ONE wrapper so they move as a
-      block. `.work-row` is a two-column grid, and the bug this guards against
-      is real history: with automatic placement, separate direct children
-      alternated between the rail and the main column, so the summary and
-      chips landed in the 168px rail -- and which field went where depended
-      on how many optional fields a story happened to set.
+      block. `.work-row` is a two-column grid, and under automatic placement
+      separate direct children alternate between the rail and the main column:
+      the summary and chips land in the 168px rail, and which field goes where
+      depends on how many optional fields a story happens to set.
 
-      The stylesheet now pins a column on every direct child, which is the
-      actual fix, and this wrapper is what keeps the group from needing three
-      more of them. A NEW DIRECT CHILD OF .work-row STILL NEEDS ITS OWN
+      The stylesheet pins a column on every direct child, which is the actual
+      fix, and this wrapper is what keeps the group from needing three more of
+      them. A NEW DIRECT CHILD OF .work-row STILL NEEDS ITS OWN
       `grid-column`; adding a bare one puts the bug back. Anything inside this
       wrapper is exempt, which is why the button goes here.
 
