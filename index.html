@@ -1,6 +1,14 @@
 ---
 layout: default
 permalink: /
+# When this page's content last changed, updated by hand. A regular page is not
+# a collection document: jekyll-sitemap emits `<lastmod>` for one ONLY if this
+# key is set, so without it the home page carries no freshness signal at all
+# rather than a wrong one -- and it is the page that changes most often. It
+# covers what the page PRINTS, which includes both _data files and each story's
+# title, lesson and category, so revising a story dates this page too.
+# `_tools/check_dates.py` knows that and checks all of them.
+last_modified_at: 2026-08-10
 # No `seo: type:` override. seo-tag's default for this page is WebSite, which is
 # correct for the node it builds -- it also emits `author` and `headline`, and
 # both belong on a CreativeWork rather than on a Person. The person is described

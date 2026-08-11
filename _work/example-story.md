@@ -26,6 +26,12 @@ description: "One or two sentences: the situation, the call, and what it cost. T
 # Publication date of the page, not of the work it describes. Without it Jekyll
 # uses BUILD time, so the date moves on every deploy. Set once, then leave it.
 date: 2026-01-01
+# When this story's CONTENT last changed -- a DIFFERENT question from `date`,
+# and the one field here you must remember to update by hand when you revise it.
+# One key drives both the JSON-LD dateModified and the sitemap lastmod. Unset,
+# both silently answer with `date`, so a revised story reports itself unrevised.
+# Not for comment or formatting edits; only for something a reader would see.
+last_modified_at: 2026-01-01
 
 # --- Optional; omitted fields simply do not render ---------------------------
 # Header breadcrumb label ("work / <crumb>"). Falls back to `title`, which is

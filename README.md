@@ -66,8 +66,20 @@ Copy `_work/example-story.md`. It carries `published: false`, so it is a templat
 page: it stays out of the built site, the home list, prev/next and the sitemap until a copy sets
 `published: true`.
 
-Required: `slug` (keep the filename identical to it), `title`, `category`, `order`, `description`
-and `date`.
+Required: `slug` (keep the filename identical to it), `title`, `category`, `order`, `description`,
+`date` and `last_modified_at`.
+
+**`date` and `last_modified_at` answer different questions and both are required.** `date` is when
+the story was published and never moves. `last_modified_at` is when its content last changed, and
+it is the only field here you have to remember to update: revise a story and it needs the new date,
+by hand. Both `jekyll-seo-tag` and `jekyll-sitemap` read that one key, so it drives the JSON-LD
+`dateModified` and the sitemap's `lastmod` together.
+
+Leave it unset and neither is absent -- both silently fall back to `date`, so a revised story
+reports itself unrevised in two places that agree with each other, which is what makes it look
+right. Search engines are then told there is nothing to re-read, and the description they show
+stays the old one. Do not bump it for a comment or a formatting edit; only for something a reader
+would see. `_tools/check_dates.py` is what catches a forgotten update, and it knows the difference.
 
 The rest are presentational -- `partners`, `chips`, `hero_image` and friends -- and a story that
 omits one renders without it. Two carry a fallback rather than nothing: `crumb` falls back to
@@ -257,7 +269,7 @@ reach, defaults or no defaults.)
 
 ## Tools
 
-`_tools/` holds four committed scripts. None runs at build or deploy time -- Pages runs Jekyll and
+`_tools/` holds five committed scripts. None runs at build or deploy time -- Pages runs Jekyll and
 nothing else -- and the site builds and serves without them. They exist because each checks
 something that cannot be checked by reading the source.
 
@@ -274,6 +286,7 @@ rendered page and drive a headless Chrome to get the answer; two do not need it:
 | `check_subset_coverage.py` | yes | a built site |
 | `resubset_mono.py` | no | no, but one network fetch |
 | `probe_card_gates.py` | no | no |
+| `check_dates.py` | no | no |
 
 The two that want Chrome expect it on port 9351, and neither starts it:
 
@@ -375,6 +388,27 @@ doctored copy.
 Run it after changing any constant the card gates on, which is the case it exists for: a checker
 that passed before a value moved says nothing about the value that replaced it.
 
+### `check_dates.py` -- finds pages that misreport when they last changed
+
+`last_modified_at` is the one field here that has to be updated by hand, and forgetting it is
+silent. This compares what each page declares against what its content actually did, taken from git
+history.
+
+```
+python _tools/check_dates.py
+```
+
+Run it before publishing a revision. It exits non-zero and names the commit that moved the content.
+
+It knows the difference between a content change and a touch: comments, both YAML and Liquid,
+HTML comments and whitespace are stripped before comparison, so rewording a comment raises nothing.
+A checker that cried wolf on every formatting edit would be ignored within a week, which would be
+worse than not having it. It also reads the WORKING TREE, not just committed history -- the moment
+you need it is before you commit a revision, when git has not seen the change yet.
+
+The home page's sources are not just `index.html`. It prints both `_data` files and each story's
+title, lesson and category, so revising a story dates the home page too, and the check follows that.
+
 ## Layout
 
 ```
@@ -383,7 +417,7 @@ _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
 _data/           off-hours.yml, path-here.yml -- the two data-driven home sections
 _work/           one file per story
-_tools/          four committed authoring scripts; not part of the build, not published
+_tools/          five committed authoring scripts; not part of the build, not published
 assets/css/      style.scss compiles to /assets/css/style.css
 assets/js/       chapter-rail.js, off-hours.js -- both optional, both vanilla
 assets/fonts/    self-hosted woff2, two families, each with its own license
