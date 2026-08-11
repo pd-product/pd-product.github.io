@@ -21,6 +21,15 @@ order: 3
 # it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
 # move on every deploy and re-announce the story as new. Set once, then leave it.
 date: 2026-08-04
+# When this story's CONTENT last changed, which is a DIFFERENT question from
+# `date` above and has to be updated by hand when you revise it. Both
+# jekyll-seo-tag and jekyll-sitemap read this one key, so it fixes the JSON-LD
+# `dateModified` and the sitemap `lastmod` together. Leave it unset and both
+# quietly answer with `date`, so a revised story reports itself unrevised in two
+# places that agree with each other. Do NOT bump it for a comment or a
+# formatting edit -- only for something a reader would see.
+# `_tools/check_dates.py` is what catches a forgotten update.
+last_modified_at: 2026-08-09
 role: "Sole author, with AI coding tools"
 team: "None. A planner validated the strategy separately."
 timeframe: "Ongoing since early 2026"
