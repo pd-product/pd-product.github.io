@@ -79,7 +79,8 @@ Leave it unset and neither is absent -- both silently fall back to `date`, so a 
 reports itself unrevised in two places that agree with each other, which is what makes it look
 right. Search engines are then told there is nothing to re-read, and the description they show
 stays the old one. Do not bump it for a comment or a formatting edit; only for something a reader
-would see. `_tools/check_dates.py` is what catches a forgotten update, and it knows the difference.
+would see. `_tools/check_dates.py` is the reminder. It cannot tell those apart -- it flags any
+change since the date was last declared and leaves the judgement to you.
 
 The rest are presentational -- `partners`, `chips`, `hero_image` and friends -- and a story that
 omits one renders without it. Two carry a fallback rather than nothing: `crumb` falls back to
@@ -286,7 +287,7 @@ rendered page and drive a headless Chrome to get the answer; two do not need it:
 | `check_subset_coverage.py` | yes | a built site |
 | `resubset_mono.py` | no | no, but one network fetch |
 | `probe_card_gates.py` | no | no |
-| `check_dates.py` | no | no, but it runs Jekyll |
+| `check_dates.py` | no | no |
 
 The two that want Chrome expect it on port 9351, and neither starts it:
 
@@ -398,30 +399,19 @@ history.
 python _tools/check_dates.py
 ```
 
-Run it before publishing a revision. It exits non-zero and names the commit that moved the content.
-It reads the WORKING TREE as well as committed history, because the moment you need it is before
-you commit a revision, when git has not seen the change yet.
+Run it before publishing a revision. It is instant and needs nothing but git.
 
-**It builds the page rather than reading the source**, which is the only reason it can tell a
-content change from a touch. For each candidate commit it takes the current tree, swaps in just
-that commit's version of the page's authored files, runs Jekyll, and compares what the page
-actually renders. So it needs the same toolchain a local build needs, and it takes about a minute.
+**It is advisory and deliberately dumb.** It compares dates, not pages, so it cannot tell a content
+edit from a comment edit. A page it flags may be perfectly fine; the job is to make you look.
 
-That is slower than reading files and it is the point. Deciding what renders by stripping comments
-out of the source means reimplementing the renderer, and every rule in such a stripper is a guess:
-`_data` files have no front matter, rewrapping a paragraph changes the markup but not the page, and
-HTML comments do not reliably vanish -- the note on `{% seo %}` in `index.html` records a tag that
-executed inside one and leaked text onto the page.
+It asks "has anything changed since this date was last declared", not "when was this file last
+touched". That difference is what keeps it useful: the commit that writes a date is itself a touch,
+so the second question would leave every page permanently flagged. It also means a flag clears
+itself -- decide a change was cosmetic and re-declare the same date, which moves the marker forward
+and records the decision in history rather than in your memory.
 
-Holding the layouts, includes and `_config.yml` at their current version in every build is what
-separates content from presentation. A layout change dates nothing: `lastmod` and `dateModified`
-describe a document, not the site design around it. It compares `<main>` plus the page's title and
-meta description, so the header, nav and footer are outside the comparison for the same reason.
-
-Two things fail: a date behind the content, and a date in the future. A date AHEAD of the page's own
-last change only prints a note -- a story's `lesson` renders on the home row and not on its own
-page, so revising it dates the home page and leaves the story's date untouched, and bumping both is
-careful rather than wrong.
+Revising a story flags the story AND the home page, because the home row prints its title and
+lesson. Both dates want bumping; the output names which file caused which flag.
 
 ## Layout
 
