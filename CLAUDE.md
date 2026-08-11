@@ -23,6 +23,11 @@ not raise them again unprompted.
 - **No licence from GitHub's picker.** The repository is all rights reserved and the `LICENSE` file
   is deliberately not an open-source licence. Adopting a recognised one to make GitHub's label
   tidier would grant rights the owner withholds.
+- **No per-story share cards.** Every story link previews the site card. `_tools/make_og_card.py`
+  could already draw one, so this is a decision rather than a missing capability; its docstring owns
+  what building them would require.
+- **`temp/` is not committed.** The CDP harness there is local scratch. A script that earns a place
+  in the repo moves to `_tools/` and gets a section in README.md; the rest stays untracked.
 - **No analytics, JS libraries, CDN dependencies, or dark/light toggle.** Dark and light are pure
   `prefers-color-scheme`. There are exactly two executable JavaScript assets -- the chapter-rail
   reading state and the Off hours reveal -- both vanilla, both progressive enhancement, and both of
@@ -72,6 +77,12 @@ failure mode in every case is silent.
   faithfully is not a defence.
 
 ## Known and accepted
+
+On a phone the work-row title reads as a heading and is not tappable: the "Read the case" button is
+the only target in the row, and it carries the 44px touch floor. Accepted rather than outstanding.
+The obvious fix is a second link on the title, and that is the one thing it must not be -- the same
+story would then appear twice in a screen reader's link list. Moving the link ONTO the title and
+dropping the button would keep one link per row, and is the only variant worth reopening.
 
 A story page is clean down to 275px and scrolls horizontally at 270px and below: `.site-nav` runs
 past the right edge, giving `scrollWidth` 272 against `clientWidth` 270. That is well below the
