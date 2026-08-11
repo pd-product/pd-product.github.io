@@ -41,14 +41,20 @@ Both files carry HTML entities in some strings -- `&amp;`, `&gt;`, `&middot;` --
 ASCII, and both are printed without the `escape` filter for that reason. Adding an entry means
 writing the entity, not the character. Escaping them renders the entity text on the page.
 
-That is the rule everywhere, not just here, and it has two halves: **write entities, and expect
-them to survive.** Any authored string -- `_data`, story front matter, tradeoff option names -- may
-carry an entity, so no template escapes one on its way into element content. Where the same string
-also lands in an ATTRIBUTE, the template applies `escape_once` rather than `escape`: it escapes a
-bare `&` and the double quote that would end the attribute early, and leaves a well-formed entity
-alone. Plain `escape` would double it, and a value that prints in both places would then disagree
-with itself. `_layouts/story.html` and `_includes/tradeoffs.html` each pair an attribute with
-content this way; the comments on those lines own the detail.
+The same rule governs authored PROSE anywhere in the repo -- `_data` entries, story front matter,
+tradeoff option names -- and it has two halves: **write entities, and expect them to survive.** No
+template escapes one on its way into element content. Where such a value also lands in an
+ATTRIBUTE, the template applies `escape_once` rather than `escape`: it escapes a bare `&` and the
+double quote that would end the attribute early, and leaves a well-formed entity alone. Plain
+`escape` would double it, and a value that prints in both places would then disagree with itself.
+`_layouts/story.html` and `_includes/tradeoffs.html` each pair an attribute with content this way;
+the comments on those lines own the detail.
+
+**URLs and paths are not prose and do not take this rule.** Slugs, `hero_image`, nav `url` values
+and the two contact links are written raw, carry no entities, and mostly reach their attributes
+through `relative_url`. The contact pair keeps plain `escape`, which is right for an href: an `&`
+in a query string has to become `&amp;` there. So do not write an entity into a URL -- an authored
+`&amp;` in a `mailto:` would be escaped again and send the wrong address.
 
 Grid shape is why the counts are what they are: six Off hours entries fill a 3-up and a 2-up grid
 exactly, and four path stops fill a 4-up and a 2-up. A seventh or a fifth leaves a gap at a
