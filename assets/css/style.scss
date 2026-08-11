@@ -861,9 +861,11 @@ a:hover { color: var(--text); }
   align-items: start;
 }
 
-/* Contact's two items share a row, and `start` above puts a 12.5px mono link
-   and a 34px display heading on the same top edge -- which floats the link
-   about 18px above the heading's baseline. Baseline puts them on one line.
+/* Contact's two items share a row, and `start` above puts a 15px mono link and
+   a 34px display heading on the same top edge -- which floats the link 15px
+   above the heading's baseline. Baseline puts them on one line: measured at
+   1280, the two baselines are 0.0px apart with this rule and 15.0px apart
+   without it.
    BOTH selectors need the rule: an item aligned to baseline whose only partner
    is still on `start` has nothing to align against and falls back to `start`,
    so deleting either half silently restores the defect. Not `end`, which aligns
@@ -903,17 +905,17 @@ a:hover { color: var(--text); }
 /* Loses its bottom margin: it now sits beside its links rather than above. */
 .contact > h2 { grid-column: 1; margin-bottom: 0; }
 
-/* Plain mono lines, not bordered chips. The chip treatment was designed for a
-   row of three; with one link it reads as an orphaned chip rather than a
-   deliberate single line. If a second contact link is ever added, restore the
-   border and padding on `a` and drop the size back to 11px -- the chip row is
-   the right form for a set, this is the right form for one. */
+/* Plain mono lines, not bordered chips. The chip treatment is for a row of
+   three; with one link it reads as an orphaned chip rather than a deliberate
+   single line. If a second contact link is ever added, restore the border and
+   padding on `a` and drop the size to 11px -- the chip row is the right form
+   for a set, this is the right form for one. */
 .contact-links {
   grid-column: 2;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  font: 400 12.5px var(--mono);
+  font: 400 15px var(--mono);
 }
 
 /* --- Simple page (404.html) --------------------------------------------
