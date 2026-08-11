@@ -42,22 +42,28 @@ role; that applies to this table exactly as it applies to lists.
         {%- comment -%}
         data-label carries the option name into the sub-640px stacked view,
         where the dimension column is dropped and the pairs need naming.
-        `escape` because this is free-text front matter going into an
-        attribute: an option name containing a double quote would otherwise
-        terminate the attribute early, and a bare `&` is an invalid entity
-        reference.
+
+        `escape_once`, NOT `escape`. This is the same value the column head
+        prints as element content, and the two have to agree. Plain `escape`
+        turns an authored `&amp;` into `&amp;amp;`, so the head reads
+        "Research & build" while the stacked label reads "Research &amp;
+        build" -- and an entity is how ASCII source writes a character it
+        cannot type. escape_once leaves a well-formed entity alone, escapes a
+        bare `&`, and still escapes the double quote that would otherwise
+        terminate the attribute early.
         {%- endcomment -%}
-        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected | escape }}">{{ row.rejected }}</td>
+        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected | escape_once }}">{{ row.rejected }}</td>
         {%- comment -%}
         `data-chosen` and the note below exist for the stacked view only. At
         640px and below the whole thead is display: none, which takes the check
-        mark, the "(chosen)" label and the colour shift with it -- so the table
-        lost the one thing it exists to say on exactly the widths where most
-        people read it. The attribute is what the stylesheet hooks the marker
-        onto; the note is what a screen reader gets there. Above 640px the note
-        is display: none, because the column header already says it.
+        mark, the "(chosen)" label and the colour shift with it -- so without
+        these the table loses the one thing it exists to say, on exactly the
+        widths where most people read it. The attribute is what the stylesheet
+        hooks the marker onto; the note is what a screen reader gets there.
+        Above 640px the note is display: none, because the column header
+        already says it.
         {%- endcomment -%}
-        <td role="cell" class="tradeoff-chosen" data-chosen data-label="{{ table.chosen | escape }}">{{ row.chosen }}<span class="sr-only tradeoff-chosen-note"> (chosen)</span></td>
+        <td role="cell" class="tradeoff-chosen" data-chosen data-label="{{ table.chosen | escape_once }}">{{ row.chosen }}<span class="sr-only tradeoff-chosen-note"> (chosen)</span></td>
       </tr>
       {%- endfor %}
     </tbody>

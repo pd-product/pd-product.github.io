@@ -41,6 +41,15 @@ Both files carry HTML entities in some strings -- `&amp;`, `&gt;`, `&middot;` --
 ASCII, and both are printed without the `escape` filter for that reason. Adding an entry means
 writing the entity, not the character. Escaping them renders the entity text on the page.
 
+That is the rule everywhere, not just here, and it has two halves: **write entities, and expect
+them to survive.** Any authored string -- `_data`, story front matter, tradeoff option names -- may
+carry an entity, so no template escapes one on its way into element content. Where the same string
+also lands in an ATTRIBUTE, the template applies `escape_once` rather than `escape`: it escapes a
+bare `&` and the double quote that would end the attribute early, and leaves a well-formed entity
+alone. Plain `escape` would double it, and a value that prints in both places would then disagree
+with itself. `_layouts/story.html` and `_includes/tradeoffs.html` each pair an attribute with
+content this way; the comments on those lines own the detail.
+
 Grid shape is why the counts are what they are: six Off hours entries fill a 3-up and a 2-up grid
 exactly, and four path stops fill a 4-up and a 2-up. A seventh or a fifth leaves a gap at a
 breakpoint, which is a design question rather than only a data one.

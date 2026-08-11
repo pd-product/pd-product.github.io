@@ -23,13 +23,17 @@ which have silent wrong defaults rather than absent ones.
   cases, warm for the personal one. An attribute rather than a class because
   the stylesheet matches on the VALUE, so an unknown or missing category
   simply matches nothing and the header renders untinted -- which is exactly
-  how the page looked before the tint existed. A new category therefore
-  degrades to the old design instead of inheriting the wrong signal.
+  how a story page reads with no tint at all. A new category therefore
+  degrades to the untinted design instead of inheriting the wrong signal.
 
-  `escape` because this is free-text front matter going into an attribute; a
-  double quote in a category would otherwise end it early.
+  `escape_once`, NOT `escape`. This is free-text front matter going into an
+  attribute, and the SAME value prints as element content in the eyebrow
+  below. Plain `escape` would turn an authored `&amp;` into `&amp;amp;` and
+  put the two out of step. escape_once still escapes the double quote that
+  would otherwise end the attribute early. _includes/tradeoffs.html pairs an
+  attribute with content the same way and takes the same filter.
   {%- endcomment -%}
-  <header class="story-header" data-category="{{ page.category | escape }}">
+  <header class="story-header" data-category="{{ page.category | escape_once }}">
     {%- comment -%}
     The eyebrow number is the story's position in the sorted list, NOT the raw
     `order` value. `order` is a sort key only. Deriving the display from
@@ -61,18 +65,21 @@ which have silent wrong defaults rather than absent ones.
 
   `hero_alt` is a SEPARATE field from `hero_caption` on purpose. alt and caption
   do different jobs: alt describes the image for someone who cannot see it, the
-  caption adds context everyone reads. Feeding the caption into alt made a
+  caption adds context everyone reads. Feeding the caption into alt makes a
   screen reader announce the same sentence twice, once as the image and once as
   the caption. Falling back to the title keeps a diagram from being unlabelled
   if a story sets hero_image and forgets hero_alt.
 
-  Both go through `escape`: one field, one treatment. The figcaption carries it
-  as surely as the attribute does -- both are free-text front matter.
+  One rule, applied twice: ESCAPE IN AN ATTRIBUTE, ENTITIES IN CONTENT. The alt
+  attribute takes `escape_once` and the figcaption takes no filter at all.
+  Both fields are free-text front matter and either may need an entity to write
+  a character ASCII source cannot type -- a filter on the content side would
+  render `&mdash;` as those eight characters on the page.
   {%- endcomment -%}
   {%- if page.hero_image %}
   <figure class="story-hero">
-    <img src="{{ page.hero_image | relative_url }}" alt="{{ page.hero_alt | default: page.title | escape }}">
-    {%- if page.hero_caption %}<figcaption>{{ page.hero_caption | escape }}</figcaption>{% endif %}
+    <img src="{{ page.hero_image | relative_url }}" alt="{{ page.hero_alt | default: page.title | escape_once }}">
+    {%- if page.hero_caption %}<figcaption>{{ page.hero_caption }}</figcaption>{% endif %}
   </figure>
   {%- endif %}
 
