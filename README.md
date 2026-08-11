@@ -273,6 +273,7 @@ It writes that fixture itself; serve it, then draw:
 ```
 python -m http.server 8731 --directory temp/og-fixture
 python _tools/make_og_card.py            # draws and gates; installs nothing
+python _tools/make_og_card.py --write    # installs a card that MATCHES the committed one
 python _tools/make_og_card.py --replace  # installs a card that DIFFERS from the committed one
 ```
 
