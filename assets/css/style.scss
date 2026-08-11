@@ -503,12 +503,11 @@ a:hover { color: var(--text); }
 
 .work-row .work-copy { grid-column: 2; }
 
-/* Story-page eyebrow only, now that the home row prints the category alone. */
+/* Story-page eyebrow only; the home row prints the category alone. */
 .eyebrow-sep { margin: 0 .4em; }
 
-/* NO HOVER RULE. The title used to go accent when the row was hovered, back
-   when the row was the anchor. It is not a link now and must not colour like
-   one; the button is the only thing that responds. */
+/* NO HOVER RULE. The title is not a link and must not colour like one; the
+   button is the only thing in the row that responds. */
 .work-title {
   font: 500 23px/1.22 var(--display);
   letter-spacing: -.02em;
@@ -516,7 +515,7 @@ a:hover { color: var(--text); }
   margin-bottom: 11px;
 }
 
-/* Inert, like the image rules above: index.html no longer prints `description`
+/* Inert, like the image rules above: index.html does not print `description`
    on the home row. Kept rather than deleted because restoring that line is one
    conditional in the template and should not also need a stylesheet change --
    the same reason the hero-figure rules are written and unused. The 62ch here
@@ -650,15 +649,13 @@ a:hover { color: var(--text); }
 .facts li:last-child { color: var(--accent); }
 
 /* --- Home: section headings (index.html) -------------------------------
-   One rule for all four home-page section headings. This REPLACES the 11.5px
-   mono accent label that About and Contact used to carry; their grid
-   placement in the 168px rail is untouched, only the type changed. Both words
-   measure under 140px at 34px, so neither wraps in the rail.
+   One rule for all four home-page section headings. About and Contact place
+   theirs in the 168px rail, and that grid placement is independent of the type
+   here. Both words measure under 140px at 34px, so neither wraps in the rail.
 
-   The mono accent label is still the treatment everywhere else it appears --
+   The 11.5px mono accent label is the treatment everywhere else it appears --
    .story-meta dt, .chapter-rail > h2, .work-lesson-label, the eyebrows and the
-   pager labels. It is simply no longer what a home-page section heading looks
-   like.
+   pager labels. It is simply not what a home-page section heading looks like.
 
    Selected by CLASS, not by id, even though these are the only four elements
    that match. An id selector would outrank every single-class rule in this
@@ -710,18 +707,17 @@ a:hover { color: var(--text); }
 
 .path-stop:last-child .path-year { color: var(--accent); }
 
-/* A CLASS, not `.path-stop p`, and that is a correctness fix rather than a
-   style preference. The handoff specified the descendant form, which scores
-   (0,1,1) and therefore outranks the single-class `.path-year` above it: the
-   year rendered at 15px Helvetica in --meta instead of 12px mono in
-   --nav-muted, at every width. Measured before this change, `.path-year`
-   computed to 15px / Helvetica Neue / rgb(200,205,210). (`.path-year` has no
-   responsive override of its own; the Off hours pair below did, and those lost
-   too, being single-class themselves.)
+/* A CLASS, not `.path-stop p`, and that is a correctness requirement rather
+   than a style preference. The descendant form scores (0,1,1) and therefore
+   outranks the single-class `.path-year` above it: under it the year renders
+   at 15px Helvetica Neue in --meta's rgb(200,205,210), instead of 12px mono in
+   --nav-muted, at every width. (`.path-year` has no responsive override of its
+   own; the Off hours pair below does, and those lose too, being single-class
+   themselves.)
 
-   The same trap sits in `.off-hours-card`. Both are class-based now, which is
-   also what the file header asks for, and neither can be outranked by a
-   sibling in the same block. */
+   The same trap sits in `.off-hours-card`. Both are class-based, which is also
+   what the file header asks for, and neither can be outranked by a sibling in
+   the same block. */
 .path-copy {
   font: 400 15px/1.5 var(--sans);
   color: var(--meta);
@@ -776,13 +772,13 @@ a:hover { color: var(--text); }
   color: var(--text);
 }
 
-/* A class, for the reason spelled out on .path-copy above: the handoff's
-   `.off-hours-card p` outranked both `.off-hours-numeral` and
-   `.off-hours-label`, so the 34px display numeral rendered at 15px Helvetica
-   and the 11px mono label rendered at 15px Helvetica as well. The 640px
-   overrides on both lost to it too, being single-class themselves. Only `font`
-   and `color` were affected, which is why it did not look obviously broken --
-   text-transform and letter-spacing still applied, so the labels were
+/* A class, for the reason spelled out on .path-copy above: an
+   `.off-hours-card p` descendant rule outranks both `.off-hours-numeral` and
+   `.off-hours-label`, so the 34px display numeral renders at 15px Helvetica
+   and the 11px mono label renders at 15px Helvetica as well. The 640px
+   overrides on both lose to it too, being single-class themselves. Only `font`
+   and `color` are affected, which is why it does not look obviously broken --
+   text-transform and letter-spacing still apply, so the labels come out
    uppercase in the wrong face at the wrong size. */
 .off-hours-copy {
   font: 400 15px/1.6 var(--sans);
@@ -810,9 +806,9 @@ a:hover { color: var(--text); }
 /* The rescue state. assets/js/off-hours.js sets this PER CARD, so a floor can
    settle the two cards mid-animation without touching the four that have not
    been triggered. It has to beat both the hidden rule above and any in-flight
-   transition -- printing during the reveal captured cards at opacity 0.22 and
-   0.014 before this existed, because removing the hidden attribute alone
-   leaves the transition running.
+   transition -- without it, printing during the reveal catches cards at
+   opacity 0.22 and 0.014, because removing the hidden attribute alone leaves
+   the transition running.
 
    Same specificity as the hidden rule (0,2,0), so SOURCE ORDER is what makes
    this win. It must stay below it. `transition: none` is the load-bearing
@@ -865,9 +861,11 @@ a:hover { color: var(--text); }
   align-items: start;
 }
 
-/* Contact's two items share a row, and `start` above puts a 12.5px mono link
-   and a 34px display heading on the same top edge -- which floats the link
-   about 18px above the heading's baseline. Baseline puts them on one line.
+/* Contact's two items share a row, and `start` above puts a 15px mono link and
+   a 34px display heading on the same top edge -- which floats the link 15px
+   above the heading's baseline. Baseline puts them on one line: measured at
+   1280, the two baselines are 0.0px apart with this rule and 15.0px apart
+   without it.
    BOTH selectors need the rule: an item aligned to baseline whose only partner
    is still on `start` has nothing to align against and falls back to `start`,
    so deleting either half silently restores the defect. Not `end`, which aligns
@@ -896,8 +894,8 @@ a:hover { color: var(--text); }
   font: 400 15px/1.66 var(--sans);
   color: var(--muted);
   /* 62ch, matching .work-summary and .work-lesson directly above, so the copy
-     column has one measure down the whole page. Was 72ch, which was right for a
-     full-width column but this column is no longer full width. */
+     column has one measure down the whole page. A 72ch measure belongs to a
+     full-width column, and this column is not one. */
   max-width: 62ch;
   text-wrap: pretty;
 }
@@ -907,17 +905,17 @@ a:hover { color: var(--text); }
 /* Loses its bottom margin: it now sits beside its links rather than above. */
 .contact > h2 { grid-column: 1; margin-bottom: 0; }
 
-/* Plain mono lines, not bordered chips. The chip treatment was designed for a
-   row of three; with one link it reads as an orphaned chip rather than a
-   deliberate single line. If a second contact link is ever added, restore the
-   border and padding on `a` and drop the size back to 11px -- the chip row is
-   the right form for a set, this is the right form for one. */
+/* Plain mono lines, not bordered chips. The chip treatment is for a row of
+   three; with one link it reads as an orphaned chip rather than a deliberate
+   single line. If a second contact link is ever added, restore the border and
+   padding on `a` and drop the size to 11px -- the chip row is the right form
+   for a set, this is the right form for one. */
 .contact-links {
   grid-column: 2;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  font: 400 12.5px var(--mono);
+  font: 400 15px var(--mono);
 }
 
 /* --- Simple page (404.html) --------------------------------------------
@@ -982,7 +980,7 @@ a:hover { color: var(--text); }
    Matched on the ATTRIBUTE VALUE rather than a class, so the failure mode is
    the right one: a category that is missing, misspelt, or newly invented
    matches neither selector and the header renders untinted -- which is exactly
-   how every story page looked before this existed. A class emitted from the
+   how a story page reads with no tint at all. A class emitted from the
    same field would instead need one `.story-header-<value>` rule per
    category and would silently render unstyled markup for anything else.
 
@@ -1218,10 +1216,9 @@ a:hover { color: var(--text); }
   color: var(--muted);
 }
 
-/* An accent square, not the em dash this rule used to emit. The constraints
-   chapter moved from an ordered list to an unordered one, so this is now the
-   marker that chapter is read with, and the numbers it gave up are the ones
-   the chapter HEADINGS now carry.
+/* An accent square, and it is the marker the constraints chapter is read with.
+   That chapter is an unordered list; the numbering on a story page belongs to
+   the chapter HEADINGS, not to this list.
 
    Deliberately NOT scoped to the constraints list. It is the only unordered
    list in any story today, and there is no class to scope to -- kramdown emits
@@ -1249,9 +1246,9 @@ a:hover { color: var(--text); }
    this deliberately does not style anything. It stops one authoring slip from
    breaking the whole page.
 
-   Measured at 390px before this existed: a five-column table pushed the
-   document to scrollWidth 461 against clientWidth 390, so the page gained a
-   horizontal scrollbar and EVERY line of body prose was clipped at the right
+   Measured at 390px without this guard: a five-column table pushes the
+   document to scrollWidth 461 against clientWidth 390, so the page gains a
+   horizontal scrollbar and EVERY line of body prose is clipped at the right
    edge, not just the table. That is a WCAG 1.4.10 reflow failure produced by a
    file nobody would think of as risky.
 
@@ -1620,8 +1617,8 @@ a:hover { color: var(--text); }
      is a real mismatch. display: none removes it from both trees, so there is
      nothing to mismatch. The <dl> that does move holds nothing focusable.
 
-     The rail also carried a bottom border to separate it from the prose below.
-     Now that it sits underneath, that border moves to the top for the same
+     Above this breakpoint the rail carries a bottom border to separate it from
+     the prose below. Sitting underneath, it takes a top border for the same
      reason: it separates the metadata from the story either way. */
   .story-rail { order: 2; border-bottom: 0; border-top: 1px solid var(--hairline); padding-top: 20px; }
   .story-prose { order: 1; }
@@ -1728,9 +1725,7 @@ a:hover { color: var(--text); }
    matchMedia('(prefers-reduced-motion: reduce)') itself either way. */
 @media (prefers-reduced-motion: reduce) {
   /* The work-row button's fill. Colour-only and 150ms, so it is mild, but the
-     preference is a preference -- and this replaced the row hairline
-     transition that carried the same rule for the same reason, so dropping it
-     would have quietly reversed that call rather than restated it. */
+     preference is a preference and mildness is not an exemption. */
   .work-cta a { transition: none; }
 
   /* Belt to the script's braces. assets/js/off-hours.js checks the same

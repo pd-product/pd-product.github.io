@@ -41,6 +41,21 @@ Both files carry HTML entities in some strings -- `&amp;`, `&gt;`, `&middot;` --
 ASCII, and both are printed without the `escape` filter for that reason. Adding an entry means
 writing the entity, not the character. Escaping them renders the entity text on the page.
 
+The same rule governs authored PROSE anywhere in the repo -- `_data` entries, story front matter,
+tradeoff option names -- and it has two halves: **write entities, and expect them to survive.** No
+template escapes one on its way into element content. Where such a value also lands in an
+ATTRIBUTE, the template applies `escape_once` rather than `escape`: it escapes a bare `&` and the
+double quote that would end the attribute early, and leaves a well-formed entity alone. Plain
+`escape` would double it, and a value that prints in both places would then disagree with itself.
+`_layouts/story.html` and `_includes/tradeoffs.html` each pair an attribute with content this way;
+the comments on those lines own the detail.
+
+**URLs and paths are not prose and do not take this rule.** Slugs, `hero_image`, nav `url` values
+and the two contact links are written raw, carry no entities, and mostly reach their attributes
+through `relative_url`. The contact pair keeps plain `escape`, which is right for an href: an `&`
+in a query string has to become `&amp;` there. So do not write an entity into a URL -- an authored
+`&amp;` in a `mailto:` would be escaped again and send the wrong address.
+
 Grid shape is why the counts are what they are: six Off hours entries fill a 3-up and a 2-up grid
 exactly, and four path stops fill a 4-up and a 2-up. A seventh or a fifth leaves a gap at a
 breakpoint, which is a design question rather than only a data one.
@@ -131,6 +146,14 @@ its marker can never land on the wrong column. Place it in the body where it bel
 `tradeoffs` is a list even with one table. Target 3 rows, 5 is the ceiling -- a story needing more
 dimensions should add a second table for a second decision rather than a taller one.
 
+Per table: `rejected` and `chosen` name the two options and head the two columns, and `rows`
+carries one entry per dimension, each with its own `dimension`, `rejected` and `chosen`. A fourth
+key, `title`, is optional and draws a caption above the table; omit it and the table has none.
+Nothing else is read, and nothing errors. Omit `rejected` and its column head is blank; omit
+`chosen` and the head keeps the check mark with no option name beside it; omit `rows` and the table
+body is empty. In the first two the sub-640px stacked view loses that column's label as well, since
+it is drawn from the same value.
+
 **The include line is required and fails silently without it.** Declaring `tradeoffs:` in front
 matter renders nothing on its own: the include is placed by hand, and `{% for table in nil %}`
 iterates zero times without complaining. A story with a fully authored table and no include line
@@ -150,12 +173,12 @@ source, only on the page:
   at that breakpoint while the unstyled `h3` stays at 18.72px, so a subheading renders LARGER than
   the chapter heading above it.
 - A **Markdown table** is unstyled next to the designed tradeoff table it will be compared with.
-  It also used to break the page: at 390 a five-column table pushed the document to `scrollWidth`
-  461 against `clientWidth` 390, giving the whole page a horizontal scrollbar and clipping every
-  line of body prose at the right edge -- a WCAG 1.4.10 reflow failure, from one authoring slip.
-  `.story-prose > table` now carries a containment guard so that cannot happen. **The guard is not
-  support.** It keeps the page conformant and makes the table look cramped and wrong, which is the
-  intended signal.
+  It is also the one authoring slip that can take the page out of conformance: measured at 390, a
+  bare five-column table pushes the document to `scrollWidth` 461 against `clientWidth` 390, giving
+  the whole page a horizontal scrollbar and clipping every line of body prose at the right edge --
+  a WCAG 1.4.10 reflow failure. `.story-prose > table` carries a containment guard so that cannot
+  happen. **The guard is not support.** It keeps the page conformant and makes the table look
+  cramped and wrong, which is the intended signal.
 
 So: chapters are `h2`, and everything under them is paragraphs, lists and figures. A story that
 genuinely needs an `h3`, a blockquote, code, a rule or a Markdown table needs those styles designed
@@ -228,24 +251,31 @@ Do not put a `README.md` inside these folders. Any `.md` in a publishable locati
 so a stray note turns into a published, indexed URL. Placeholder folders are held by `.gitkeep`,
 which Jekyll ignores because it starts with a dot.
 
-(The `defaults` blocks in `_config.yml` are no longer the mechanism -- both are scoped to a `type`,
-which is the fix for exactly this problem. The advice stands on its own: Jekyll publishes markdown
-it can reach, defaults or no defaults.)
+(The `defaults` blocks in `_config.yml` are both scoped to a `type`, which is what keeps them from
+reaching a stray file. The advice stands on its own either way: Jekyll publishes markdown it can
+reach, defaults or no defaults.)
 
 ## Tools
 
-`_tools/` holds two committed scripts. Neither runs at build or deploy time -- Pages runs Jekyll and
-nothing else -- and the site builds and serves without them. They exist because the two things they
-check cannot be checked by reading the source.
+`_tools/` holds four committed scripts. None runs at build or deploy time -- Pages runs Jekyll and
+nothing else -- and the site builds and serves without them. They exist because each checks
+something that cannot be checked by reading the source.
 
 **The leading underscore is load-bearing.** Jekyll skips entries starting with `_`, which is why
-`_tools/` needs no entry in `exclude:` the way `temp/` does. Renamed to `tools/`, both scripts would
-deploy as live URLs on pdiggins.com.
+`_tools/` needs no entry in `exclude:` the way `temp/` does. Renamed to `tools/`, every script in
+it would deploy as a live URL on pdiggins.com.
 
-Both drive a headless Chrome, for the same reason in both cases: the question is about the rendered
-page, not the file. Each script's own docstring is its living record; this is the map.
+Each script's own docstring is its living record; this is the map. Two of them ask about the
+rendered page and drive a headless Chrome to get the answer; two do not need it:
 
-Both expect it on port 9351, and neither starts it:
+| Script | Chrome | Server on 8731 |
+|---|---|---|
+| `make_og_card.py` | yes, with `--disable-lcd-text` | its own font fixture |
+| `check_subset_coverage.py` | yes | a built site |
+| `resubset_mono.py` | no | no, but one network fetch |
+| `probe_card_gates.py` | no | no |
+
+The two that want Chrome expect it on port 9351, and neither starts it:
 
 ```
 "/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new \
@@ -273,6 +303,7 @@ It writes that fixture itself; serve it, then draw:
 ```
 python -m http.server 8731 --directory temp/og-fixture
 python _tools/make_og_card.py            # draws and gates; installs nothing
+python _tools/make_og_card.py --write    # installs a card that MATCHES the committed one
 python _tools/make_og_card.py --replace  # installs a card that DIFFERS from the committed one
 ```
 
@@ -304,6 +335,46 @@ The check is per face, not per site: the two subsets are different sets, so a ch
 the mono face and absent from the display one. Body copy is exempt -- `--sans` is a system stack
 with no subset, so nothing there can fall back this way.
 
+### `resubset_mono.py` -- proves the shipped mono face reproduces from upstream
+
+This is the procedure the Assets section above describes. Both mono faces are subsets, and a subset
+cannot be checked by looking at it: it renders every character the site uses whether or not it came
+from the release the design was measured against, and it is called "Site Mono" either way.
+
+```
+python _tools/resubset_mono.py                       # prove the shipped face reproduces
+python _tools/resubset_mono.py --add U+20AC          # also build one with a codepoint added
+python _tools/resubset_mono.py --add U+20AC --write  # install the grown face
+```
+
+With no `--add` it builds nothing installable. That run is still the point: it rebuilds the current
+108 codepoints from upstream and compares all 17 decompressed tables with the shipped file. A
+same-codepoint rebuild matches every one of them, bar `head`'s checksum and build timestamp.
+
+The complete upstream faces are **not committed** -- they are third-party OFL binaries and this
+repository is all rights reserved. The script fetches IBM Plex Mono 2.004 from a pinned `@ibm/plex`
+release, checks it against a recorded SHA-256, and caches it under `temp/`. That needs network
+access once. A digest mismatch stops the run rather than warning: it means the release no longer
+serves the bytes the shipped subset was built from, and the pin must not be updated to match
+without rebuilding and re-proving the subset.
+
+### `probe_card_gates.py` -- checks that the card generator's gates have teeth
+
+Feeds `make_og_card.py` values that are wrong and reports any it accepts, then feeds it the values
+the card actually ships and reports if those are refused. Both halves are the check: a gate that
+refuses everything passes a probe suite with no controls.
+
+```
+python _tools/probe_card_gates.py
+```
+
+It needs no Chrome and no server -- it reads the font files and `_config.yml` directly, and writes
+only into `temp/`. `_config.yml` itself is never edited; the `check_alt` probes run against a
+doctored copy.
+
+Run it after changing any constant the card gates on, which is the case it exists for: a checker
+that passed before a value moved says nothing about the value that replaced it.
+
 ## Layout
 
 ```
@@ -312,7 +383,7 @@ _layouts/        default.html (page shell), story.html (story page)
 _includes/       nav.html, footer.html, chapter-rail.html, tradeoffs.html
 _data/           off-hours.yml, path-here.yml -- the two data-driven home sections
 _work/           one file per story
-_tools/          committed authoring scripts; not part of the build, not published
+_tools/          four committed authoring scripts; not part of the build, not published
 assets/css/      style.scss compiles to /assets/css/style.css
 assets/js/       chapter-rail.js, off-hours.js -- both optional, both vanilla
 assets/fonts/    self-hosted woff2, two families, each with its own license

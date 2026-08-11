@@ -28,15 +28,15 @@
      4. two print routes, because printing renders the whole document including
         the part nobody has scrolled to.
 
-   FLOOR 2 IS A DEAD-OBSERVER DETECTOR FIRST AND A DEADLINE SECOND, and the
-   difference from the handoff matters. It specified a flat ~1200ms timer from
-   page load that cleared anything still hidden. Measured on the built page,
-   this section starts at y=1657 against a 900px desktop viewport -- the same
-   at 1024, 1180, 1280 and 1440 wide -- so it is never on screen at load: that
-   timer fired about a second before any reader could reach the section, and
-   the reveal never played at all on a desktop.
-   Arming on scroll fixes the same problem from the other end, and the timer
-   now starts from the arming moment rather than from load.
+   FLOOR 2 IS A DEAD-OBSERVER DETECTOR FIRST AND A DEADLINE SECOND, AND IT IS
+   ARMED ON SCROLL RATHER THAN AT LOAD. A flat ~1200ms timer anchored to page
+   load, clearing anything still hidden, cannot work here. Measured on the built
+   page, this section starts at y=1657 against a 900px desktop viewport -- the
+   same at 1024, 1180, 1280 and 1440 wide -- so it is never on screen at load:
+   that timer fires about a second before any reader could reach the section,
+   and the reveal never plays at all on a desktop. Arming on scroll fixes the
+   same problem from the other end, and the timer starts from the arming moment
+   rather than from load.
 
    The detector relies on a live observer always calling back once, even when
    nothing intersects. That falls out of the spec's own bookkeeping rather than
@@ -193,10 +193,10 @@
      IT MUST TOUCH EVERY CARD, NOT ONLY THE STILL-HIDDEN ONES. `reveal` removes
      data-reveal at the START of a card's animation, so for up to ~1280ms -- 280
      of stagger plus a 1000ms transition -- a card is unmarked and still
-     transparent. An earlier version skipped unmarked cards to avoid restarting
-     a transition; printing in that window captured opacities of 0.22, 0.014
-     and 0, two cards fully invisible, on the very output the floor exists to
-     protect. Killing the transition is what makes touching them safe.
+     transparent. Skipping unmarked cards to avoid restarting a transition puts
+     opacities of 0.22, 0.014 and 0 -- two cards fully invisible -- on the very
+     output the floor exists to protect, because printing can land in exactly
+     that window. Killing the transition is what makes touching them safe.
 
      The done flag is PER CARD, not on the section, so settleFlying can use the
      same mechanism on a subset. */
@@ -358,14 +358,12 @@
   /* Trigger when a card's top passes TRIGGER of the viewport height, expressed
      as a PIXEL bottom margin computed from innerHeight.
 
-     It used to be `-6%`, and that cost three review rounds arguing about what
-     a percentage rootMargin resolves against. Measured in Chrome at 1440x900,
-     390x844, 1000x1000 and 1600x500, the trigger sat at 93.1-93.8% of HEIGHT
-     every time -- but the spec describes these offsets as behaving like CSS
-     margins, where percentages resolve against inline size, and two careful
-     readers took it the other way. Pixels make the question moot and keep one
-     threshold in one place instead of the same number written twice. The cost
-     is recomputing on resize, which is a handful of lines below.
+     NOT a percentage. Measured in Chrome at 1440x900, 390x844, 1000x1000 and
+     1600x500, the trigger sits at 93.1-93.8% of HEIGHT every time -- but the
+     spec describes these offsets as behaving like CSS margins, where
+     percentages resolve against inline size. Pixels make the question moot and
+     keep one threshold in one place instead of the same number written twice.
+     The cost is recomputing on resize, which is a handful of lines below.
 
      THE ENORMOUS TOP MARGIN IS NOT PADDING, IT IS WHAT MAKES THE TEST
      MONOTONIC. IntersectionObserver reports CHANGES to isIntersecting. With a
@@ -375,17 +373,16 @@
      hidden while sitting above the reader.
 
      That is reachable in one click: `contact` is in the nav on every page and
-     `/#contact` lands well past this section. Measured at 320x568 before this
-     margin existed, after that jump all six cards sat above the viewport and
-     all six were still marked hidden.
+     `/#contact` lands well past this section. Measured at 320x568 without this
+     margin: after that jump all six cards sit above the viewport and all six
+     stay marked hidden.
 
-     To be accurate about the consequence, because an earlier version of this
-     note overstated it: those cards are not lost for the life of the page. A
-     reader who scrolls back up re-enters them through the root's top edge,
-     which IS a change, and they reveal then. The real defects are that content
-     above the reader sits in a hidden state at all, and that scrolling UPWARD
-     triggers an entrance animation on cards the reader has already passed,
-     which is backwards.
+     To be accurate about the consequence, which is easy to overstate: those
+     cards are not lost for the life of the page. A reader who scrolls back up
+     re-enters them through the root's top edge, which IS a change, and they
+     reveal then. The real defects are that content above the reader sits in a
+     hidden state at all, and that scrolling UPWARD triggers an entrance
+     animation on cards the reader has already passed, which is backwards.
 
      Extending the root 100000px upward means anything at or above the line is
      always inside it. isIntersecting then only ever goes false -> true, the

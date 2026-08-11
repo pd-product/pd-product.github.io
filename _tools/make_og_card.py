@@ -15,10 +15,10 @@ pdiggins.com. The note above `exclude:` in _config.yml owns that rule.
 
 WHERE THE VALUES COME FROM
 
-Every value below is a design value, not a measurement of the previous card. The
-card is no longer the authority; these are. An earlier version composited a
-headline band onto the committed PNG and copied the rest through, because nothing
-in the repo knew what the rest was made of. It does now.
+Every value below is a design value, not a measurement of the committed card.
+These values are the authority and the PNG is their output, which is what makes
+a whole-card redraw possible instead of compositing a headline band onto the
+previous PNG and copying the rest through.
 
 The card's type is the site's own rules enlarged, which is the whole reason it
 can be specified at all:
@@ -45,9 +45,8 @@ USING IT
 To reword, edit HEADLINE and break it by hand. Breaks are editorial -- they fall
 on sense units and no algorithm finds them -- so the tool validates them and
 never rewraps. A headline that does not fit is refused, with the offending line
-named. It is never shrunk: 64px is the one value on this card that was never in
-doubt, and quietly abandoning it to fit a long sentence trades the design for the
-copy without telling anyone.
+named. It is never shrunk: 64px is fixed, and quietly abandoning it to fit a
+long sentence trades the design for the copy without telling anyone.
 
 Changing the line count is free below the block. The rule and the footer do not
 move, because the headline is centred between the eyebrow's baseline and the rule
@@ -75,8 +74,8 @@ drifted, subpixel fringing, a card of the wrong size.
 They CANNOT catch a wrong value, and no amount of them ever will. They predict
 from the same constants they drew from, so editing one moves both sides and they
 still agree. Set the wordmark to 24px and every one of them passes, because 24px
-is then what the card is supposed to be. That is exactly how a whole-card version
-once shipped a 9px-narrow wordmark: its checks were self-consistent too.
+is then what the card is supposed to be. A whole-card version can ship a
+9px-narrow wordmark this way with every check green.
 
 What catches that is the comparison against the committed card, which is why a
 redraw that changes anything needs --replace. The resting state is a run that
@@ -446,7 +445,7 @@ def glyph_spans(text, type_, origin):
 
     Kerned, because the browser kerns. Intervals closer than a pixel are merged
     so that a span is one contiguous region to test containment against; the gate
-    no longer pairs runs to spans, so the merge is about keeping the predicted
+    does not pair runs to spans, so the merge is about keeping the predicted
     region honest rather than about matching counts.
     """
     family, weight, size, track, _ = type_
@@ -628,8 +627,8 @@ def connect():
     pages = [t for t in targets if t["type"] == "page"]
     if not pages:
         # Chrome stays alive on the debugging port with every tab closed, so this
-        # is a live endpoint with nothing to drive. Worth naming: the bare
-        # IndexError it used to raise reads like a protocol fault.
+        # is a live endpoint with nothing to drive. Worth naming: a bare
+        # IndexError from an empty list here reads like a protocol fault.
         sys.exit(f"Chrome on {PORT} has no page target open.\n"
                  f"  Relaunch it; see README.md's Tools section for the command.")
     _ws = websocket.create_connection(pages[0]["webSocketDebuggerUrl"], timeout=60)
@@ -1077,9 +1076,9 @@ def report(before, after, els):
     """What moved against the committed card, so a redraw is legible as a diff.
 
     The bands PARTITION the card rather than tracking the elements. A band drawn
-    around the new elements stops counting where the old card had ink and the new
-    one does not, which is precisely what happens when a four-line headline
-    becomes one line: the rows the old lines used to occupy go unreported.
+    around the redrawn elements stops counting where the committed card has ink
+    and the redraw does not, which is precisely what happens when a four-line
+    headline becomes one line: the rows the committed lines occupy go unreported.
     """
     print("\n   against the committed card:")
     a, b = np.asarray(before).astype(np.int16), np.asarray(after).astype(np.int16)
