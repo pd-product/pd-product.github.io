@@ -286,7 +286,7 @@ rendered page and drive a headless Chrome to get the answer; two do not need it:
 | `check_subset_coverage.py` | yes | a built site |
 | `resubset_mono.py` | no | no, but one network fetch |
 | `probe_card_gates.py` | no | no |
-| `check_dates.py` | no | no |
+| `check_dates.py` | no | no, but it runs Jekyll |
 
 The two that want Chrome expect it on port 9351, and neither starts it:
 
@@ -399,15 +399,29 @@ python _tools/check_dates.py
 ```
 
 Run it before publishing a revision. It exits non-zero and names the commit that moved the content.
+It reads the WORKING TREE as well as committed history, because the moment you need it is before
+you commit a revision, when git has not seen the change yet.
 
-It knows the difference between a content change and a touch: comments, both YAML and Liquid,
-HTML comments and whitespace are stripped before comparison, so rewording a comment raises nothing.
-A checker that cried wolf on every formatting edit would be ignored within a week, which would be
-worse than not having it. It also reads the WORKING TREE, not just committed history -- the moment
-you need it is before you commit a revision, when git has not seen the change yet.
+**It builds the page rather than reading the source**, which is the only reason it can tell a
+content change from a touch. For each candidate commit it takes the current tree, swaps in just
+that commit's version of the page's authored files, runs Jekyll, and compares what the page
+actually renders. So it needs the same toolchain a local build needs, and it takes about a minute.
 
-The home page's sources are not just `index.html`. It prints both `_data` files and each story's
-title, lesson and category, so revising a story dates the home page too, and the check follows that.
+That is slower than reading files and it is the point. Deciding what renders by stripping comments
+out of the source means reimplementing the renderer, and every rule in such a stripper is a guess:
+`_data` files have no front matter, rewrapping a paragraph changes the markup but not the page, and
+HTML comments do not reliably vanish -- the note on `{% seo %}` in `index.html` records a tag that
+executed inside one and leaked text onto the page.
+
+Holding the layouts, includes and `_config.yml` at their current version in every build is what
+separates content from presentation. A layout change dates nothing: `lastmod` and `dateModified`
+describe a document, not the site design around it. It compares `<main>` plus the page's title and
+meta description, so the header, nav and footer are outside the comparison for the same reason.
+
+Two things fail: a date behind the content, and a date in the future. A date AHEAD of the page's own
+last change only prints a note -- a story's `lesson` renders on the home row and not on its own
+page, so revising it dates the home page and leaves the story's date untouched, and bumping both is
+careful rather than wrong.
 
 ## Layout
 
