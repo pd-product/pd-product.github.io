@@ -57,6 +57,15 @@ STORIES = sorted(ROOT.glob("_work/*.md"))
 # changed after its declared date -- the home page prints each story's title,
 # lesson and category, so revising a story revises the home page too, and the
 # two data files are the Off hours and The path here sections outright.
+#
+# SITE CHROME IS DELIBERATELY OUT OF SCOPE, and this is a boundary rather than an
+# oversight. `_config.yml`, `_includes/nav.html`, `_includes/footer.html` and the
+# layouts all reach the rendered page, but they reach EVERY page: treating them
+# as sources would date every page in the site on any nav or footer edit, which
+# is both untrue -- the content did not change -- and useless, because a signal
+# that fires on everything carries nothing. `lastmod` and `dateModified` are
+# claims about the document, not about the site it sits in. The cost is real and
+# worth naming: reword a nav label or a contact link and no date moves.
 DATA = ["_data/off-hours.yml", "_data/path-here.yml"]
 
 
