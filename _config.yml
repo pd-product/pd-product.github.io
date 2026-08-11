@@ -24,9 +24,11 @@ brand: "Pat Diggins"
 # discretion. Judge it by rendered width, not by counting.
 #
 # The tagline is used only as metadata and is not printed anywhere, since the
-# hero claim lives in index.html.
-tagline: "Solving problems with AI"
-description: "Senior PM. I build products that solve problems people have learned to work around."
+# hero claim lives in index.html. It does carry the same words as that page's
+# .intro .eyebrow, which the share card also sets as type; the note above the
+# h1 in index.html owns that coupling.
+tagline: "Building with AI"
+description: "Senior PM at Microsoft on publisher platforms. Always learning. Often solving problems."
 author: "Patrick Diggins"
 
 # Rendered by _includes/footer.html. Year of first publication, per the US
@@ -141,7 +143,7 @@ og_image:
   # Describes what the CARD LOOKS LIKE, not what it says. Someone who hears this
   # is about to meet the headline again as page text; repeating it here makes
   # them listen to it twice and tells them nothing about the image.
-  alt: "A dark share card: a small green monospace line reading solving problems with ai, above a large four-line headline, with the name pat diggins and pdiggins.com along the bottom."
+  alt: "A dark share card: a small green monospace line reading building with ai, above a large two-line headline, with the name pat diggins and pdiggins.com along the bottom."
 
 # The person this site is about. Rendered as a ProfilePage + Person JSON-LD
 # block on the HOME PAGE ONLY, by _layouts/default.html. Data, not markup, so

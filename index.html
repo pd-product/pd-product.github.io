@@ -19,8 +19,18 @@ The h1 below is the authoritative hero claim and lives here as page markup. It
 is NOT the only copy of that sentence: `description` in _config.yml carries a
 prefixed version as metadata, and assets/og/default.png sets it as type in the
 share card. Rewording it here means moving all three, or the page's own search
-snippet and link preview contradict the page. site.title and site.tagline stay
-in config for the seo tag and are deliberately not printed on the page.
+snippet and link preview contradict the page.
+
+THE EYEBROW HAS THE SAME SHAPE, and is easier to miss because it is three
+words. The card sets it as type as well, from EYEBROW in
+_tools/make_og_card.py, and site.tagline in _config.yml carries the same words
+as metadata. The generator gates its eyebrow against og_image.alt, along with
+the headline's LINE COUNT, the wordmark and the url -- but the headline's
+wording is deliberately not in that alt text, and nothing checks either string
+against this page or against the tagline.
+
+site.title and site.tagline stay in config for the seo tag and are deliberately
+not printed on the page.
 
 This MUST be a Liquid comment, not an HTML one. Liquid executes tags inside
 HTML comments: naming the seo tag in a `<!-- -->` block expanded it, and its
@@ -32,13 +42,13 @@ The ONE section on this page with no aria-labelledby, deliberately. The only
 heading inside it is the page h1, which names the WHOLE PAGE rather than a
 region within it, and the nav does not anchor here. Left unnamed this stays a
 generic box inside <main>, which is correct: pointing at the h1 would put a
-landmark named "I build products that solve problems people have..." in the
-landmark list, and that heading is already reachable by heading navigation.
+landmark named "Always learning. Often solving problems." in the landmark list,
+and that heading is already reachable by heading navigation.
 The five anchored sections below are the named regions; see the note on #work.
 {%- endcomment -%}
 <section class="intro">
-  <p class="eyebrow">solving problems with ai</p>
-  <h1>I build products that solve problems people have learned to work around.</h1>
+  <p class="eyebrow">building with ai</p>
+  <h1>Always learning. Often solving problems.</h1>
   {%- comment -%}
   Four facts and three separators, each its own element. The separators are
   marked up rather than generated for the same reason as .site-crumb-sep:
