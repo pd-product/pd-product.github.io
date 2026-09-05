@@ -294,12 +294,12 @@ The two that want Chrome expect it on port 9351, and neither starts it:
 ```
 "/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new \
   --remote-debugging-port=9351 --remote-allow-origins='*' --no-first-run \
-  --user-data-dir='C:/Users/pbd/AppData/Local/Temp/cdp' about:blank
+  --user-data-dir='C:/Users/<you>/AppData/Local/Temp/cdp' about:blank
 ```
 
 `--remote-allow-origins` is not optional; without it every connection hangs. Nor are the forward
 slashes in that path cosmetic -- bash eats the backslashes in an unquoted `C:\Users\...` and Chrome
-silently receives `C:UserspbdAppData...`. Add `--disable-lcd-text` for the card generator, which
+silently receives `C:Users<you>AppData...`. Add `--disable-lcd-text` for the card generator, which
 gates on it; the checker reads the DOM and never a pixel, so it is indifferent and one browser
 carrying the flag serves both.
 
