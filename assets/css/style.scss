@@ -60,8 +60,8 @@ ul,ol{margin:0}
 .about-intro{display:grid;grid-template-columns:1.2fr 1fr;gap:54px;padding:20px 56px 64px;align-items:center}
 .about-bio h1{margin-bottom:26px;font:600 62px/1.04 "Fraunces",Georgia,serif;letter-spacing:-2px}
 .about-bio>p+p{margin-top:18px}
-.about-portrait{align-self:center;display:flex;flex-direction:column;justify-content:center;padding:18px;background:var(--peach)}
-.about-portrait img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:center}
+.about-portrait{align-self:stretch;display:flex;flex-direction:column;justify-content:center;padding:18px;background:var(--peach)}
+.about-portrait img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;object-position:center}
 .about-path{display:grid;grid-template-columns:1fr 2fr;gap:54px;padding:48px 56px;background:var(--cream-deep)}
 .about-path h2,.about-off h2{font:500 34px/1.15 "Fraunces",Georgia,serif;letter-spacing:-.7px}
 .journey{list-style:none;padding:0}
