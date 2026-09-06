@@ -1,0 +1,71 @@
+{%- comment -%}
+Chapter rail, derived from the story's own h2 headings.
+
+Nothing is declared per story: omit a chapter and its rail entry disappears,
+add one and it appears. The rail and the page cannot disagree, because one is
+generated from the other.
+
+Requires each h2 to carry an explicit kramdown anchor, e.g.
+
+    ## The situation    {#situation}
+
+The explicit anchor is what keeps a shared deep link such as
+/work/<slug>/#situation working after the heading text is reworded. Kramdown
+auto_ids is disabled in _config.yml so that a forgotten anchor drops the
+chapter out of the rail visibly, rather than silently minting an unstable id
+derived from the heading text.
+
+PARSING NOTE. The label is taken by removing the heading's complete OPENING
+TAG from its inner HTML. Two approaches that do not work, recorded so neither
+is reached for again:
+
+  - Splitting on '">' is wrong. Kramdown renders inline code as
+    <code class="language-plaintext highlighter-rouge"> and links as
+    <a href="...">, both of which contain '">', so the split lands inside an
+    attribute and yields a truncated label plus malformed markup.
+  - Removing a RECONSTRUCTED `id">` prefix is also wrong. It assumes the
+    opening tag is exactly
+    <h2 id="foo">. A heading carrying any other attribute renders as
+    <h2 id="foo" class="wide">, so the reconstructed prefix `foo">` does not
+    occur in the head at all, remove_first is a silent no-op, and strip_html
+    cannot clean up after it because there is no '<' left to match. The label
+    then renders as attribute debris.
+
+So: take the opener as everything up to the FIRST '>'. That is reliable
+because kramdown escapes '>' in body text as &gt;, so the first '>' in the
+head is always the one that closes the opening tag, whatever attributes it
+carries.
+
+Known limits, accepted rather than fixed, because authoring guidance controls
+them and the failure is visible on the page:
+  - Only the `{#id}` attribute form is matched. `{: .class #id}` renders the
+    class BEFORE the id, so the outer `split: '<h2 id="'` misses the heading
+    entirely and it vanishes from the rail silently. This is the reason the
+    explicit `{#id}` convention is a convention and not a preference; the
+    opener fix above does not and cannot rescue this case.
+  - An h2 whose content is only an image yields an empty label; the anchor is
+    used as the label so the entry is never blank.
+
+Authoring guidance (not enforced here): 3-8 entries is the comfortable range,
+and heading text under ~24 characters avoids wrapping in the 168px rail.
+{%- endcomment -%}
+{%- assign chunks = include.content | split: '<h2 id="' -%}
+{%- if chunks.size > 1 -%}
+<nav class="chapter-rail" aria-label="Chapters">
+  <h2>Chapters</h2>
+  {%- comment -%}
+  role="list": the stylesheet's `ul, ol { list-style: none }` reset drops the
+  implicit list role in Safari with VoiceOver. See index.html.
+  {%- endcomment -%}
+  <ul role="list">
+    {%- for chunk in chunks offset:1 -%}
+      {%- assign head = chunk | split: '</h2>' | first -%}
+      {%- assign anchor = head | split: '"' | first -%}
+      {%- assign opener = head | split: '>' | first | append: '>' -%}
+      {%- assign label = head | remove_first: opener | strip_html | strip -%}
+      {%- if label == '' -%}{%- assign label = anchor -%}{%- endif -%}
+      <li><a href="#{{ anchor }}">{{ label }}</a></li>
+    {%- endfor -%}
+  </ul>
+</nav>
+{%- endif -%}

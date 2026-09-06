@@ -199,8 +199,6 @@ exclude:
   - README.md
   - CLAUDE.md
   - Gemfile
-  # Historical source snapshots are comparison material, not publishable pages.
-  - archive/
   - temp/
 
 # Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded,

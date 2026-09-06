@@ -1,0 +1,89 @@
+---
+slug: "targeting-architecture"
+title: "Rebuilding targeting around how publishers sell"
+# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
+# copy, not a trim of `title` -- the full title is too long for that slot.
+crumb: "targeting architecture"
+# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
+# meta description. It does not render on the home-page row -- that is a
+# template decision in index.html, not a reason to drop the key. The key must
+# be `description`: with any other name seo-tag falls back to page.excerpt,
+# which is the first block of the body -- the opening `## ` heading. Search and
+# link previews then read that heading instead.
+description: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
+# One line, shown on the home-page row. A trim of this story's own "What I
+# would redo" chapter, approved as written; the full sentence stays in that
+# chapter and this is deliberately the shorter form.
+lesson: "Treat the customer experience of a transition as part of the design."
+category: "supply"
+order: 1
+# Publication date of this page, not the date of the work it describes. Without
+# it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
+# move on every deploy and re-announce the story as new. Set once, then leave it.
+date: 2026-08-04
+# When this story's CONTENT last changed, which is a DIFFERENT question from
+# `date` above and has to be updated by hand when you revise it. Both
+# jekyll-seo-tag and jekyll-sitemap read this one key, so it fixes the JSON-LD
+# `dateModified` and the sitemap `lastmod` together. Leave it unset and both
+# quietly answer with `date`, so a revised story reports itself unrevised in two
+# places that agree with each other. Do NOT bump it for a comment or a
+# formatting edit -- only for something a reader would see.
+# `_tools/check_dates.py` is what catches a forgotten update.
+last_modified_at: 2026-08-09
+role: "PM, Prebid Server Premium. Owned roadmap and outcome."
+team: "Customers, support, design, multiple eng teams"
+partners: "1P and 3P publishers, demand partners, support and services"
+timeframe: "Over a year, scoping to GA"
+chips:
+  - "over a year"
+  - "staged rollout"
+# No hero_image for v1 -- the site ships without diagrams. Adding one here
+# brings the hero and home-page card back with no CSS change. Set `hero_alt`
+# alongside it (what the image shows, for someone who cannot see it);
+# `hero_caption` is the separate visible caption.
+tradeoffs:
+  - rejected: "Leave the model alone"
+    chosen: "Rebuild the targeting model"
+    rows:
+      - dimension: "Time to ship"
+        rejected: "Nothing to ship; the friction continues"
+        chosen: "Over a year from scoping to general availability"
+      - dimension: "What it fixes"
+        rejected: "Nothing structurally; the bulk tools reduce the symptom slightly"
+        chosen: "Lets publishers express intent at the level that matches how they sell, and unlocks better inventory-to-demand matching"
+      - dimension: "Cost of being wrong"
+        rejected: "Publishers keep absorbing overhead we already knew was prohibitive"
+        chosen: "A long investment, plus migrating every existing publisher off a live model without disrupting revenue"
+published: true
+---
+
+## The situation    {#situation}
+
+Configurations in Prebid Server Premium, Microsoft's server-side header bidding platform for publishers, determine what inventory a publisher sends to which demand partners. Historically that was expressed at the placement level, so a publisher describing their full offering had to create and maintain thousands of individual configurations. For larger publishers it reached into the tens of thousands.
+
+Customers were direct with me about how prohibitive this overhead was. They had given the same feedback before, and the design had not changed in response. There were other friction points for both customers and the teams supporting them, but this one was the piece that had to be solved. The tension was that the platform worked. The argument against fixing it was that we would be re-architecting something that already functioned, which made it easy to keep deferring.
+
+## Constraints I was handed    {#constraints}
+
+- The existing model was live and carrying real publisher revenue, so nothing could break for anyone already running on it.
+- The only alternative on the table was making no investment at all and letting first-party and third-party publishers keep absorbing the friction.
+- Ownership of the core targeting logic was genuinely unsettled between engineering teams, and engineering leadership had to settle it before the work could be assigned.
+{: role="list"}
+
+## The call I made    {#the-call}
+
+The expected option was to leave it. Prebid Server Premium functioned, the bulk tools we had were rudimentary but they existed, and the complaints were coming from customers rather than from any internal metric. I argued for rebuilding the targeting model so publishers could express intent at whatever level actually matched how they sell, from run of site all the way down to an individual placement, with geographic, device, segment, and key-value targeting alongside it. That meant re-architecting something that already worked, and asking multiple engineering teams to commit to more than a year of work on the strength of customer complaints.
+
+{% include tradeoffs.html tradeoffs=page.tradeoffs %}
+
+I made the case with three kinds of evidence together, because no single one was enough. Qualitative customer feedback established that the problem was real and specific. Comparison against competitor platforms established that our model was the outlier. Internal data on configurations, revenue, and usage established the scale. On its own each was arguable. Together they were hard to set aside.
+
+## What shipped    {#shipped}
+
+Publishers now express targeting at whatever granularity matches how they actually sell, with geographic, device, segment, and key-value dimensions available alongside it. The average number of active configurations a publisher maintains fell by about a third, comparing the state before the work began to two months after general availability, and revenue grew through the transition. The rollout went through publishers on the API first to prove out architecture, reliability, and performance, then through the interface with a deliberately vocal group of customers, then to general availability, with both models available in parallel afterward and remaining customers migrated by script so the old architecture could be fully retired.
+
+The configuration count is the visible proxy. The substance is that publishers can now say what they mean once, instead of restating it placement by placement.
+
+## What I would redo    {#redo}
+
+At general availability my instinct was to let both models coexist for a while, undefined but not indefinite, so publishers could move at their own pace. The team working directly with customers told me almost immediately that having both options visible was causing confusion and churn. What looked like optionality to me looked like ambiguity to a publisher deciding which one to use. The technical rollout had been staged carefully; the customer-facing transition had not been staged with the same rigor, and the gap was communication and education before launch rather than anything in the software. I reversed the decision, built a migration plan and a communications plan with engineering and services, and moved everyone. The lesson I took is to treat the customer experience of a transition as part of the design, not as something that follows it.
