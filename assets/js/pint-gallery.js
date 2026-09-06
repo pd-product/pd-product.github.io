@@ -49,7 +49,10 @@
     const frame = Math.max(0, Math.min(30, Math.round(position)));
     view.image.src = view.sources[frame];
     view.card.dataset.frame = String(frame);
-    view.labelButton.hidden = frame !== 30;
+    // The text alternative belongs to the back-label state, not only its final
+    // frame. Reveal it with the button-label change so it is available while
+    // the pint is turning instead of appearing a beat after the animation.
+    view.labelButton.hidden = view.target !== 30;
   }
 
   async function turn(view, back) {
@@ -58,6 +61,7 @@
     view.target = back ? 30 : 0;
     view.button.firstChild.textContent = back ? "Show flavor " : "Turn pint ";
     view.button.setAttribute("aria-pressed", String(back));
+    view.labelButton.hidden = !back;
 
     try {
       await prepare(view);
