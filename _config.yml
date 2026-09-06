@@ -12,7 +12,7 @@
 # causal explanation for it here. The convention holds either way: seo-tag
 # supplies its own pipe between page title and site title, so a second one in
 # this string would read as a doubled separator regardless.
-title: "Pat Diggins &#8211; Senior Product Manager"
+title: "Pat Diggins &#8211; Product Manager"
 brand: "Pat Diggins"
 # tagline and description must NOT be the same string. jekyll-seo-tag appends
 # the tagline (falling back to the description) to the site title whenever the
@@ -27,8 +27,8 @@ brand: "Pat Diggins"
 # hero claim lives in index.html. It does carry the same words as that page's
 # .intro .eyebrow, which the share card also sets as type; the note above the
 # h1 in index.html owns that coupling.
-tagline: "Building with AI"
-description: "Senior PM at Microsoft on publisher platforms. Always learning. Often solving problems."
+tagline: "A taste of how I think"
+description: "Product manager in New York. Different challenges. The same curiosity."
 author: "Patrick Diggins"
 
 # Rendered by _includes/footer.html. Year of first publication, per the US
@@ -50,40 +50,9 @@ noindex: false
 url: "https://pdiggins.com"
 baseurl: ""
 
-# Contact is links only. There is no server, so there is no form.
-# These keys are COMMENTED OUT rather than left as placeholder strings: an unset
-# key is nil and therefore falsy in Liquid, so index.html omits the link
-# entirely. A placeholder string is truthy and would render a live broken link.
-# Note an empty string "" would also be truthy in Liquid -- omit the key, do not
-# blank it. Uncomment each as its real value becomes available.
-# email: deliberately omitted for v1 -- a public mailto: gets scraped.
-# email: "you@example.com"
+# Used by the shared footers and the Person structured-data block.
+# Public email and hosted-resume links are deliberately omitted.
 linkedin: "https://www.linkedin.com/in/patrick-diggins/"
-# No resume key, and no resume link in index.html. Hosting a PDF here is
-# maintenance the owner declined to carry; LinkedIn is the reference. Restoring
-# it is a config key plus a list item in index.html, not a redesign -- but note
-# jekyll-sitemap enumerates static .pdf files, so a republished PDF is offered
-# to crawlers again unless it is excluded.
-
-# Nav is data, not markup: edited here, rendered by _includes/nav.html.
-# All four are anchors on the home page, so they are written as absolute paths
-# and work from story pages too.
-#
-# The home page carries a fifth anchored section, #path-here, which is
-# deliberately NOT in the nav: it is context for the sections around it rather
-# than a destination, and a five-item mono row starts wrapping at the phone
-# breakpoint. Its id is the fragment target, so it can still be linked
-# directly. What makes it a landmark is separate -- the aria-labelledby on the
-# section in index.html, which is what gives it an accessible name.
-nav:
-  - title: "work"
-    url: "/#work"
-  - title: "off hours"
-    url: "/#off-hours"
-  - title: "about"
-    url: "/#about"
-  - title: "contact"
-    url: "/#contact"
 
 # Story pages. Add a file to _work/ and it gets a page, a URL, a home-page
 # row, and prev/next placement. Nothing is hand-indexed.
@@ -119,17 +88,17 @@ defaults:
       type: "work"
     values:
       layout: "story"
-      image: "/assets/og/default.png"
+      image: "/assets/og/default.jpg"
   - scope:
       path: ""
       type: "pages"
     values:
-      image: "/assets/og/default.png"
+      image: "/assets/og/default.jpg"
 
 # Dimensions and alt for the share card above, emitted by hand in
 # _layouts/default.html because routing them through seo-tag corrupts the
 # JSON-LD (see the note on `image`). Keep these true of the real file:
-# assets/og/default.png is 1200x630, and the alt describes the card's
+# assets/og/default.jpg is 1200x630, and the alt describes the card's
 # composition -- deliberately not a transcription of it, for the reason on
 # `alt` below.
 og_image:
@@ -137,13 +106,13 @@ og_image:
   # compares them, and emits the dimensions only when the page is really using
   # this card -- a story with its own card would otherwise be described with
   # this one's width and height.
-  path: "/assets/og/default.png"
+  path: "/assets/og/default.jpg"
   width: 1200
   height: 630
   # Describes what the CARD LOOKS LIKE, not what it says. Someone who hears this
   # is about to meet the headline again as page text; repeating it here makes
   # them listen to it twice and tells them nothing about the image.
-  alt: "A dark share card: a small green monospace line reading building with ai, above a large two-line headline, with the name pat diggins and pdiggins.com along the bottom."
+  alt: "Three studio-rendered ice cream pints on a peach-tile counter, labeled Publisher Pistachio, Evidence Espresso, and Compound Caramel."
 
 # The person this site is about. Rendered as a ProfilePage + Person JSON-LD
 # block on the HOME PAGE ONLY, by _layouts/default.html. Data, not markup, so
@@ -173,9 +142,9 @@ person:
   # Matches the role suffix in `title` above. Keep the two in step -- this is
   # the machine-readable claim search engines read, and `title` is the headline
   # a human sees in the same result, so a mismatch is visible in one glance.
-  job_title: "Senior Product Manager"
+  job_title: "Product Manager"
   # A headshot is the right image for a Person; the share card is not.
-  image: "/assets/img/pat-diggins.jpg"
+  image: "/assets/img/pat-diggins-about.webp"
   same_as:
     - "https://www.linkedin.com/in/patrick-diggins/"
 

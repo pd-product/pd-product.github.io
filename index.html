@@ -1,335 +1,47 @@
 ---
 layout: default
 permalink: /
-# When this page's content last changed, updated by hand. A regular page is not
-# a collection document: jekyll-sitemap emits `<lastmod>` for one ONLY if this
-# key is set, so without it the home page carries no freshness signal at all
-# rather than a wrong one -- and it is the page that changes most often. It
-# covers what the page PRINTS, which includes both _data files and each story's
-# title, lesson and category, so revising a story dates this page too.
-# `_tools/check_dates.py` knows that and checks all of them.
-last_modified_at: 2026-08-10
-# No `seo: type:` override. seo-tag's default for this page is WebSite, which is
-# correct for the node it builds -- it also emits `author` and `headline`, and
-# both belong on a CreativeWork rather than on a Person. The person is described
-# by a SEPARATE ProfilePage block that _layouts/default.html emits on this page
-# only, from the `person:` data in _config.yml.
+last_modified_at: 2026-09-06
 ---
-{%- comment -%}
-No `title` here on purpose. With one, jekyll-seo-tag renders "Home | Pat
-Diggins ...", and "Home" is noise in a browser tab and a search result. Without
-it the home page's title is the site title alone. Story pages still get their
-own title prefixed.
-{%- endcomment -%}
+<header class="home-intro">
+  <h1>A taste of<br>how I think.</h1>
+  <p>Different challenges. The same curiosity.</p>
+</header>
 
-{%- comment -%}
-The h1 below is the authoritative hero claim and lives here as page markup. It
-is NOT the only copy of that sentence: `description` in _config.yml carries a
-prefixed version as metadata, and assets/og/default.png sets it as type in the
-share card. Rewording it here means moving all three, or the page's own search
-snippet and link preview contradict the page.
-
-THE EYEBROW HAS THE SAME SHAPE, and is easier to miss because it is three
-words. The card sets it as type as well, from EYEBROW in
-_tools/make_og_card.py, and site.tagline in _config.yml carries the same words
-as metadata. The generator gates its eyebrow against og_image.alt, along with
-the headline's LINE COUNT, the wordmark and the url -- but the headline's
-wording is deliberately not in that alt text, and nothing checks either string
-against this page or against the tagline.
-
-site.title and site.tagline stay in config for the seo tag and are deliberately
-not printed on the page.
-
-This MUST be a Liquid comment, not an HTML one. Liquid executes tags inside
-HTML comments: naming the seo tag in a `<!-- -->` block expanded it, and its
-own `<!-- End Jekyll SEO tag -->` closed this comment early, leaking the rest
-of the text onto the page as visible content.
-{%- endcomment -%}
-{%- comment -%}
-The ONE section on this page with no aria-labelledby, deliberately. The only
-heading inside it is the page h1, which names the WHOLE PAGE rather than a
-region within it, and the nav does not anchor here. Left unnamed this stays a
-generic box inside <main>, which is correct: pointing at the h1 would put a
-landmark named "Always learning. Often solving problems." in the landmark list,
-and that heading is already reachable by heading navigation.
-The five anchored sections below are the named regions; see the note on #work.
-{%- endcomment -%}
-<section class="intro">
-  <p class="eyebrow">building with ai</p>
-  <h1>Always learning. Often solving problems.</h1>
-  {%- comment -%}
-  Four facts and three separators, each its own element. The separators are
-  marked up rather than generated for the same reason as .site-crumb-sep:
-  generated text may be announced depending on browser and assistive
-  technology, and a pseudo-element cannot carry aria-hidden. Decorative text
-  has to be marked up to be hideable.
-
-  role="list" for the reason every other list here carries it -- the
-  `list-style: none` reset drops the implicit list role in Safari with
-  VoiceOver.
-  {%- endcomment -%}
-  <ul class="facts" role="list">
-    <li>new york</li>
-    <li class="facts-sep" aria-hidden="true">&middot;</li>
-    <li>senior pm at microsoft</li>
-    <li class="facts-sep" aria-hidden="true">&middot;</li>
-    <li>pc gamer</li>
-    <li class="facts-sep" aria-hidden="true">&middot;</li>
-    <li>ice cream year-round</li>
-  </ul>
-</section>
-
-<section id="work" class="work-list" aria-labelledby="work-heading">
-  {%- comment -%}
-  The design has no visible "Work" heading, but the nav anchors here and the
-  section needs a name, so it is hidden rather than removed. Hiding goes through
-  the shared .sr-only utility; this element does not get a near-identical rule
-  of its own.
-
-  THE HEADING ALONE DOES NOT NAME THE SECTION -- aria-labelledby does, and all
-  five anchored sections carry one for that reason. A <section> maps to
-  role="region" ONLY when it has an accessible name, and an accessible name
-  comes from aria-label or aria-labelledby, never from a descendant heading.
-  Verified in the rendered accessibility tree: without these attributes the page
-  exposes banner, main, contentinfo and one navigation, and not one of the five
-  sections appears at all. The headings stay reachable by heading navigation
-  either way; the landmarks the nav mirrors do not.
-
-  Removing an aria-labelledby, or an id it points at, silently demotes that
-  section back to a generic box. Nothing on screen changes.
-  {%- endcomment -%}
-  <h2 class="sr-only" id="work-heading">Work</h2>
-  {%- comment -%}
-  role="list" is not redundant here. The stylesheet's `ul, ol { list-style:
-  none }` reset removes the implicit list role in Safari with VoiceOver, so
-  without this the work index stops announcing as "list, 3 items" -- and this
-  is the site's primary content. Restated explicitly rather than fixed by
-  restoring markers, which the design does not use. Every list in the repo
-  carries it for the same reason.
-  {%- endcomment -%}
-  <ol class="work-rows" role="list">
-    {%- assign ordered = site.work | sort: "order" -%}
-    {%- for story in ordered %}
-    <li class="work-row">
-      {%- comment -%}
-      THE ROW IS NOT A LINK, and nothing in it may become one except the Read
-      the case button at the end of .work-copy. A row-sized anchor is what this
-      replaced: it offered no affordance at rest, and none at all on a phone,
-      where there is no hover to reveal one.
-
-      NOTHING AT ROW LEVEL MAY TAKE A HOVER STATE either, and that is the same
-      decision rather than a second one. Accent means interactive everywhere
-      else on this site, so a row that lit up would advertise a click it can no
-      longer accept -- which is the original defect inverted, not fixed.
-
-      The cost is real and was accepted: the target went from the whole row to
-      one button, so the button carries a 44px floor on touch (see the
-      stylesheet). A second link to the same story is not the way to win that
-      back; it would list twice in a screen reader's link list.
-      {%- endcomment -%}
-      {%- assign card = story.card_image | default: story.hero_image -%}
-      {%- if card %}
-      <img class="work-card-image" src="{{ card | relative_url }}" alt="">
-      {%- endif %}
-      {%- comment -%}
-      Position in the sorted list, not the raw `order` value. See the same
-      note in _layouts/story.html; both derive it this way so they agree --
-      the home row prints it as a display numeral and the story page prints
-      it inside its eyebrow, but the number itself is the same derivation in
-      both places.
-
-      aria-hidden because it is decorative here, and because the information
-      is already carried: the rows are an <ol>, so a screen reader announces
-      the position anyway. Without this it is read twice, once as list
-      position and once as a bare "01". The colour token says the same thing
-      -- --numeral is deliberately near-invisible and no content depends on
-      it being read.
-      {%- endcomment -%}
-      <p class="work-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
-      {%- comment -%}
-      Category only. The number moved to the numeral above, so the index and
-      separator spans are gone from this row -- the story page keeps the full
-      `01 / supply` form.
-
-      A DIRECT child of the row rather than the first thing inside .work-copy,
-      which is where it reads like it belongs. It has to be a grid item in its
-      own right so that at 960px and below it can share a baseline row with the
-      numeral while the title drops beneath both. Kept inside the wrapper it
-      could not: a flex or baseline relationship cannot reach across
-      .work-copy's box.
-      {%- endcomment -%}
-      <p class="eyebrow">{{ story.category }}</p>
-      {%- comment -%}
-      Title, lesson, chips and the button go in ONE wrapper so they move as a
-      block. `.work-row` is a two-column grid, and under automatic placement
-      separate direct children alternate between the rail and the main column:
-      the summary and chips land in the 168px rail, and which field goes where
-      depends on how many optional fields a story happens to set.
-
-      The stylesheet pins a column on every direct child, which is the actual
-      fix, and this wrapper is what keeps the group from needing three more of
-      them. A NEW DIRECT CHILD OF .work-row STILL NEEDS ITS OWN
-      `grid-column`; adding a bare one puts the bug back. Anything inside this
-      wrapper is exempt, which is why the button goes here.
-
-      The wrapper is otherwise unstyled beyond its column. Every rule in the
-      design CSS is class-based, so the descendants keep their styling with no
-      change to the stylesheet.
-      {%- endcomment -%}
-      <div class="work-copy">
-        {%- comment -%}
-        The id is the LOOP POSITION, not the slug, and one `row_id` feeds both
-        this heading and the button below so the two cannot drift apart.
-
-        `slug | default: forloop.index` collided: a story whose slug is "2" and
-        a slugless story sitting second both mint work-title-2, and duplicate
-        ids mean getElementById returns the first, so the second button would
-        borrow the first story's accessible name. The position is unique inside
-        the loop by construction, and these ids are referenced nowhere but the
-        aria-labelledby in this row -- they are not URLs and nothing links to
-        them -- so nothing depends on them being readable.
-        {%- endcomment -%}
-        {%- assign row_id = forloop.index -%}
-        <h3 class="work-title" id="work-title-{{ row_id }}">{{ story.title }}</h3>
-        {%- comment -%}
-        `description` deliberately does NOT render here. The row is title,
-        lesson and chips; the lesson is the line that makes it specific.
-
-        This is a TEMPLATE change, not a front-matter one. `description` is
-        still required on every story and is still the page's meta
-        description -- deleting the key would send the story to search
-        results described by its own opening heading. The .work-summary rules
-        in the stylesheet are kept and marked inert for the same reason the
-        hero-image rules are: restoring this line is a one-line change here
-        and nothing in the CSS.
-        {%- endcomment -%}
-        {%- comment -%}
-        The lesson line is what makes the index specific rather than generic:
-        each row states what the case taught, not only what it achieved.
-        Guarded, so a story without `lesson` renders as before.
-        {%- endcomment -%}
-        {%- if story.lesson %}
-        <div class="work-lesson">
-          <p class="work-lesson-label">Lesson</p>
-          <p class="work-lesson-text">{{ story.lesson }}</p>
-        </div>
-        {%- endif %}
-        {%- if story.chips %}
-        <ul class="chips" role="list">
-          {%- for chip in story.chips %}<li class="chip">{{ chip }}</li>{% endfor %}
-        </ul>
-        {%- endif %}
-        {%- comment -%}
-        The row's ONLY interactive element, and the only one that is never
-        guarded -- the numeral, eyebrow and title are unguarded too, but the
-        card image, lesson and chips are optional. This one always renders
-        because every story has a page.
-
-        THE ACCESSIBLE NAME IS THE BUTTON TEXT PLUS THE TITLE, in that order,
-        and it has to be. Three links reading only "Read the case" are
-        indistinguishable in a screen reader's link list, which is WCAG 2.4.4.
-        Referencing the visible span first keeps the spoken name starting with
-        the words on screen, which is what voice control matches on (2.5.3) --
-        an aria-label replacing the text would break that.
-
-        The arrow is aria-hidden and OUTSIDE the referenced span, so it is
-        neither announced nor part of the name. It is `&#8594;`, not the
-        `&#8599;` the Contact links use: the diagonal one means the link leaves
-        the site, and this one stays on it.
-
-        NO SPACE IS WRITTEN BETWEEN THE TWO SPANS. The anchor is a flex
-        container, which discards whitespace between its items, so one written
-        here would render as nothing and read as though it were doing the
-        spacing. The gap is a `gap` in the stylesheet.
-        {%- endcomment -%}
-        <p class="work-cta">
-          <a href="{{ story.url | relative_url }}" aria-labelledby="work-cta-{{ row_id }} work-title-{{ row_id }}"><span id="work-cta-{{ row_id }}">Read the case</span><span aria-hidden="true">&#8594;</span></a>
-        </p>
+<section class="pint-shelf" id="work" aria-labelledby="work-heading">
+  <h2 class="sr-only" id="work-heading">Selected work</h2>
+  {%- assign ordered = site.work | sort: "order" -%}
+  {%- for story in ordered %}
+  <article class="pint-card" data-pint="{{ story.pint_id }}" aria-label="{{ story.flavor | escape_once }}">
+    <a class="pint-stage" href="{{ story.url | relative_url }}" aria-label="Read {{ story.title | escape_once }}">
+      <img src="{{ '/assets/img/pints/' | append: story.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ story.flavor | escape_once }}, a studio-rendered ice cream pint on peach tile">
+    </a>
+    <div class="pint-copy">
+      <div class="pint-actions">
+        <button class="pint-turn" type="button" aria-pressed="false" hidden>Turn pint <span aria-hidden="true">↻</span></button>
+        <button class="pint-label-read" type="button" aria-haspopup="dialog" hidden>Read label</button>
       </div>
-    </li>
-    {%- endfor %}
-  </ol>
+      <h3>{%- for line in story.home_title_lines -%}{{ line }}{% unless forloop.last %}<br>{% endunless %}{%- endfor -%}</h3>
+      <a class="pint-case-link" href="{{ story.url | relative_url }}">Read the case <span aria-hidden="true">→</span></a>
+      <div class="sr-only pint-facts">
+        <dl>
+          <dt>Problem</dt><dd>{{ story.fact_problem }}</dd>
+          <dt>Approach</dt><dd>{{ story.fact_approach }}</dd>
+          <dt>Lesson</dt><dd>{{ story.lesson }}</dd>
+        </dl>
+      </div>
+    </div>
+  </article>
+  {%- endfor %}
 </section>
 
-{%- comment -%}
-Four stops, hairline-separated. Content comes from _data/path-here.yml, which
-also carries the constraint this section is easy to get wrong: the third stop
-is the CURRENT role and the fourth is not a job. Read that file before editing
-anything here.
-
-`year` prints unescaped because it carries `&middot;` as an entity; see the
-same note in the data file.
-{%- endcomment -%}
-<section id="path-here" class="path-here" aria-labelledby="path-here-heading">
-  <h2 id="path-here-heading">The path here</h2>
-  <ol class="path-grid" role="list">
-    {%- for stop in site.data['path-here'] %}
-    <li class="path-stop">
-      <p class="path-year">{{ stop.year }}</p>
-      <p class="path-copy">{{ stop.copy }}</p>
-    </li>
-    {%- endfor %}
-  </ol>
-</section>
-
-{%- comment -%}
-Six cards from _data/off-hours.yml. The numeral is derived from position, not
-stored, so reordering the data renumbers the grid; see the note in that file.
-
-`label` and `copy` both print unescaped because both carry HTML entities --
-two labels have `&amp;`, and one card's copy has `&gt;`. The card
-is a plain <li> and the reveal animation attaches nothing here -- the hidden
-state is applied by assets/js/off-hours.js at runtime, so a page loaded with
-no JavaScript shows every card. That is the point of doing it that way round.
-{%- endcomment -%}
-<section id="off-hours" class="off-hours" aria-labelledby="off-hours-heading">
-  <h2 id="off-hours-heading">Off hours</h2>
-  <ul class="off-hours-grid" role="list">
-    {%- for entry in site.data['off-hours'] %}
-    <li class="off-hours-card">
-      <p class="off-hours-numeral" aria-hidden="true">{% if forloop.index < 10 %}0{% endif %}{{ forloop.index }}</p>
-      <p class="off-hours-label">{{ entry.label }}</p>
-      <p class="off-hours-copy">{{ entry.copy }}</p>
-    </li>
-    {%- endfor %}
-  </ul>
-</section>
-
-<section id="about" class="about" aria-labelledby="about-heading">
-  <h2 id="about-heading">About</h2>
-  <img class="about-photo" src="{{ '/assets/img/pat-diggins.jpg' | relative_url }}" alt="Pat Diggins">
-  {%- comment -%}
-  Same pattern and the same reason as .work-copy: without this wrapper the two
-  paragraphs are separate grid items, so the second falls to a third row a full
-  rail-height below the photo. The wrapper is unstyled apart from its placement.
-  {%- endcomment -%}
-  <div class="about-copy">
-    <p>I started in customer-facing roles and moved into product by taking on technical problems before they were mine to solve. Today I own publisher platforms and follow problems from customer workflow through data, architecture, implementation, and adoption.</p>
-    <p>I make the product call, stay close enough to test it, and use AI to investigate, build, and ship.</p>
+<p class="sr-only" id="pint-status" aria-live="polite"></p>
+<dialog class="label-dialog" aria-labelledby="label-dialog-title">
+  <div class="label-dialog-top">
+    <p>Case facts</p>
+    <button class="label-dialog-close" type="button" autofocus>Close</button>
   </div>
-</section>
-
-<section id="contact" class="contact" aria-labelledby="contact-heading">
-  <h2 id="contact-heading">Contact</h2>
-  <!-- Links only: GitHub Pages has no server, so there is no form to submit.
-       Each link renders only once its value is set in _config.yml, so an
-       unfinished site shows a short list rather than live broken links. The
-       section itself always exists because the nav anchors to #contact. -->
-  <ul class="contact-links" role="list">
-    {%- comment -%}
-    Labels are lowercase mono with a trailing north-east arrow, per the design.
-    The arrow and the accent are HTML entities so the source stays ASCII.
-    {%- endcomment -%}
-    {%- comment -%}
-    `escape` on both: these are raw config strings going straight into an href,
-    with no relative_url in between to normalise them. A bare `&` in a URL is an
-    invalid entity reference, and a double quote would end the attribute.
-    {%- endcomment -%}
-    {%- if site.email %}
-    <li><a href="mailto:{{ site.email | escape }}">email &#8599;</a></li>
-    {%- endif %}
-    {%- if site.linkedin %}
-    <li><a href="{{ site.linkedin | escape }}" rel="me">linkedin &#8599;</a></li>
-    {%- endif %}
-  </ul>
-</section>
+  <h2 id="label-dialog-title"></h2>
+  <div class="label-dialog-content"></div>
+  <a class="label-dialog-case" href="#">Read the case <span aria-hidden="true">→</span></a>
+</dialog>

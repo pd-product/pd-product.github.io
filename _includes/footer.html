@@ -1,9 +1,27 @@
 <footer class="site-footer">
-  <!-- The copyright line is required content, not decoration, and must survive
-       any restyling of this footer. Values come from _config.yml so the year
-       and name cannot be hardcoded wrong. This is the only copyright notice
-       shown in the normally rendered site; the other two are LICENSE and the
-       Copyright section of README.md. The year is the year of first
-       publication and is not bumped annually. -->
-  <p class="copyright">&copy; {{ site.copyright_year }} {{ site.author }}. All rights reserved.</p>
+  <nav aria-label="Footer">
+    {%- if page.url == "/" %}
+      <a href="{{ '/about/' | relative_url }}">About Pat</a>
+      <a href="{{ site.linkedin | escape }}" rel="me">LinkedIn <span aria-hidden="true">↗</span></a>
+    {%- elsif page.url == "/about/" %}
+      <a href="{{ '/#work' | relative_url }}">The work</a>
+      <a href="{{ site.linkedin | escape }}" rel="me">LinkedIn <span aria-hidden="true">↗</span></a>
+    {%- elsif page.layout == "story" %}
+      <a href="{{ '/about/' | relative_url }}">About Pat</a>
+      {%- assign ordered = site.work | sort: "order" -%}
+      {%- assign position = nil -%}
+      {%- for story in ordered -%}{%- if story.url == page.url -%}{%- assign position = forloop.index0 -%}{%- endif -%}{%- endfor -%}
+      {%- assign next_index = position | plus: 1 -%}
+      {%- if next_index < ordered.size -%}
+        {%- assign next = ordered[next_index] -%}
+        <a rel="next" href="{{ next.url | relative_url }}">Next: {{ next.flavor }} <span aria-hidden="true">→</span></a>
+      {%- else %}
+        <a href="{{ '/#work' | relative_url }}">Back to the work <span aria-hidden="true">→</span></a>
+      {%- endif %}
+    {%- else %}
+      <a href="{{ '/#work' | relative_url }}">The work</a>
+      <a href="{{ '/about/' | relative_url }}">About Pat</a>
+    {%- endif %}
+  </nav>
+  <small>&copy; {{ site.copyright_year }} {{ site.author }}. All rights reserved.</small>
 </footer>
