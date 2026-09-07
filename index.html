@@ -1,7 +1,7 @@
 ---
 layout: default
 permalink: /
-last_modified_at: 2026-09-06
+last_modified_at: 2026-09-07
 ---
 <header class="home-intro">
   <h1>A taste of<br>how I think.</h1>
@@ -22,7 +22,7 @@ last_modified_at: 2026-09-06
         <button class="pint-label-read" type="button" aria-haspopup="dialog" hidden>Read label</button>
       </div>
       <h3>{%- for line in story.home_title_lines -%}{{ line }}{% unless forloop.last %}<br>{% endunless %}{%- endfor -%}</h3>
-      <a class="pint-case-link" href="{{ story.url | relative_url }}">Read the case <span aria-hidden="true">→</span></a>
+      <a class="pint-case-link arrow-link" href="{{ story.url | relative_url }}"><span class="arrow-link-label">Read the case</span><span aria-hidden="true">→</span></a>
       <template class="pint-facts">
         <dl>
           <dt>Problem</dt><dd>{{ story.fact_problem }}</dd>
@@ -43,5 +43,5 @@ last_modified_at: 2026-09-06
   </div>
   <h2 id="label-dialog-title"></h2>
   <div class="label-dialog-content"></div>
-  <a class="label-dialog-case" href="#">Read the case <span aria-hidden="true">→</span></a>
+  <a class="label-dialog-case arrow-link" href="#"><span class="arrow-link-label">Read the case</span><span aria-hidden="true">→</span></a>
 </dialog>

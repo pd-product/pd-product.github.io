@@ -28,7 +28,7 @@ brand: "Pat Diggins"
 # .intro .eyebrow, which the share card also sets as type; the note above the
 # h1 in index.html owns that coupling.
 tagline: "A taste of how I think"
-description: "Product manager in New York. Different challenges. The same curiosity."
+description: "Pat Diggins is a New York product manager working across publisher platforms, data, architecture, implementation, and AI."
 author: "Patrick Diggins"
 
 # Rendered by _includes/footer.html. Year of first publication, per the US
@@ -140,7 +140,8 @@ og_image:
 # `sameAs` on the WebSite node, which asserts that the WEBSITE is the same
 # thing as the LinkedIn profile. sameAs belongs on the Person below.
 person:
-  name: "Patrick Diggins"
+  name: "Pat Diggins"
+  alternate_name: "Patrick Diggins"
   # Matches the role suffix in `title` above. Keep the two in step -- this is
   # the machine-readable claim search engines read, and `title` is the headline
   # a human sees in the same result, so a mismatch is visible in one glance.

@@ -19,6 +19,8 @@ Do not re-propose these without a new owner request:
   Espresso, and Compound Caramel.
 - The approved case prose is the current reduced text in `_work/*.md`.
   Do not rewrite it without explicit approval.
+- Story `description` is concise search/share copy; `summary` is the approved
+  visible introduction. Do not collapse them back into one field.
 - The Soda Fountain visual system is teal, cream, peach tile, Fraunces display
   type, DM Sans body/UI type, and the approved studio pint renders.
 

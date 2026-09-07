@@ -55,7 +55,7 @@ after the full change is ready.
 
 Each published `_work/*.md` file needs:
 
-- `slug`, `title`, `description`, `lesson`, `category`, and `order`
+- `slug`, `title`, `description`, `summary`, `lesson`, `category`, and `order`
 - `date` and `last_modified_at`
 - `role`, `team`, `timeframe`; `partners` when applicable
 - `flavor` and `pint_id`
@@ -83,14 +83,18 @@ The front frame and case link work without JavaScript. With JavaScript:
   always navigates;
 - Read label opens selectable Problem, Approach, and Lesson text in a native
   dialog;
-- a cold interaction loads its requested endpoint first while the intermediate
-  animation frames warm in the background;
+- every standard-motion turn uses the complete frame sequence, including the
+  first interaction;
+- on the one-pint mobile layout, the next visible pint warms as it approaches
+  the viewport so the first turn can animate without loading every pint;
 - reduced-motion users load only the requested endpoint and get an instant
   swap;
 - decode failure preserves the front image and all case navigation.
 
-Only the front frame loads initially. On first intent, the requested endpoint
-takes priority; the remaining frames then enable smooth subsequent turns.
+Only the front frame is required for the initial render. Standard-motion turns
+wait for the complete sequence rather than snapping to an endpoint. Mobile
+prewarming is viewport-led; reduced-motion users continue to fetch only the
+requested endpoint.
 
 ## Assets and licenses
 

@@ -7,13 +7,10 @@ home_title_lines:
   - "Rebuilding targeting around how publishers sell"
 fact_problem: "Publishers maintained thousands of placement-level configurations."
 fact_approach: "Rebuild targeting around how publishers sell."
-# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
-# meta description. It does not render on the home-page row -- that is a
-# template decision in index.html, not a reason to drop the key. The key must
-# be `description`: with any other name seo-tag falls back to page.excerpt,
-# which is the first block of the body -- the opening `## ` heading. Search and
-# link previews then read that heading instead.
-description: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
+# Concise search/share description. `summary` below preserves the approved,
+# longer on-page introduction without forcing it into search-result snippets.
+description: "How I rebuilt publisher targeting around the way customers sell, reducing active configurations by 33% while revenue grew."
+summary: "Publishers had to describe their inventory placement by placement, which meant maintaining thousands of configurations to express something simple. The cheaper option was to leave it alone and let them absorb the work. I argued for rebuilding the targeting model instead."
 # One line, shown on the home-page row. A trim of this story's own "What I
 # would redo" chapter, approved as written; the full sentence stays in that
 # chapter and this is deliberately the shorter form.
@@ -32,7 +29,7 @@ date: 2026-08-04
 # places that agree with each other. Do NOT bump it for a comment or a
 # formatting edit -- only for something a reader would see.
 # `_tools/check_dates.py` is what catches a forgotten update.
-last_modified_at: 2026-09-06
+last_modified_at: 2026-09-07
 role: "PM, Prebid Server Premium. Owned roadmap and outcome."
 team: "Customers, support, design, multiple eng teams"
 partners: "1P and 3P publishers, demand partners, support and services"
