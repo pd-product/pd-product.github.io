@@ -57,6 +57,12 @@
     for (var i = 0; i < headings.length; i++) {
       if (headings[i].getBoundingClientRect().top <= line) active = headings[i];
     }
+    /* A short final chapter may never reach the read line because the quote and
+       footer consume the remaining scroll range. Once the end of the prose is
+       visible, the reader is necessarily in that final chapter. */
+    if (prose.getBoundingClientRect().bottom <= window.innerHeight - 24) {
+      active = headings[headings.length - 1];
+    }
     if (bottom) active = headings[headings.length - 1];
     setCurrent(active.id);
 

@@ -165,7 +165,12 @@
         view.timer = setTimeout(() => turn(view, false), 170);
       }
     });
-    view.link.addEventListener("focus", () => select(view));
+    view.link.addEventListener("focus", () => {
+      /* Touch moves focus before click. Let the click handler own that gesture
+         so its first tap turns the pint instead of navigating immediately. */
+      if (view.pointerType && view.pointerType !== "mouse") return;
+      select(view);
+    });
     view.card.addEventListener("focusout", (event) => {
       if (!view.card.contains(event.relatedTarget) && !view.pinned) turn(view, false);
     });
