@@ -47,6 +47,8 @@ after the full change is ready.
 - `assets/js/pint-gallery.js` — progressive-enhancement pint interaction
 - `assets/js/chapter-rail.js` — visible current-chapter highlighting
 - `assets/img/pints/<flavor>/frame-00..30.webp` — production rotation frames
+- `assets/img/pints/<flavor>/still-800/` — native 800x1200 front/back stills
+- `assets/img/pints/<flavor>/motion-600/` — 600x900 intermediate rotation frames
 - `_originals/` — source imagery that Jekyll does not publish
 - `_tools/` — local validation and asset scripts
 - `archive/v1/` — ignored-by-Jekyll historical source snapshot
@@ -96,13 +98,52 @@ wait for the complete sequence rather than snapping to an endpoint. Mobile
 prewarming is viewport-led; reduced-motion users continue to fetch only the
 requested endpoint.
 
+Front/back stills use 400w/800w `srcset` candidates. On the home page, the original
+responsive poster stays mounted for layout, accessibility and no-JS fallback.
+After interaction, decoded frames are drawn into one persistent opaque 2D canvas
+over that poster. It is mounted only after its first successful draw and never
+cleared, resized or replaced between frames. Slow/failed decoding leaves the last
+good pixels visible, rather than exposing an empty image or compositor layer.
+Source selection happens on detached images: endpoints use responsive candidates,
+motion uses its single selected tier, and repeated ticks for the same rounded frame
+are deduplicated. Interrupted turns cannot commit stale decoded frames. Endpoint
+selection refreshes after viewport resize without reallocating the canvas.
+High-DPI or wider-than-400px pints use the 600x900 intermediate sequence and
+800x1200 endpoints. A sequence's tier is fixed when the gallery initializes;
+responsive endpoint selection continues adapting to viewport changes.
+Save-Data and detected 2G connections use the lean 400x600 sequence and
+skip speculative mobile prewarming. Browsers without Network Information use
+the normal width/DPR path. Reduced motion remains endpoint-only at either size.
+The browser may request an initial responsive still before JavaScript applies
+the constrained-connection preference; no guarantee of zero high-res initial
+requests is implied. No new runtime dependency or scroll-triggered turn is added.
+
 ## Assets and licenses
 
 DM Sans and Fraunces are self-hosted as Latin WOFF2 files. Their unmodified SIL
 Open Font License texts ship beside them.
 
-The 31 WebP frames per pint are the only render frames published. PNG render
-intermediates and Blender working files stay outside the published asset tree.
+Each pint publishes 31 lean WebPs, 29 retina motion WebPs, and two retina still
+WebPs. Runtime selects a sequence; it does not preload both complete tiers.
+Canvas backing stores are fixed at 800x1200 (400x600 on constrained connections),
+about 3.7MiB (0.9MiB) of RGBA pixels per interacted pint, excluding browser overhead
+and image decode/cache memory. No complete array of decoded images is retained.
+PNG render intermediates and Blender working files stay outside the published
+asset tree.
+
+To regenerate both tiers from approved native 800x1200 PNG masters:
+
+```powershell
+python _tools/encode_pints.py PATH_TO_MASTERS
+```
+
+The masters directory contains `publisher/`, `evidence/`, and `compound/`, each
+with `frame-00.png` through `frame-30.png`. These are rendered at 64 Cycles samples
+from the approved shared-camera scene, not upscaled from delivered WebPs.
+The encoder also regenerates the lean tier from those same masters (quality 90
+endpoints, 75 motion), writes retina quality 92 endpoints and quality 85 motion,
+and records source hashes beside the masters. Validation
+budgets are under 800KB for all lean frames and 2MB for all retina frames.
 
 The shared 1200x630 social card is `assets/og/default.jpg`. Its source composite
 is `_originals/site-v2/soda-fountain-family-front.png`; regenerate it with:
@@ -112,6 +153,25 @@ python _tools/make_og_card.py --write
 ```
 
 ## Validation
+
+The frame-presentation regression test runs without a browser or dependencies:
+`node _tools/test_pint_presentation.cjs`. It covers delayed/out-of-order decoding,
+interrupted turns, safe failure, repeated adjacent turns, and the guarantee that
+the visible surface is not cleared/resized/replaced or painted with an undecoded
+frame. Live hover/pixel checks remain necessary, with diagnostics disabled.
+The gallery exposes `data-renderer="persistent-canvas-v3"` on `.pint-shelf` so a
+review can verify the actually executing code, not merely the served file. Bump
+the gallery/CSS version query in `_layouts/default.html` on a renderer update;
+normal reloads can retain stale browser assets.
+
+For the full optional browser suite, use an environment with Playwright and Edge
+already installed, start the local build, then run `node _tools/test_site_browser.cjs`.
+It checks all six pages at 15 widths, touch/keyboard/reduced-motion behavior,
+constrained connections, failed-image/canvas fallback, and uninstrumented adjacent
+hover crossings followed by exact canvas-pixel checks. `SITE_URL` overrides the
+default `http://127.0.0.1:8812`; `QA_OUTPUT` overrides `temp/browser-qa`; and
+`PLAYWRIGHT_MODULE` can point to an existing external Playwright installation.
+These are development-only tools, not dependencies loaded by the site.
 
 ```powershell
 $env:TZ = "UTC"

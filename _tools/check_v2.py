@@ -35,6 +35,10 @@ class Page(HTMLParser):
             key = "href" if tag == "link" else "src"
             if key in attrs:
                 self.sources.append(attrs[key])
+        if tag == "img" and "srcset" in attrs:
+            for candidate in attrs["srcset"].split(","):
+                self.sources.append(candidate.strip().split()[0])
+            assert attrs.get("sizes"), "responsive image missing sizes"
         if tag == "img" and "alt" not in attrs:
             self.missing_alt.append(attrs.get("src", "unknown"))
         if tag == "h1":
@@ -94,13 +98,30 @@ for relative, page in pages.items():
             assert target.exists(), f"missing asset in {relative}: {url}"
 
 assert not (BUILT / "archive").exists(), "archive was published"
+for authoring in ("_originals", "_tools", "temp"):
+    assert not (BUILT / authoring).exists(), f"{authoring} was published"
+assert not list((BUILT / "assets/img/pints").rglob("*.png")), "PNG masters were published"
 frames = list((BUILT / "assets/img/pints").rglob("frame-*.webp"))
-assert len(frames) == 93, f"expected 93 pint frames, found {len(frames)}"
+assert len(frames) == 186, f"expected 186 tiered pint frames, found {len(frames)}"
+lean_frames, rich_frames = [], []
 for flavor in ("publisher", "evidence", "compound"):
-    assert len(list((BUILT / "assets/img/pints" / flavor).glob("frame-*.webp"))) == 31
-assert sum(path.stat().st_size for path in frames) < 800_000, "pint frame budget exceeded"
+    directory = BUILT / "assets/img/pints" / flavor
+    lean = sorted(directory.glob("frame-*.webp"))
+    motion = sorted((directory / "motion-600").glob("frame-*.webp"))
+    stills = sorted((directory / "still-800").glob("frame-*.webp"))
+    assert [p.name for p in lean] == [f"frame-{i:02d}.webp" for i in range(31)]
+    assert [p.name for p in motion] == [f"frame-{i:02d}.webp" for i in range(1, 30)]
+    assert [p.name for p in stills] == ["frame-00.webp", "frame-30.webp"]
+    for paths, dimensions in ((lean, (400, 600)), (motion, (600, 900)), (stills, (800, 1200))):
+        for path in paths:
+            with Image.open(path) as image:
+                assert image.size == dimensions, (path, image.size)
+    lean_frames.extend(lean)
+    rich_frames.extend(motion + stills)
+assert sum(path.stat().st_size for path in lean_frames) < 800_000, "lean frame budget exceeded"
+assert sum(path.stat().st_size for path in rich_frames) < 2_000_000, "retina frame budget exceeded"
 
 with Image.open(BUILT / "assets/og/default.jpg") as image:
     assert image.size == (1200, 630), image.size
 
-print(f"ok: {len(files)} pages, 93 pint frames, routes, fragments, assets, landmarks, image alt, and share card")
+print(f"ok: {len(files)} pages, 93 lean + 93 retina pint frames, srcsets, routes, fragments, assets, landmarks, image alt, and share card")

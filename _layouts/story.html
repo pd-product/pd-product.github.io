@@ -17,7 +17,7 @@ layout: default
         <p class="story-summary">{{ page.summary | default: page.description }}</p>
       </div>
     </div>
-    <div class="story-pint"><img src="{{ '/assets/img/pints/' | append: page.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ page.flavor | escape_once }} pint"></div>
+    <div class="story-pint">{%- assign pint_alt = page.flavor | append: ' pint' -%}{% include pint-image.html id=page.pint_id alt=pint_alt sizes="(max-width: 390px) calc(100vw - 60px), (max-width: 760px) 330px, (max-width: 862px) 250px, (max-width: 1200px) calc(35vw - 51.8px), 369px" %}</div>
   </header>
   <div class="story-body">
     <aside class="story-rail">
