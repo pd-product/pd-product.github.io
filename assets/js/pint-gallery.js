@@ -7,6 +7,7 @@
   const status = document.getElementById("pint-status");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const duration = 1100;
+  let mobilePreloadObserver = null;
 
   const views = cards.map((card) => {
     const image = card.querySelector("img");
@@ -91,18 +92,12 @@
       }
 
       if (!view.framesReady) {
-        // The requested face is the useful response to a cold interaction.
-        // Decode it first and keep the animation frames warming in the
-        // background; later turns use the complete smooth sequence.
-        const endpoint = loadFrame(view, view.target);
-        prepare(view).catch(() => {});
-        await endpoint;
+        // A turn should always read as a physical turn, including the first
+        // interaction. Wait for the complete sequence instead of snapping to
+        // a cold endpoint; narrow layouts prewarm each pint as it approaches
+        // the viewport below, so this is usually already resolved on mobile.
+        await prepare(view);
         if (token !== view.token) return;
-        if (!view.framesReady) {
-          show(view, view.target);
-          setLoading(view, false);
-          return;
-        }
       }
     } catch {
       status.textContent = "Rotation unavailable. The case links still work.";
@@ -200,6 +195,23 @@
     });
   });
 
+  /* On the one-pint mobile layout, warm only the pint that is visible or about
+     to enter the viewport. Desktop keeps hover-led loading, and reduced-motion
+     users keep the endpoint-only path above. */
+  function startMobilePreloading() {
+    if (mobilePreloadObserver || reducedMotion.matches || !matchMedia("(max-width: 880px)").matches || !("IntersectionObserver" in window)) return;
+    mobilePreloadObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const view = views.find((candidate) => candidate.card === entry.target);
+        if (view) prepare(view).catch(() => {});
+        mobilePreloadObserver.unobserve(entry.target);
+      });
+    }, { rootMargin: "240px 0px" });
+    views.forEach((view) => mobilePreloadObserver.observe(view.card));
+  }
+  startMobilePreloading();
+
   shelf.addEventListener("keydown", (event) => {
     if (event.key !== "Escape" || dialog.open) return;
     views.forEach((view) => {
@@ -210,9 +222,17 @@
     status.textContent = "All flavor labels shown";
   });
 
-  const motionChanged = () => views.forEach((view) => {
-    if (view.ready || view.target === 30) turn(view, view.target === 30);
-  });
+  const motionChanged = () => {
+    if (reducedMotion.matches && mobilePreloadObserver) {
+      mobilePreloadObserver.disconnect();
+      mobilePreloadObserver = null;
+    } else if (!reducedMotion.matches) {
+      startMobilePreloading();
+    }
+    views.forEach((view) => {
+      if (view.ready || view.target === 30) turn(view, view.target === 30);
+    });
+  };
   if (reducedMotion.addEventListener) reducedMotion.addEventListener("change", motionChanged);
   else reducedMotion.addListener(motionChanged);
 })();

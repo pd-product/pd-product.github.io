@@ -2,10 +2,10 @@
   <nav aria-label="Footer">
     {%- if page.url == "/" %}
       <a href="{{ '/about/' | relative_url }}">About Pat</a>
-      <a href="{{ site.linkedin | escape }}" rel="me">LinkedIn <span aria-hidden="true">↗</span></a>
+      <a class="arrow-link" href="{{ site.linkedin | escape }}" rel="me"><span class="arrow-link-label">LinkedIn</span><span aria-hidden="true">↗</span></a>
     {%- elsif page.url == "/about/" %}
       <a href="{{ '/#work' | relative_url }}">The work</a>
-      <a href="{{ site.linkedin | escape }}" rel="me">LinkedIn <span aria-hidden="true">↗</span></a>
+      <a class="arrow-link" href="{{ site.linkedin | escape }}" rel="me"><span class="arrow-link-label">LinkedIn</span><span aria-hidden="true">↗</span></a>
     {%- elsif page.layout == "story" %}
       <a href="{{ '/about/' | relative_url }}">About Pat</a>
       {%- assign ordered = site.work | sort: "order" -%}
@@ -14,9 +14,9 @@
       {%- assign next_index = position | plus: 1 -%}
       {%- if next_index < ordered.size -%}
         {%- assign next = ordered[next_index] -%}
-        <a rel="next" href="{{ next.url | relative_url }}">Next: {{ next.flavor }} <span aria-hidden="true">→</span></a>
+        <a class="arrow-link" rel="next" href="{{ next.url | relative_url }}"><span class="arrow-link-label">Next: {{ next.flavor }}</span><span aria-hidden="true">→</span></a>
       {%- else %}
-        <a href="{{ '/#work' | relative_url }}">Back to the work <span aria-hidden="true">→</span></a>
+        <a class="arrow-link" href="{{ '/#work' | relative_url }}"><span class="arrow-link-label">Back to the work</span><span aria-hidden="true">→</span></a>
       {%- endif %}
     {%- else %}
       <a href="{{ '/#work' | relative_url }}">The work</a>

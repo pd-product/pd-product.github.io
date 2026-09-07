@@ -6,12 +6,16 @@ layout: default
 {%- assign display_index = position | plus: 1 -%}
 
 <article class="story">
-  <nav class="page-crumb" aria-label="Case navigation"><a href="{{ '/#work' | relative_url }}">← Back to the work</a></nav>
   <header class="story-hero">
-    <div>
-      <p class="eyebrow">{% if display_index < 10 %}0{% endif %}{{ display_index }} / {{ page.category }} · {{ page.flavor }}</p>
-      <h1>{{ page.title }}</h1>
-      <p class="story-summary">{{ page.description }}</p>
+    <div class="story-hero-copy">
+      <nav class="page-crumb story-crumb" aria-label="Case navigation">
+        <a class="arrow-link" href="{{ '/#work' | relative_url }}"><span aria-hidden="true">←</span><span class="arrow-link-label">Back to the work</span></a>
+      </nav>
+      <div class="story-hero-heading">
+        <p class="eyebrow">{% if display_index < 10 %}0{% endif %}{{ display_index }} / {{ page.category }} · {{ page.flavor }}</p>
+        <h1>{{ page.title }}</h1>
+        <p class="story-summary">{{ page.description }}</p>
+      </div>
     </div>
     <div class="story-pint"><img src="{{ '/assets/img/pints/' | append: page.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ page.flavor | escape_once }} pint"></div>
   </header>

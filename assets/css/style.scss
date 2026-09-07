@@ -9,6 +9,8 @@ html{scroll-behavior:smooth}
 body{margin:0;overflow-x:clip;background:var(--outside);color:var(--ink);font:400 16px/1.65 "DM Sans",Arial,sans-serif}
 img{max-width:100%}
 a{color:inherit;text-underline-offset:5px}
+.arrow-link{text-decoration:none}
+.arrow-link-label{text-decoration:underline;text-underline-offset:5px}
 button{font:inherit}
 h1,h2,h3,p,dl,dd,figure,blockquote{margin:0}
 ul,ol{margin:0}
@@ -59,7 +61,7 @@ ul,ol{margin:0}
 .label-dialog-case{display:inline-flex;align-items:center;gap:7px;min-height:44px;margin-top:20px;font-size:16px}
 
 .page-crumb{padding:10px 56px}
-.page-crumb a{display:inline-flex;align-items:center;min-height:44px;font-size:14px}
+.page-crumb a{display:inline-flex;align-items:center;gap:6px;min-height:44px;font-size:14px}
 .eyebrow{font-size:12px;letter-spacing:1.4px;text-transform:uppercase}
 
 .about-intro{display:grid;grid-template-columns:1.2fr 1fr;gap:54px;padding:20px 56px 64px;align-items:center}
@@ -81,10 +83,14 @@ ul,ol{margin:0}
 .interests section{padding-top:18px;border-top:1px solid #10484a35}
 .interests p{margin-top:8px;font-size:15px}
 
-.story-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(250px,.7fr);gap:36px;padding:18px 56px 34px;align-items:center}
+.story-hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(250px,.7fr);gap:36px;padding:18px 56px 34px;align-items:stretch}
+.story-hero-copy{display:grid;grid-template-rows:auto 1fr;min-width:0}
+.story-crumb{padding:0}
+.story-hero-heading{align-self:center}
 .story-hero .eyebrow{margin-bottom:16px}
 .story-hero h1{max-width:720px;font:600 clamp(42px,5.8vw,60px)/1.04 "Fraunces",Georgia,serif;letter-spacing:-1.5px}
 .story-summary{max-width:680px;margin-top:22px;font-size:17px;line-height:1.55}
+.story-pint{align-self:start}
 .story-pint img{display:block;width:100%;height:auto}
 .story-body{display:grid;grid-template-columns:220px minmax(0,1fr);gap:72px;padding:36px 56px}
 .story-rail{position:sticky;top:24px;align-self:start;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);overflow-y:auto;overscroll-behavior:contain}
@@ -119,7 +125,8 @@ ul,ol{margin:0}
 .page-simple p{margin-top:20px}
 
 @media(hover:hover){
-  .masthead-name:hover,.site-footer a:hover,.page-crumb a:hover,.pint-case-link:hover,.pint-label-read:hover,.label-dialog-case:hover{text-decoration-thickness:2px}
+  .masthead-name:hover,.site-footer a:hover,.page-crumb a:hover,.pint-label-read:hover{text-decoration-thickness:2px}
+  .arrow-link:hover .arrow-link-label{text-decoration-thickness:2px}
   .pint-turn:hover,.label-dialog-close:hover{background:var(--teal);color:var(--cream)}
   .chapter-rail a:hover{background:#10484a0b;opacity:1}
 }
