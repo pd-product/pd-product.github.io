@@ -8,13 +8,10 @@ home_title_lines:
   - "built it"
 fact_problem: "Repeated fixes left targeting edge cases uncovered."
 fact_approach: "Test the proposed design against real inventory and auctions."
-# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
-# meta description. It does not render on the home-page row -- that is a
-# template decision in index.html, not a reason to drop the key. The key must
-# be `description`: with any other name seo-tag falls back to page.excerpt,
-# which is the first block of the body -- the opening `## ` heading. Search and
-# link previews then read that heading instead.
-description: "Two engineering leaders proposed a fix they believed would hold. I had doubts, so I spent a weekend testing it. The design would have left 14% of revenue exposed."
+# Concise search/share description. `summary` below preserves the approved,
+# longer on-page introduction without forcing it into search-result snippets.
+description: "How a weekend analysis showed a proposed fix would leave 14% of revenue exposed—and changed the architecture before engineering began."
+summary: "Two engineering leaders proposed a fix they believed would hold. I had doubts, so I spent a weekend testing it. The design would have left 14% of revenue exposed."
 # One line, and the only prose on the home-page row now that the description
 # does not render there. Owner-supplied, and deliberately shorter than this
 # story's "What I would redo" chapter, which makes the same point at length.
@@ -33,7 +30,7 @@ date: 2026-08-04
 # places that agree with each other. Do NOT bump it for a comment or a
 # formatting edit -- only for something a reader would see.
 # `_tools/check_dates.py` is what catches a forgotten update.
-last_modified_at: 2026-09-06
+last_modified_at: 2026-09-07
 role: "PM. Built the analysis independently."
 team: "Two eng leaders, plus the implementing teams"
 partners: "Publishers with uncommon inventory setups"

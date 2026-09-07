@@ -14,7 +14,7 @@ layout: default
       <div class="story-hero-heading">
         <p class="eyebrow">{% if display_index < 10 %}0{% endif %}{{ display_index }} / {{ page.category }} · {{ page.flavor }}</p>
         <h1>{{ page.title }}</h1>
-        <p class="story-summary">{{ page.description }}</p>
+        <p class="story-summary">{{ page.summary | default: page.description }}</p>
       </div>
     </div>
     <div class="story-pint"><img src="{{ '/assets/img/pints/' | append: page.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ page.flavor | escape_once }} pint"></div>

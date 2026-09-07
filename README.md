@@ -55,7 +55,7 @@ after the full change is ready.
 
 Each published `_work/*.md` file needs:
 
-- `slug`, `title`, `description`, `lesson`, `category`, and `order`
+- `slug`, `title`, `description`, `summary`, `lesson`, `category`, and `order`
 - `date` and `last_modified_at`
 - `role`, `team`, `timeframe`; `partners` when applicable
 - `flavor` and `pint_id`

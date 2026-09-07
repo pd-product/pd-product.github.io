@@ -22,6 +22,7 @@
         "@type": "Person",
         "@id": {{ "/" | absolute_url | append: "#person" | jsonify }},
         "name": {{ site.person.name | jsonify }},
+        "alternateName": {{ site.person.alternate_name | jsonify }},
         "jobTitle": {{ site.person.job_title | jsonify }},
         "image": {{ site.person.image | absolute_url | jsonify }},
         "url": {{ "/" | absolute_url | jsonify }},

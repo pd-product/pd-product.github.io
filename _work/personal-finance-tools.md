@@ -7,13 +7,10 @@ home_title_lines:
   - "The spreadsheet that became a toolkit"
 fact_problem: "A rebalancing spreadsheet was too tedious to maintain."
 fact_approach: "Keep existing aggregation; build the missing Python tools."
-# Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
-# meta description. It does not render on the home-page row -- that is a
-# template decision in index.html, not a reason to drop the key. The key must
-# be `description`: with any other name seo-tag falls back to page.excerpt,
-# which is the first block of the body -- the opening `## ` heading. Search and
-# link previews then read that heading instead.
-description: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
+# Concise search/share description. `summary` below preserves the approved,
+# longer on-page introduction without forcing it into search-result snippets.
+description: "How a portfolio-rebalancing spreadsheet became a locally run personal-finance toolkit—and what I learned about controlling scope."
+summary: "I set out to rebalance our portfolio in a spreadsheet, realized how tedious it would be to maintain, and decided to find out what I could build instead. It turned into a suite of tools, and a lesson about scope."
 # One line, and the only prose on the home-page row now that the description
 # does not render there. Owner-supplied, and deliberately shorter than this
 # story's "What I would redo" chapter, which makes the same point at length.
@@ -32,7 +29,7 @@ date: 2026-08-04
 # places that agree with each other. Do NOT bump it for a comment or a
 # formatting edit -- only for something a reader would see.
 # `_tools/check_dates.py` is what catches a forgotten update.
-last_modified_at: 2026-09-06
+last_modified_at: 2026-09-07
 role: "Sole author, with AI coding tools"
 team: "None. A planner validated the strategy separately."
 timeframe: "Ongoing since early 2026"
