@@ -45,7 +45,7 @@ after the full change is ready.
 - `about.html` — About page
 - `assets/css/style.scss` — complete visual system
 - `assets/js/pint-gallery.js` — progressive-enhancement pint interaction
-- `assets/js/chapter-rail.js` — visible current-chapter and reading-progress state
+- `assets/js/chapter-rail.js` — visible current-chapter highlighting
 - `assets/img/pints/<flavor>/frame-00..30.webp` — production rotation frames
 - `_originals/` — source imagery that Jekyll does not publish
 - `_tools/` — local validation and asset scripts
@@ -120,7 +120,7 @@ node --check assets/js/chapter-rail.js
 
 Also review the built site at 320, 360, 390, 412, 430, 600, 768, 900, 1000,
 and 1200px. Test keyboard focus, touch/no-hover behavior, the label dialog,
-Escape, chapter state/progress, reduced motion, horizontal overflow, and the
+Escape, chapter highlighting, reduced motion, horizontal overflow, and the
 tablet tradeoff layout before publishing.
 
 ## Repository policy
