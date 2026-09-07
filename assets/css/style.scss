@@ -38,6 +38,7 @@ ul,ol{margin:0}
 .pint-card{min-width:0;display:grid;grid-template-rows:auto 1fr;background:var(--cream)}
 .pint-stage{display:block;position:relative;color:inherit;text-decoration:none}
 .pint-stage img{display:block;width:100%;height:auto;aspect-ratio:2/3}
+.pint-motion{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none}
 .pint-copy{display:grid;grid-template-rows:44px 1fr 44px;justify-items:center;align-items:center;gap:32px;padding:32px 25px;text-align:center}
 .pint-actions{display:flex;align-items:center;justify-content:center;gap:12px;min-height:44px}
 .no-js .pint-copy{grid-template-rows:1fr 44px}

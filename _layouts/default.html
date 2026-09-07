@@ -36,14 +36,14 @@
     <link rel="apple-touch-icon" href="{{ '/assets/favicon-180.png' | relative_url }}?v=2">
     <link rel="preload" href="{{ '/assets/fonts/DMSans-Latin.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="{{ '/assets/fonts/Fraunces-Latin.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}?v=pint-canvas-3">
   </head>
   <body class="page-{{ page.layout | default: 'default' }}{% if page.url == '/' %} page-home{% endif %}">
     <a class="skip-link" href="#main">Skip to content</a>
     {% include nav.html %}
     <main class="site-main" id="main" tabindex="-1">{{ content }}</main>
     {% include footer.html %}
-    {%- if page.url == "/" %}<script src="{{ '/assets/js/pint-gallery.js' | relative_url }}" defer></script>{% endif %}
+    {%- if page.url == "/" %}<script src="{{ '/assets/js/pint-gallery.js' | relative_url }}?v=pint-canvas-3" defer></script>{% endif %}
     {%- if page.layout == "story" %}<script src="{{ '/assets/js/chapter-rail.js' | relative_url }}" defer></script>{% endif %}
   </body>
 </html>

@@ -1,0 +1,2 @@
+{%- assign pint_base = '/assets/img/pints/' | append: include.id | append: '/' | relative_url -%}
+<img src="{{ pint_base }}frame-00.webp" srcset="{{ pint_base }}frame-00.webp 400w, {{ pint_base }}still-800/frame-00.webp 800w" sizes="{{ include.sizes }}" width="400" height="600" alt="{{ include.alt | escape_once }}"{% if include.lazy %} loading="lazy" decoding="async"{% endif %}>

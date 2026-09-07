@@ -23,10 +23,8 @@ brand: "Pat Diggins"
 # limit, truncate to the device width, and rewrite titles at their own
 # discretion. Judge it by rendered width, not by counting.
 #
-# The tagline is used only as metadata and is not printed anywhere, since the
-# hero claim lives in index.html. It does carry the same words as that page's
-# .intro .eyebrow, which the share card also sets as type; the note above the
-# h1 in index.html owns that coupling.
+# The tagline is metadata. Its wording matches the visible home-page headline;
+# the shared social card is the three-pint studio image, not a text composition.
 tagline: "A taste of how I think"
 description: "Pat Diggins is a New York product manager working across publisher platforms, data, architecture, implementation, and AI."
 author: "Patrick Diggins"
@@ -175,12 +173,9 @@ exclude:
   - archive/
   - temp/
 
-# Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded,
-# which retains every comment, so without this line a local build produces
-# /assets/css/style.css at about 61KB with all 92 comment blocks intact while
-# the deployed file is 18KB with none. Expect that KB figure to drift -- editing
-# any comment in style.scss moves it, and only the compressed side is pinned to
-# what Pages serves.
+# Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded
+# and retains comments. Match the deployed serialization in local builds too;
+# exact output sizes vary as the stylesheet changes.
 #
 # The cascade is identical either way, so nothing RENDERS differently and no
 # selector, value or specificity reading changes. What differs is the serialized

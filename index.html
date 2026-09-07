@@ -14,7 +14,9 @@ last_modified_at: 2026-09-07
   {%- for story in ordered %}
   <article class="pint-card" data-pint="{{ story.pint_id }}" aria-label="{{ story.flavor | escape_once }}">
     <a class="pint-stage" href="{{ story.url | relative_url }}" aria-label="Read {{ story.title | escape_once }}">
-      <img src="{{ '/assets/img/pints/' | append: story.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ story.flavor | escape_once }}, a studio-rendered ice cream pint on peach tile"{% unless forloop.first %} loading="lazy" decoding="async"{% endunless %}>
+      {%- assign pint_alt = story.flavor | append: ', a studio-rendered ice cream pint on peach tile' -%}
+      {%- assign lazy_pint = true -%}{%- if forloop.first -%}{%- assign lazy_pint = false -%}{%- endif -%}
+      {% include pint-image.html id=story.pint_id alt=pint_alt lazy=lazy_pint sizes="(max-width: 460px) 100vw, (max-width: 880px) 460px, (max-width: 1200px) 33.333vw, 400px" %}
     </a>
     <div class="pint-copy">
       <div class="pint-actions">
