@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {%- comment -%}
+    Two switches, deliberately ORed rather than merged. `site.noindex` is the
+    withdrawal switch and pulls the WHOLE site out of search; `page.noindex` is a
+    per-page opt-out for a page that should exist but should not be indexed,
+    which is 404.html today. Neither can mask the other: if the site switch is on,
+    every page carries the tag regardless of what a page says.
+    {%- endcomment -%}
+    {%- if site.noindex or page.noindex %}
+    <meta name="robots" content="noindex">
+    {%- endif %}
+    {% seo %}
+    {%- comment -%}
+    og:image:* by hand, and it has to stay that way. seo-tag will emit these
+    three itself if `image` is given as a hash instead of a path -- but its
+    JSON-LD drop then forwards every key of that hash into the structured data
+    and hardcodes `"@type": "imageObject"`, lowercase. Schema.org type names are
+    case-sensitive, `imageObject` is not a registered type, and `alt` is not a
+    Schema.org property, so the hash form buys three meta tags at the cost of a
+    malformed image node on every page.
+
+    These MUST follow {% seo %}: Open Graph structured properties describe the
+    og:image immediately preceding them, and seo-tag emits that.
+
+    The equality test is load-bearing. A story may override `image` with its own
+    card, and these dimensions would then describe a DIFFERENT file -- a wrong
+    width is worse than an absent one, because a scraper reserves the wrong box
+    and the card renders letterboxed or cropped. So the three tags are emitted
+    only when the page is actually using the default card. A per-story card
+    still gets its og:image from seo-tag; it just goes without dimensions until
+    someone adds a per-story block here too.
+    {%- endcomment -%}
+    {%- if site.og_image and page.image == site.og_image.path %}
+    <meta property="og:image:width" content="{{ site.og_image.width }}">
+    <meta property="og:image:height" content="{{ site.og_image.height }}">
+    <meta property="og:image:alt" content="{{ site.og_image.alt | escape_once }}">
+    <meta name="twitter:image:alt" content="{{ site.og_image.alt | escape_once }}">
+    {%- endif %}
+    {%- comment -%}
+    ProfilePage, home page only. This is the SECOND ld+json block on `/` and the
+    only page that carries two -- the record's Verification block allows for
+    that explicitly, so do not "fix" it back to one.
+
+    Why hand-written rather than driven through seo-tag: the plugin builds one
+    node per page and always hangs `author` and `headline` on it, and both
+    belong on a CreativeWork. Asking it for `@type: Person` produced a Person
+    described as having an author. Google supports multiple separate items on a
+    page, so the clean shape is to leave seo-tag its valid WebSite node and
+    describe the person separately.
+
+    `mainEntity` is what makes this a profile OF someone rather than a page that
+    merely mentions them, and the `@id` values give both nodes stable
+    identifiers a crawler can reference. `jsonify` handles the escaping -- do
+    not hand-quote these values.
+    {%- endcomment -%}
+    {%- if page.url == "/" and site.person %}
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ProfilePage",
+      "@id": {{ "/" | absolute_url | append: "#profile" | jsonify }},
+      "mainEntity": {
+        "@type": "Person",
+        "@id": {{ "/" | absolute_url | append: "#person" | jsonify }},
+        "name": {{ site.person.name | jsonify }},
+        {%- if site.person.job_title %}
+        "jobTitle": {{ site.person.job_title | jsonify }},
+        {%- endif %}
+        {%- if site.person.image %}
+        "image": {{ site.person.image | absolute_url | jsonify }},
+        {%- endif %}
+        "url": {{ "/" | absolute_url | jsonify }}
+        {%- if site.person.same_as %},
+        "sameAs": {{ site.person.same_as | jsonify }}
+        {%- endif %}
+      }
+    }
+    </script>
+    {%- endif %}
+    <link rel="icon" href="{{ '/assets/favicon-32.png' | relative_url }}" sizes="32x32">
+    <link rel="icon" href="{{ '/assets/favicon-512.png' | relative_url }}" sizes="512x512">
+    <link rel="apple-touch-icon" href="{{ '/assets/favicon-180.png' | relative_url }}">
+    {%- comment -%}
+    ONE face is preloaded, and this is the one: Space Grotesk Regular is the
+    weight 400 that sets the largest type on EVERY page type -- the hero h1 at
+    47px, the story title at 41px, the section headings at 34px and the work
+    numerals at 132px. The other three faces stay unpreloaded on purpose. Plex
+    Medium and Space Grotesk Medium are conditional -- neither appears on all
+    pages -- so preloading them would compete for bandwidth with the one face
+    that always matters, and would be a wasted fetch wherever it is unused.
+
+    `crossorigin` IS REQUIRED even though the font is same-origin. Font requests
+    are made in CORS mode, and a preload without the attribute does not match
+    the request the stylesheet later makes, so the file is fetched TWICE. The
+    attribute is valueless here, which is the anonymous mode fonts need.
+
+    THIS MUST STAY ABOVE THE STYLESHEET, which is the whole point of it. An
+    @font-face src is only discovered once the stylesheet has been fetched and
+    parsed, so the font would otherwise wait out that round trip; declared here
+    it starts alongside the CSS instead.
+
+    WHAT IT BUYS IS A SHORTER SWAP, NOT A LAYOUT FIX. `font-display: swap` plus
+    the metric-matched "Display Fallback" face hold the headline's line count at
+    almost every width, but not all: there are widths where the fallback loses a
+    line and widths where it keeps the count and breaks a word earlier, so the
+    headline CAN move when the real font lands. The metrics note in
+    assets/css/style.scss owns the measured intervals; do not restate them here.
+    Nor do they stop the swap being visible: the fallback's x-height runs large,
+    so first paint is a different weight and size. This shortens the time that
+    mismatched paint is on screen. It is the only lever here that does -- the
+    preload changes no geometry itself.
+    {%- endcomment -%}
+    <link rel="preload" href="{{ '/assets/fonts/SpaceGrotesk-Regular.woff2' | relative_url }}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{{ '/assets/css/style.css' | relative_url }}">
+  </head>
+  <body>
+    <!-- First focusable element on every page, and invisible until focused.
+         Three nav items is a short thing to tab past, but on a story page the
+         breadcrumb and the chapter rail sit ahead of the prose too. -->
+    <a class="skip-link" href="#main">Skip to content</a>
+    {% include nav.html %}
+    <main class="content" id="main" tabindex="-1">
+      {{ content }}
+    </main>
+    {% include footer.html %}
+    <!-- Both scripts are progressive enhancement, both are vanilla with no
+         dependencies, and both exit immediately on a page that does not carry
+         their element. Loaded site-wide rather than gated on a page test for
+         that reason: the exit is one querySelector.
+
+         Reading state for the story chapter rail. Without it the rail is still
+         a list of working anchor links. -->
+    <script src="{{ '/assets/js/chapter-rail.js' | relative_url }}" defer></script>
+    <!-- Reveal for the Off hours cards. Without it every card is simply
+         visible: the hidden state is applied by the script, never by the
+         stylesheet, so a failure here costs the animation and never the
+         content. See the floors in the file. -->
+    <script src="{{ '/assets/js/off-hours.js' | relative_url }}" defer></script>
+  </body>
+</html>

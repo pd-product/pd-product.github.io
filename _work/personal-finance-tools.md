@@ -1,9 +1,12 @@
 ---
 slug: "personal-finance-tools"
 title: "The spreadsheet that became a toolkit"
-# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
-# copy, not a trim of `title` -- the full title is too long for that slot.
-crumb: "personal finance tools"
+flavor: "Compound Caramel"
+pint_id: "compound"
+home_title_lines:
+  - "The spreadsheet that became a toolkit"
+fact_problem: "A rebalancing spreadsheet was too tedious to maintain."
+fact_approach: "Keep existing aggregation; build the missing Python tools."
 # Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
 # meta description. It does not render on the home-page row -- that is a
 # template decision in index.html, not a reason to drop the key. The key must
@@ -15,7 +18,7 @@ description: "I set out to rebalance our portfolio in a spreadsheet, realized ho
 # does not render there. Owner-supplied, and deliberately shorter than this
 # story's "What I would redo" chapter, which makes the same point at length.
 lesson: "When building feels cheap, skipped planning becomes expensive."
-category: "personal"
+category: "Personal tools"
 order: 3
 # Publication date of this page, not the date of the work it describes. Without
 # it Jekyll falls back to BUILD time, so datePublished and the sitemap lastmod
@@ -29,16 +32,13 @@ date: 2026-08-04
 # places that agree with each other. Do NOT bump it for a comment or a
 # formatting edit -- only for something a reader would see.
 # `_tools/check_dates.py` is what catches a forgotten update.
-last_modified_at: 2026-08-09
+last_modified_at: 2026-09-06
 role: "Sole author, with AI coding tools"
 team: "None. A planner validated the strategy separately."
 timeframe: "Ongoing since early 2026"
 # `partners` is deliberately omitted -- it does not apply to a personal
 # project, and an omitted field drops its rail entry rather than printing
 # "not applicable".
-chips:
-  - "ongoing"
-  - "python"
 tradeoffs:
   - rejected: "Spreadsheet or off-the-shelf"
     chosen: "Build around the product I use"
@@ -59,27 +59,29 @@ published: true
 
 Early in 2026 I spent a while researching investment and tax strategy to revamp our portfolios, then hired a financial planner for a short engagement to pressure-test what I had come up with. That left me with several jobs that would recur indefinitely, the most tedious being portfolio rebalancing and estimated tax payments. Both are the kind of work that is straightforward in principle and miserable in practice, because doing them properly means holding a lot of interacting rules in your head at once.
 
-I started building the rebalancing model in a spreadsheet. Fairly early on it became clear that it would be too tedious and time consuming to maintain. This was the same period I was learning what agentic coding tools could actually do at work, so I decided to find out what I could build instead. The tension was mundane and familiar: the obvious solution was the one I would end up avoiding.
+I started the rebalancing model in a spreadsheet, but it quickly became clear that it would be too tedious to maintain. At the same time I was learning what agentic coding tools could do at work, so I decided to see what I could build instead. The obvious solution was the one I would end up avoiding.
 
 ## Constraints I set myself    {#constraints}
 
-- The inputs are personal financial information, so nothing could be handled carelessly and no real figures could go anywhere they did not need to be.
-- Nobody else was going to maintain this, so complexity I added was complexity I would carry myself.
-- The tax work depended on income information that the rebalancing work did not need, so the data the tools required was not going to stay simple.
+- The inputs are personal financial information, so nothing could be handled carelessly or sent anywhere it did not need to be.
+- Nobody else would maintain it, so every layer of complexity would be mine to carry.
+- Tax work needed income information that rebalancing did not, so the data model would not stay simple.
 {: role="list"}
 
 ## The call I made    {#the-call}
 
-The expected option was a spreadsheet, or paying for a product that does some of this. I already subscribe to Monarch, which aggregates accounts well. The call I made was to keep it for what it does well and build only the parts where my approach does not match how that product thinks about the problem. That meant writing a short requirements document first, treating a personal project like a product with a defined scope, and then building against it.
+The expected option was a spreadsheet or a product that handled some of this. I already use Monarch, which aggregates accounts well. I kept it for what it does well and built only the parts where my approach does not match how that product thinks about the problem. That meant writing requirements first, treating a personal project like a product with a defined scope, and building against them.
 
 {% include tradeoffs.html tradeoffs=page.tradeoffs %}
 
-I kept Monarch for aggregating and exporting the data, which is the part it does better than anything I would write, and built tools that consume that export. That boundary meant I never had to rebuild aggregation. The tools now cover rebalancing, estimated tax payments, spend analysis, and budgeting.
+Monarch remained the aggregator and exporter—the part it does better than anything I would write—and my tools consumed its export. That boundary kept me from rebuilding aggregation. The tools now cover rebalancing, estimated tax payments, spend analysis, and budgeting.
 
 ## What I built    {#shipped}
 
-A suite of Python tools covering rebalancing, estimated tax payments, spend analysis, and budgeting. The obvious benefit is that they save me the manual work. The one I did not anticipate is that they let me run each exercise as often as I want, more accurately and in more depth than I otherwise would. That turned out to be the actual value, and it matches what I found using the same tools at work. The real gain was reaching analysis I would otherwise have skipped.
+A suite of Python tools now covers rebalancing, estimated tax payments, spend analysis, and budgeting. They save manual work, but the benefit I did not anticipate is that I can run each exercise as often as I want, with more accuracy and depth. The real gain is reaching analysis I would otherwise have skipped—the same value I found using these tools at work.
+
+{% include result.html value="4" copy="recurring workflows now covered: rebalancing, estimated taxes, spend analysis, and budgeting." %}
 
 ## What I would redo    {#redo}
 
-I would have gone back to planning when the scope changed, and I did not. The project started as a rebalancing tool with a clear requirements document. Then the tax work needed richer income data, which made me want to consolidate how all the tools ingested data, which led to building document processing with personal information stripped out. Each step followed sensibly from the last and none of them were in the original plan. I would never have let that happen on a work project, because a conversation with an engineer would have forced a re-plan. Building alone with tools that make the next feature feel almost free, I skipped that step, and I paid for it in refactoring that cost more than the planning would have. The lesson generalizes past this project: when building feels cheap, skipped planning becomes expensive.
+I should have returned to planning when the scope changed. The project began as a rebalancing tool with clear requirements. Then tax work needed richer income data, which led to consolidating ingestion and building document processing with personal information stripped out. Each step followed sensibly from the last, but none was in the plan. On a work project, a conversation with an engineer would have forced a re-plan. Working alone with tools that made each feature feel almost free, I skipped that step and paid for it in refactoring. The lesson generalizes: when building feels cheap, skipped planning becomes expensive.

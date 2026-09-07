@@ -1,10 +1,10 @@
-/* Chapter rail: marks the chapter you are reading and fills the rail's top
-   hairline as you move through the story. Vanilla, no dependencies, no build
-   step. Safe to load on every page -- it exits if there is no rail.
+/* Chapter rail: marks the chapter you are reading as you move through the
+   story. Vanilla, no dependencies, no build step. Safe to load on every page
+   -- it exits if there is no rail.
 
    Without this file the rail still works as navigation: every entry is a live
    anchor link and CSS handles hover. There is NO current-chapter indication
-   without it -- the accent bar is driven by the aria-current this script sets.
+   without it -- the accent state is driven by the aria-current this script sets.
    A `:target` rule cannot supply one: :target matches the element whose own id
    equals the fragment, and the rail's anchors carry href="#situation" with no
    id of their own. Putting ids on them would collide with the heading ids that
@@ -43,8 +43,7 @@
      shorter than the gap between the read line and the bottom of the viewport,
      so its heading never rises past the line however far you scroll, and the
      rail stays stuck on the second-to-last chapter. Clamping to the last
-     heading at the bottom of the page is the fix; the progress fill has the
-     same problem and is clamped with it. */
+     heading at the bottom of the page is the fix. */
   function atBottom() {
     return window.innerHeight + window.scrollY >=
       document.documentElement.scrollHeight - 2;
@@ -57,15 +56,14 @@
     for (var i = 0; i < headings.length; i++) {
       if (headings[i].getBoundingClientRect().top <= line) active = headings[i];
     }
+    /* A short final chapter may never reach the read line because the quote and
+       footer consume the remaining scroll range. Once the end of the prose is
+       visible, the reader is necessarily in that final chapter. */
+    if (prose.getBoundingClientRect().bottom <= window.innerHeight - 24) {
+      active = headings[headings.length - 1];
+    }
     if (bottom) active = headings[headings.length - 1];
     setCurrent(active.id);
-
-    var box = prose.getBoundingClientRect();
-    var travelled = line - box.top;
-    var total = box.height - line;
-    var progress = total > 0 ? travelled / total : 0;
-    if (bottom) progress = 1;
-    rail.style.setProperty('--rail-progress', Math.min(1, Math.max(0, progress)).toFixed(3));
   }
 
   var queued = false;

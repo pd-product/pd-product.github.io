@@ -1,72 +1,11 @@
-{%- comment -%}
-Tradeoff tables, rendered from front matter rather than a Markdown table.
-
-The chosen column is identified by name, not by position, so the marker can
-never land on the wrong column. The check mark is written as an HTML entity to
-keep the source ASCII.
-
-`tradeoffs` is a LIST of tables even when a story has only one. A story that
-needs more than ~5 dimensions is meant to use a second table for a second
-decision rather than a taller one, and a list supports that without a later
-change to every existing story.
-
-The explicit ARIA roles below are NOT redundant markup and must not be
-"cleaned up". At 640px and below the stylesheet sets `display: block` on the
-table, thead, tbody, tr, th and td so each row can stack as labelled pairs.
-Browsers derive the implicit table/row/cell roles from the CSS display value,
-so that rule silently reduces the table to a run of generic blocks with no row
-or column relationships announced. Restating the roles keeps the structure
-readable at every width.
-
-This is the same bug class as the list-role rule elsewhere in this repo, where
-`list-style: none` drops the implicit list role in Safari with VoiceOver and
-every list therefore carries an explicit `role="list"`. A CSS display value
-that changes an element's implicit role has to be answered with an explicit
-role; that applies to this table exactly as it applies to lists.
-{%- endcomment -%}
-{%- for table in include.tradeoffs -%}
-<figure class="tradeoff">
-  {%- if table.title %}<figcaption>{{ table.title }}</figcaption>{% endif -%}
-  <table role="table">
-    <thead role="rowgroup">
-      <tr role="row">
-        <th role="columnheader" scope="col" class="tradeoff-dimension"><span class="sr-only">Dimension</span></th>
-        <th role="columnheader" scope="col" class="tradeoff-rejected">{{ table.rejected }}</th>
-        <th role="columnheader" scope="col" class="tradeoff-chosen">{{ table.chosen }} <span aria-hidden="true">&#10003;</span><span class="sr-only">(chosen)</span></th>
-      </tr>
-    </thead>
-    <tbody role="rowgroup">
-      {%- for row in table.rows %}
-      <tr role="row">
-        <th role="rowheader" scope="row" class="tradeoff-dimension">{{ row.dimension }}</th>
-        {%- comment -%}
-        data-label carries the option name into the sub-640px stacked view,
-        where the dimension column is dropped and the pairs need naming.
-
-        `escape_once`, NOT `escape`. This is the same value the column head
-        prints as element content, and the two have to agree. Plain `escape`
-        turns an authored `&amp;` into `&amp;amp;`, so the head reads
-        "Research & build" while the stacked label reads "Research &amp;
-        build" -- and an entity is how ASCII source writes a character it
-        cannot type. escape_once leaves a well-formed entity alone, escapes a
-        bare `&`, and still escapes the double quote that would otherwise
-        terminate the attribute early.
-        {%- endcomment -%}
-        <td role="cell" class="tradeoff-rejected" data-label="{{ table.rejected | escape_once }}">{{ row.rejected }}</td>
-        {%- comment -%}
-        `data-chosen` and the note below exist for the stacked view only. At
-        640px and below the whole thead is display: none, which takes the check
-        mark, the "(chosen)" label and the colour shift with it -- so without
-        these the table loses the one thing it exists to say, on exactly the
-        widths where most people read it. The attribute is what the stylesheet
-        hooks the marker onto; the note is what a screen reader gets there.
-        Above 640px the note is display: none, because the column header
-        already says it.
-        {%- endcomment -%}
-        <td role="cell" class="tradeoff-chosen" data-chosen data-label="{{ table.chosen | escape_once }}">{{ row.chosen }}<span class="sr-only tradeoff-chosen-note"> (chosen)</span></td>
-      </tr>
-      {%- endfor %}
-    </tbody>
-  </table>
-</figure>
-{%- endfor -%}
+{%- for table in include.tradeoffs %}
+<dl class="tradeoffs" aria-label="Tradeoff comparison">
+  {%- for row in table.rows %}
+  <div class="trade-row">
+    <dt class="trade-dimension">{{ row.dimension }}</dt>
+    <dd><span class="trade-head">Rejected{% if forloop.first %} · {{ table.rejected }}{% endif %}</span>{{ row.rejected }}</dd>
+    <dd><span class="trade-head">Chosen{% if forloop.first %} · {{ table.chosen }}{% endif %}</span>{{ row.chosen }}</dd>
+  </div>
+  {%- endfor %}
+</dl>
+{%- endfor %}

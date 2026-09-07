@@ -1,0 +1,17 @@
+---
+layout: default
+title: "Page not found"
+permalink: /404.html
+# Page-level, not the site-wide `noindex` switch in _config.yml. A missing path
+# does get a real 404 from Pages, which carries this page's body -- but THIS
+# URL, /404.html requested directly, returns 200 with a self-canonical, so it is
+# indexable unless told otherwise. It is out of the sitemap already; this closes
+# the rest.
+noindex: true
+---
+
+<section class="page-simple">
+  <h1>Page not found</h1>
+  <p>That link is broken or the page has moved.</p>
+  <p><a href="{{ '/' | relative_url }}">Back to the home page</a></p>
+</section>

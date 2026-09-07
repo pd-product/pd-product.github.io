@@ -27,16 +27,13 @@ import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DATA = ["_data/off-hours.yml", "_data/path-here.yml"]
-
-
 def stories():
     return sorted(f"_work/{p.name}" for p in ROOT.glob("_work/*.md"))
 
 
 def sources(page):
     """The home page prints every story's title and lesson, so a story dates it."""
-    return ["index.html"] + DATA + stories() if page == "index.html" else [page]
+    return ["index.html"] + stories() if page == "index.html" else [page]
 
 
 def git(*args):
@@ -82,7 +79,7 @@ def since_declared(page, paths):
 def main():
     problems = []
     print("page                            says         changed since that date")
-    for page in ["index.html"] + stories():
+    for page in ["index.html", "about.html"] + stories():
         text = (ROOT / page).read_text(encoding="utf-8")
         if re.search(r"^published:\s*false", text, re.M):
             continue

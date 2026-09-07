@@ -1,0 +1,230 @@
+# Site metadata.
+# `title` is the SEO string and carries the role suffix. `brand` is what the
+# header link prints -- separate, because the suffix reads badly as a header and
+# would produce a doubled separator in {% seo %} page titles.
+# `author` stays the full legal name: it feeds the copyright notice, where the
+# enforceable name matters more than the familiar one.
+# The separator is an en dash entity, NOT a pipe. OBSERVED on the built site:
+# "Pat Diggins | Product Manager" rendered as "Pat Diggins Product Manager" --
+# the pipe and its surrounding spaces were swallowed somewhere in seo-tag's
+# title formatting. The cause was never reduced to a reproducer, so treat this
+# as behaviour to re-check rather than as a known mechanism, and do not write a
+# causal explanation for it here. The convention holds either way: seo-tag
+# supplies its own pipe between page title and site title, so a second one in
+# this string would read as a doubled separator regardless.
+title: "Pat Diggins &#8211; Senior Product Manager"
+brand: "Pat Diggins"
+# tagline and description must NOT be the same string. jekyll-seo-tag appends
+# the tagline (falling back to the description) to the site title whenever the
+# page title equals it, which is the home page -- so whichever one is selected
+# has to be SHORT, or the home <title> becomes the whole sentence.
+#
+# Short does not mean a character budget: search engines publish no title-length
+# limit, truncate to the device width, and rewrite titles at their own
+# discretion. Judge it by rendered width, not by counting.
+#
+# The tagline is used only as metadata and is not printed anywhere, since the
+# hero claim lives in index.html. It does carry the same words as that page's
+# .intro .eyebrow, which the share card also sets as type; the note above the
+# h1 in index.html owns that coupling.
+tagline: "Building with AI"
+description: "Senior PM at Microsoft on publisher platforms. Always learning. Often solving problems."
+author: "Patrick Diggins"
+
+# Rendered by _includes/footer.html. Year of first publication, per the US
+# Copyright Office's notice guidance; do not bump it annually.
+copyright_year: 2026
+
+# The site-wide withdrawal switch. Set to true to emit
+# <meta name="robots" content="noindex"> on every page and pull the site back out
+# of search results. Keep the key even while it is false.
+# If it ever needs turning back on, use this rather than a robots.txt Disallow:
+# a Disallow rule stops the crawler fetching the page at all, so it never sees
+# the noindex and the URL can still surface in results. The meta tag has to be
+# reachable to be obeyed.
+noindex: false
+
+# User site: served from the domain root, so baseurl is empty.
+# url must be set and absolute: jekyll-seo-tag uses it to build absolute
+# share-card URLs, which is what makes a pasted link render a preview.
+url: "https://pdiggins.com"
+baseurl: ""
+
+# Contact is links only. There is no server, so there is no form.
+# These keys are COMMENTED OUT rather than left as placeholder strings: an unset
+# key is nil and therefore falsy in Liquid, so index.html omits the link
+# entirely. A placeholder string is truthy and would render a live broken link.
+# Note an empty string "" would also be truthy in Liquid -- omit the key, do not
+# blank it. Uncomment each as its real value becomes available.
+# email: deliberately omitted for v1 -- a public mailto: gets scraped.
+# email: "you@example.com"
+linkedin: "https://www.linkedin.com/in/patrick-diggins/"
+# No resume key, and no resume link in index.html. Hosting a PDF here is
+# maintenance the owner declined to carry; LinkedIn is the reference. Restoring
+# it is a config key plus a list item in index.html, not a redesign -- but note
+# jekyll-sitemap enumerates static .pdf files, so a republished PDF is offered
+# to crawlers again unless it is excluded.
+
+# Nav is data, not markup: edited here, rendered by _includes/nav.html.
+# All four are anchors on the home page, so they are written as absolute paths
+# and work from story pages too.
+#
+# The home page carries a fifth anchored section, #path-here, which is
+# deliberately NOT in the nav: it is context for the sections around it rather
+# than a destination, and a five-item mono row starts wrapping at the phone
+# breakpoint. Its id is the fragment target, so it can still be linked
+# directly. What makes it a landmark is separate -- the aria-labelledby on the
+# section in index.html, which is what gives it an accessible name.
+nav:
+  - title: "work"
+    url: "/#work"
+  - title: "off hours"
+    url: "/#off-hours"
+  - title: "about"
+    url: "/#about"
+  - title: "contact"
+    url: "/#contact"
+
+# Story pages. Add a file to _work/ and it gets a page, a URL, a home-page
+# row, and prev/next placement. Nothing is hand-indexed.
+# permalink :title uses the `slug` front matter key when present.
+collections:
+  work:
+    output: true
+    permalink: /work/:title/
+
+# Explicit heading anchors are a URL contract: /work/<slug>/#situation must keep
+# working after a heading is reworded. auto_ids would silently mint an id from
+# the heading text instead, so a forgotten `{#id}` would appear to work and then
+# break every shared deep link on the next edit. With auto_ids off, a forgotten
+# anchor drops that chapter out of the rail, which is visible on the page.
+kramdown:
+  auto_ids: false
+
+# Share-card default. These scopes are deliberately narrow: an empty `path: ""`
+# scope with no `type` applies repo-wide and turned three stray notes under
+# assets/ into published, indexed pages. Scope every default to a type.
+#
+# `image` is a BARE PATH, not a hash, and must stay one. Giving seo-tag a hash
+# does emit og:image:width/height/alt -- but JSONLDDrop#image then forwards
+# every key into the JSON-LD and hardcodes `"@type": "imageObject"` in
+# lowercase. Schema.org type names are case-sensitive: `ImageObject` exists,
+# `imageObject` does not, and `alt` is not a Schema.org property at all. That
+# put a malformed image node on every page, which is worse than the three meta
+# tags are worth. The dimensions and alt text are emitted directly by
+# _layouts/default.html instead, from og_image below.
+defaults:
+  - scope:
+      path: ""
+      type: "work"
+    values:
+      layout: "story"
+      image: "/assets/og/default.png"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      image: "/assets/og/default.png"
+
+# Dimensions and alt for the share card above, emitted by hand in
+# _layouts/default.html because routing them through seo-tag corrupts the
+# JSON-LD (see the note on `image`). Keep these true of the real file:
+# assets/og/default.png is 1200x630, and the alt describes the card's
+# composition -- deliberately not a transcription of it, for the reason on
+# `alt` below.
+og_image:
+  # Must match the `image:` value in BOTH defaults scopes above. The layout
+  # compares them, and emits the dimensions only when the page is really using
+  # this card -- a story with its own card would otherwise be described with
+  # this one's width and height.
+  path: "/assets/og/default.png"
+  width: 1200
+  height: 630
+  # Describes what the CARD LOOKS LIKE, not what it says. Someone who hears this
+  # is about to meet the headline again as page text; repeating it here makes
+  # them listen to it twice and tells them nothing about the image.
+  alt: "A dark share card: a small green monospace line reading building with ai, above a large two-line headline, with the name pat diggins and pdiggins.com along the bottom."
+
+# The person this site is about. Rendered as a ProfilePage + Person JSON-LD
+# block on the HOME PAGE ONLY, by _layouts/default.html. Data, not markup, so
+# adding a profile is an edit here rather than in a template.
+#
+# WHY THIS IS HAND-WRITTEN rather than driven through jekyll-seo-tag:
+#
+#   - Google does not support `Person` as a rich-result type at all. It is
+#     absent from the structured-data gallery, which does list Profile page. So
+#     `seo.type: Person` bought nothing and cost correctness -- the plugin also
+#     emits `author` and `headline` on whatever node it builds, and neither
+#     belongs on a Person.
+#   - `ProfilePage` IS supported, and Google's valid-use list names "an 'About
+#     Me' page on a blog site". The requirement is that the page's primary
+#     focus be a single person affiliated with the website, which is this page.
+#   - Be realistic about the payoff: Google's stated purpose for ProfilePage is
+#     understanding creators in online communities, tied to the Discussions and
+#     Forums feature. Do not expect a visible rich result. The value is entity
+#     clarity -- letting a crawler connect this site to this person to their
+#     profiles elsewhere.
+#
+# `social:` is deliberately NOT set. seo-tag would read social.links into
+# `sameAs` on the WebSite node, which asserts that the WEBSITE is the same
+# thing as the LinkedIn profile. sameAs belongs on the Person below.
+person:
+  name: "Patrick Diggins"
+  # Matches the role suffix in `title` above. Keep the two in step -- this is
+  # the machine-readable claim search engines read, and `title` is the headline
+  # a human sees in the same result, so a mismatch is visible in one glance.
+  job_title: "Senior Product Manager"
+  # A headshot is the right image for a Person; the share card is not.
+  image: "/assets/img/pat-diggins.jpg"
+  same_as:
+    - "https://www.linkedin.com/in/patrick-diggins/"
+
+plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+# `jekyll-optional-front-matter` renders any .md file with no front matter as a
+# live page, so an un-excluded note at the root becomes a published, indexed URL.
+#
+# `temp/` is session scratch and is in .gitignore, so it does not reach Pages
+# today. It is excluded anyway, because .gitignore is the WRONG layer to be
+# relying on: a local build without this line copies temp/'s publishable files
+# into _site -- Jekyll skips entries starting with `_` or `.`, so the built
+# sites under temp/_site* are passed over, but the scripts, notes and loose
+# .html are not -- and every .html among them lands in sitemap.xml as a real
+# pdiggins.com URL. A local build then stops matching what Pages serves, and a
+# publishable file committed under temp/ would deploy. Keep the exclusion
+# independent of whether the directory is tracked.
+exclude:
+  - README.md
+  - CLAUDE.md
+  - Gemfile
+  - temp/
+
+# Pages compiles this repo's SCSS compressed. Jekyll's own default is expanded,
+# which retains every comment, so without this line a local build produces
+# /assets/css/style.css at about 61KB with all 92 comment blocks intact while
+# the deployed file is 18KB with none. Expect that KB figure to drift -- editing
+# any comment in style.scss moves it, and only the compressed side is pinned to
+# what Pages serves.
+#
+# The cascade is identical either way, so nothing RENDERS differently and no
+# selector, value or specificity reading changes. What differs is the serialized
+# file, whose byte size is off by more than 3x. Nothing here requires building
+# locally, but a local build is the only way to inspect the built output, so
+# keep it equal to what is deployed.
+sass:
+  style: compressed
+
+# NO `timezone` KEY, and that is deliberate rather than an omission. Jekyll has
+# no timezone default, so it stamps dates in the build machine's zone; GitHub's
+# builders are UTC, which is what every deployed date carries. Setting
+# `timezone: UTC` here would express that -- and would break the local build on
+# Windows, where Ruby has no zoneinfo database and tzinfo raises
+# "No source of timezone data could be found". There is no committed Gemfile to
+# declare tzinfo-data in, and adding a build dependency to a repo that has none
+# is the wrong trade for a value production already supplies.
+#
+# Pass the zone to the local build instead: `TZ=UTC` in front of the build
+# command reproduces the deployed timestamps with no gem and no config. See the
+# Verifying section of CLAUDE.md.
