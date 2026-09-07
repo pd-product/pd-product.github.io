@@ -8,9 +8,6 @@ home_title_lines:
   - "built it"
 fact_problem: "Repeated fixes left targeting edge cases uncovered."
 fact_approach: "Test the proposed design against real inventory and auctions."
-# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
-# copy, not a trim of `title` -- the full title is too long for that slot.
-crumb: "testing the fix"
 # Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
 # meta description. It does not render on the home-page row -- that is a
 # template decision in index.html, not a reason to drop the key. The key must
@@ -41,9 +38,6 @@ role: "PM. Built the analysis independently."
 team: "Two eng leaders, plus the implementing teams"
 partners: "Publishers with uncommon inventory setups"
 timeframe: "A weekend, against a year of partial fixes"
-chips:
-  - "one weekend"
-  - "14% revenue exposed"
 # Order matters: this story's opening paragraph refers to case 1 as "the
 # previous case study". Reordering requires a copy edit.
 tradeoffs:

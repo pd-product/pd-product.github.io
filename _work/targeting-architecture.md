@@ -7,9 +7,6 @@ home_title_lines:
   - "Rebuilding targeting around how publishers sell"
 fact_problem: "Publishers maintained thousands of placement-level configurations."
 fact_approach: "Rebuild targeting around how publishers sell."
-# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
-# copy, not a trim of `title` -- the full title is too long for that slot.
-crumb: "targeting architecture"
 # Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
 # meta description. It does not render on the home-page row -- that is a
 # template decision in index.html, not a reason to drop the key. The key must
@@ -40,13 +37,6 @@ role: "PM, Prebid Server Premium. Owned roadmap and outcome."
 team: "Customers, support, design, multiple eng teams"
 partners: "1P and 3P publishers, demand partners, support and services"
 timeframe: "Over a year, scoping to GA"
-chips:
-  - "over a year"
-  - "staged rollout"
-# No hero_image for v1 -- the site ships without diagrams. Adding one here
-# brings the hero and home-page card back with no CSS change. Set `hero_alt`
-# alongside it (what the image shows, for someone who cannot see it);
-# `hero_caption` is the separate visible caption.
 tradeoffs:
   - rejected: "Leave the model alone"
     chosen: "Rebuild the targeting model"

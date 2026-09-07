@@ -63,6 +63,9 @@ node --check assets/js/chapter-rail.js
 
 Inspect the built output, not only the successful build message. Confirm that
 `archive/` and Markdown notes did not publish, internal links and assets
-resolve, and the home, About, and three case pages work at desktop and 360px.
+resolve, and the home, About, and three case pages work at 320, 360, 390, 412,
+430, 600, 768, 900, 1000, and 1200px. The widths between CSS breakpoints are
+part of the contract: verify zero horizontal overflow and readable tradeoff
+columns rather than checking only named device presets.
 
 Pushing `main` publishes. Finish local review before the first push.

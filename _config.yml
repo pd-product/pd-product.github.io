@@ -89,6 +89,8 @@ defaults:
     values:
       layout: "story"
       image: "/assets/og/default.jpg"
+      seo:
+        type: "Article"
   - scope:
       path: ""
       type: "pages"

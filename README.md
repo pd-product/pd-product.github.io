@@ -45,7 +45,7 @@ after the full change is ready.
 - `about.html` — About page
 - `assets/css/style.scss` — complete visual system
 - `assets/js/pint-gallery.js` — progressive-enhancement pint interaction
-- `assets/js/chapter-rail.js` — current-chapter state
+- `assets/js/chapter-rail.js` — visible current-chapter and reading-progress state
 - `assets/img/pints/<flavor>/frame-00..30.webp` — production rotation frames
 - `_originals/` — source imagery that Jekyll does not publish
 - `_tools/` — local validation and asset scripts
@@ -83,11 +83,14 @@ The front frame and case link work without JavaScript. With JavaScript:
   always navigates;
 - Read label opens selectable Problem, Approach, and Lesson text in a native
   dialog;
-- reduced-motion users get an instant endpoint swap;
+- a cold interaction loads its requested endpoint first while the intermediate
+  animation frames warm in the background;
+- reduced-motion users load only the requested endpoint and get an instant
+  swap;
 - decode failure preserves the front image and all case navigation.
 
-Only the front frame loads initially. The remaining frames for a pint load on
-first intent.
+Only the front frame loads initially. On first intent, the requested endpoint
+takes priority; the remaining frames then enable smooth subsequent turns.
 
 ## Assets and licenses
 
@@ -115,9 +118,10 @@ node --check assets/js/pint-gallery.js
 node --check assets/js/chapter-rail.js
 ```
 
-Also review the built site at desktop, tablet, and 360px. Test keyboard focus,
-touch/no-hover behavior, the label dialog, Escape, and reduced motion before
-publishing.
+Also review the built site at 320, 360, 390, 412, 430, 600, 768, 900, 1000,
+and 1200px. Test keyboard focus, touch/no-hover behavior, the label dialog,
+Escape, chapter state/progress, reduced motion, horizontal overflow, and the
+tablet tradeoff layout before publishing.
 
 ## Repository policy
 

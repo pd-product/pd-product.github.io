@@ -3,7 +3,6 @@
 published: false
 slug: "example-story"
 title: "The full case title"
-crumb: "short breadcrumb"
 description: "The situation, the call, and what it cost."
 lesson: "The one sentence to remember."
 category: "Category"

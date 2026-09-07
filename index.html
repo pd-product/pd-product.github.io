@@ -14,7 +14,7 @@ last_modified_at: 2026-09-06
   {%- for story in ordered %}
   <article class="pint-card" data-pint="{{ story.pint_id }}" aria-label="{{ story.flavor | escape_once }}">
     <a class="pint-stage" href="{{ story.url | relative_url }}" aria-label="Read {{ story.title | escape_once }}">
-      <img src="{{ '/assets/img/pints/' | append: story.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ story.flavor | escape_once }}, a studio-rendered ice cream pint on peach tile">
+      <img src="{{ '/assets/img/pints/' | append: story.pint_id | append: '/frame-00.webp' | relative_url }}" width="400" height="600" alt="{{ story.flavor | escape_once }}, a studio-rendered ice cream pint on peach tile"{% unless forloop.first %} loading="lazy" decoding="async"{% endunless %}>
     </a>
     <div class="pint-copy">
       <div class="pint-actions">
@@ -23,13 +23,13 @@ last_modified_at: 2026-09-06
       </div>
       <h3>{%- for line in story.home_title_lines -%}{{ line }}{% unless forloop.last %}<br>{% endunless %}{%- endfor -%}</h3>
       <a class="pint-case-link" href="{{ story.url | relative_url }}">Read the case <span aria-hidden="true">→</span></a>
-      <div class="sr-only pint-facts">
+      <template class="pint-facts">
         <dl>
           <dt>Problem</dt><dd>{{ story.fact_problem }}</dd>
           <dt>Approach</dt><dd>{{ story.fact_approach }}</dd>
           <dt>Lesson</dt><dd>{{ story.lesson }}</dd>
         </dl>
-      </div>
+      </template>
     </div>
   </article>
   {%- endfor %}

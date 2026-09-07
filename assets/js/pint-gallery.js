@@ -26,22 +26,38 @@
       token: 0,
       timer: 0,
       ready: null,
+      framesReady: false,
+      loads: [],
       pinned: false,
       pointerType: "",
     };
   });
 
+  function loadFrame(view, frame) {
+    if (!view.loads[frame]) {
+      const image = new Image();
+      image.src = view.sources[frame];
+      view.loads[frame] = image.decode().then(() => view.sources[frame]);
+    }
+    return view.loads[frame];
+  }
+
   function prepare(view) {
     if (!view.ready) {
-      view.ready = Promise.all(
-        view.sources.map((source) => {
-          const image = new Image();
-          image.src = source;
-          return image.decode();
-        })
-      );
+      view.ready = Promise.all(view.sources.map((_, frame) => loadFrame(view, frame)))
+        .then(() => { view.framesReady = true; });
     }
     return view.ready;
+  }
+
+  function setLoading(view, loading) {
+    if (loading) {
+      view.card.dataset.loading = "true";
+      view.link.setAttribute("aria-busy", "true");
+    } else {
+      delete view.card.dataset.loading;
+      view.link.removeAttribute("aria-busy");
+    }
   }
 
   function show(view, position) {
@@ -62,11 +78,36 @@
     view.button.firstChild.textContent = back ? "Show flavor " : "Turn pint ";
     view.button.setAttribute("aria-pressed", String(back));
     view.labelButton.hidden = !back;
+    delete view.card.dataset.error;
+    setLoading(view, true);
 
     try {
-      await prepare(view);
+      if (reducedMotion.matches) {
+        await loadFrame(view, view.target);
+        if (token !== view.token) return;
+        show(view, view.target);
+        setLoading(view, false);
+        return;
+      }
+
+      if (!view.framesReady) {
+        // The requested face is the useful response to a cold interaction.
+        // Decode it first and keep the animation frames warming in the
+        // background; later turns use the complete smooth sequence.
+        const endpoint = loadFrame(view, view.target);
+        prepare(view).catch(() => {});
+        await endpoint;
+        if (token !== view.token) return;
+        if (!view.framesReady) {
+          show(view, view.target);
+          setLoading(view, false);
+          return;
+        }
+      }
     } catch {
       status.textContent = "Rotation unavailable. The case links still work.";
+      setLoading(view, false);
+      view.card.dataset.error = "true";
       view.button.hidden = true;
       return;
     }
@@ -86,6 +127,7 @@
       const eased = progress * progress * (3 - 2 * progress);
       show(view, from + (to - from) * eased);
       if (progress < 1) view.animation = requestAnimationFrame(tick);
+      else setLoading(view, false);
     };
     view.animation = requestAnimationFrame(tick);
   }
@@ -114,7 +156,7 @@
     view.link.addEventListener("pointerenter", (event) => {
       if (event.pointerType !== "mouse") return;
       clearTimeout(view.timer);
-      prepare(view).catch(() => {});
+      if (!reducedMotion.matches) prepare(view).catch(() => {});
       view.timer = setTimeout(() => select(view), 140);
     });
     view.card.addEventListener("pointerleave", (event) => {
@@ -139,14 +181,14 @@
       const showBack = view.target !== 30;
       view.pinned = showBack;
       turn(view, showBack);
-      status.textContent = `${view.card.getAttribute("aria-label")}: ${showBack ? "case facts shown" : "flavor label shown"}`;
+      status.textContent = `${view.card.getAttribute("aria-label")}: ${showBack ? "turning to case facts" : "turning to flavor label"}`;
     });
     view.labelButton.addEventListener("click", () => {
       clearTimeout(view.timer);
       view.pinned = true;
       dialog.querySelector("h2").textContent = view.card.getAttribute("aria-label");
       dialog.querySelector(".label-dialog-content").replaceChildren(
-        view.card.querySelector(".pint-facts dl").cloneNode(true)
+        view.card.querySelector(".pint-facts").content.querySelector("dl").cloneNode(true)
       );
       dialog.querySelector(".label-dialog-case").href = view.link.href;
       dialog.showModal();

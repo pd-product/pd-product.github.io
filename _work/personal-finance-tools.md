@@ -7,9 +7,6 @@ home_title_lines:
   - "The spreadsheet that became a toolkit"
 fact_problem: "A rebalancing spreadsheet was too tedious to maintain."
 fact_approach: "Keep existing aggregation; build the missing Python tools."
-# Header breadcrumb label on this story's page ("work / <crumb>"). Approved comp
-# copy, not a trim of `title` -- the full title is too long for that slot.
-crumb: "personal finance tools"
 # Shown under the title on the STORY PAGE, and read by jekyll-seo-tag as the
 # meta description. It does not render on the home-page row -- that is a
 # template decision in index.html, not a reason to drop the key. The key must
@@ -42,9 +39,6 @@ timeframe: "Ongoing since early 2026"
 # `partners` is deliberately omitted -- it does not apply to a personal
 # project, and an omitted field drops its rail entry rather than printing
 # "not applicable".
-chips:
-  - "ongoing"
-  - "python"
 tradeoffs:
   - rejected: "Spreadsheet or off-the-shelf"
     chosen: "Build around the product I use"
