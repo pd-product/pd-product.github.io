@@ -16,6 +16,10 @@ preserved. This makes the version directly comparable with later site source and
 keeps the templates, content, assets, configuration, and validation utilities
 together.
 
+One path differs: the v1 `CLAUDE.md` is stored as `site/CLAUDE.v1-snapshot.md`,
+unchanged in content, because Claude Code loads a `CLAUDE.md` as live
+instructions when it works in that directory.
+
 ## What is excluded
 
 Untracked files, design prototypes, local caches, generated previews, and the
