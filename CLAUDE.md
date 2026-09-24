@@ -17,10 +17,10 @@ Do not re-propose these without a new owner request:
 - The public role label is Product Manager.
 - The approved case flavors and order are Publisher Pistachio, Evidence
   Espresso, and Compound Caramel.
-- The approved case prose is the current reduced text in `_work/*.md`.
-  Do not rewrite it without explicit approval.
+- The approved case prose is the text in `_work/*.md`. Do not rewrite it
+  without explicit approval.
 - Story `description` is concise search/share copy; `summary` is the approved
-  visible introduction. Do not collapse them back into one field.
+  visible introduction. Keep them as separate fields.
 - The Soda Fountain visual system is teal, cream, peach tile, Fraunces display
   type, DM Sans body/UI type, and the approved studio pint renders.
 
@@ -50,7 +50,7 @@ Do not re-propose these without a new owner request:
 - Do not add front matter to files under `_originals/` or `_tools/`.
 - Keep scratch output under ignored `temp/`.
 
-## Verification
+## Verifying
 
 Build with UTC so dates match GitHub Pages:
 
