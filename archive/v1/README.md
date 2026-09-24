@@ -17,8 +17,8 @@ keeps the templates, content, assets, configuration, and validation utilities
 together.
 
 One path differs: the v1 `CLAUDE.md` is stored as `site/CLAUDE.v1-snapshot.md`,
-unchanged in content, because agent tools load any file named `CLAUDE.md` as
-live instructions.
+unchanged in content, because Claude Code loads a `CLAUDE.md` as live
+instructions when it works in that directory.
 
 ## What is excluded
 
