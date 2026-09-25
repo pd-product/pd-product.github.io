@@ -167,7 +167,7 @@ plugins:
 # independent of whether the directory is tracked.
 exclude:
   - README.md
-  - CLAUDE.md
+  - AGENTS.md
   - Gemfile
   # Historical source snapshots are comparison material, not publishable pages.
   - archive/
@@ -196,4 +196,4 @@ sass:
 #
 # Pass the zone to the local build instead: `TZ=UTC` in front of the build
 # command reproduces the deployed timestamps with no gem and no config. See the
-# Verifying section of CLAUDE.md.
+# Verifying section of AGENTS.md.
