@@ -52,7 +52,7 @@ Do not re-propose these without a new owner request:
 
 ## Verifying
 
-Build with UTC so dates match GitHub Pages:
+For visual or runtime changes, build with UTC so dates match GitHub Pages:
 
 ```powershell
 $env:TZ = "UTC"
@@ -70,4 +70,13 @@ resolve, and the home, About, and three case pages work at 320, 360, 390, 412,
 part of the contract: verify zero horizontal overflow and readable tradeoff
 columns rather than checking only named device presets.
 
-Pushing `main` publishes. Finish local review before the first push.
+Ordinary prose-only instructions/documentation changes require link and whitespace
+checks and review of the diff, rather than the build and viewport matrix above.
+Edits to visible product copy still require explicit approval and their affected
+rendered pages must be checked. The fixed viewport matrix applies to relevant
+visual/runtime changes. The shared `review-principles` topic owns review depth
+and escalation based on risk and prior outcomes.
+
+Pushing `main` publishes. Finish local review before the first push. Instruction
+changes use a focused PR. A merge or main push that deploys the site requires
+separate publication authorization.
