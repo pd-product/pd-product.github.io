@@ -77,6 +77,9 @@ rendered pages must be checked. The fixed viewport matrix applies to relevant
 visual/runtime changes. The shared `review-principles` topic owns review depth
 and escalation based on risk and prior outcomes.
 
-Pushing `main` publishes. Finish local review before the first push. Instruction
-changes use a focused PR. A merge or main push that deploys the site requires
-separate publication authorization.
+Pushing `main` publishes. Finish local review before the first push. Documentation-only
+changes may go directly to main without local or remote validation CI under the shared
+`github-actions-economy` topic. That topic also owns standing authorization for existing
+automatic publication caused solely by reviewed instruction/internal-doc updates. Visible site
+content, runtime/build inputs, configuration, mixed changes and explicit/manual publication
+retain their separate approval requirements; skipping validation CI does not suppress Pages publication.
