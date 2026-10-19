@@ -3,6 +3,10 @@
 Read `README.md` first. It describes the current Soda Fountain design,
 story contract, assets, interaction model, and validation commands.
 
+Shared domain, cloud, backup, and recovery guidance lives in the private
+[personal-ops](https://github.com/pd-product/personal-ops) repository. Read it for
+cross-project operations within the current owner-approved scope.
+
 ## Owner decisions
 
 Do not re-propose these without a new owner request:
