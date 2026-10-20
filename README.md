@@ -192,3 +192,6 @@ tablet tradeoff layout before publishing.
 The repository is all rights reserved. Do not add an open-source license, public
 email address, contact form, hosted resume, analytics, tracking, or new external
 runtime dependencies without an explicit owner decision.
+
+Shared domain and cloud operations notes are available as a manual reference in
+the private [personal-ops](https://github.com/pd-product/personal-ops) repository.
