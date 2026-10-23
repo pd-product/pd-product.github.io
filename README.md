@@ -154,6 +154,14 @@ python _tools/make_og_card.py --write
 
 ## Validation
 
+The shared layout sets a content policy for local resources and a no-referrer
+policy. The script hash permits only the existing inline no-JavaScript bootstrap.
+If that bootstrap changes, update its CSP hash and run the browser security check:
+`node _tools/test_security_browser.cjs`. It uses the same `SITE_URL` and
+`PLAYWRIGHT_MODULE` settings as the browser suite below.
+HSTS, framing restrictions, nosniff and Permissions-Policy require HTTP response
+headers and are outside this repository's page-level policy.
+
 The frame-presentation regression test runs without a browser or dependencies:
 `node _tools/test_pint_presentation.cjs`. It covers delayed/out-of-order decoding,
 interrupted turns, safe failure, repeated adjacent turns, and the guarantee that
