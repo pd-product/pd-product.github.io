@@ -195,6 +195,28 @@ and 1200px. Test keyboard focus, touch/no-hover behavior, the label dialog,
 Escape, chapter highlighting, reduced motion, horizontal overflow, and the
 tablet tradeoff layout before publishing.
 
+## Operations and recovery
+
+Shared domain, account, and repository controls are owned by the private
+[personal-ops](https://github.com/pd-product/personal-ops) repository. Use its
+[verification](https://github.com/pd-product/personal-ops/blob/main/docs/verification.md)
+and [recovery](https://github.com/pd-product/personal-ops/blob/main/docs/recovery.md)
+runbooks for domain or provider failures, and its
+[GitHub baseline](https://github.com/pd-product/personal-ops/blob/main/docs/github-baseline.md)
+for the approved protection boundary.
+
+For a site regression, compare the Pages build/deployment commit with the reviewed
+source and the live affected route. Prepare a revert on a separate task branch
+that preserves later unrelated work. Run the applicable validation above and
+obtain approval to publish before changing `main`. After publication, check the
+Pages deployment result and the live affected pages and assets. Do not reset or
+force-push `main` as rollback.
+
+Jekyll exclusions do not make tracked files private: this repository and its
+history are public. Keep private operational records and credentials outside it.
+Git preserves the published assets. Regenerating pint artwork also requires the
+external native masters described under Assets and licenses.
+
 ## Repository policy
 
 The repository is all rights reserved. Do not add an open-source license, public
